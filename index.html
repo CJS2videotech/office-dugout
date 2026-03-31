@@ -3,605 +3,525 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Office Dugout</title>
-<link href="https://fonts.googleapis.com/css2?family=Graduate&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<title>The Dugout</title>
+
+<!-- ── HOME SCREEN / PWA ── -->
+<meta name="application-name" content="The Dugout"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="The Dugout"/>
+<meta name="theme-color" content="#ffc52f"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+
+<!-- Inline SVG icon as data URI – works for all home screen sizes -->
+<link rel="apple-touch-icon" href="assets/andrea%20and%20cj%20button.jpg"/>
+<link rel="icon" href="assets/andrea%20and%20cj%20button.jpg" type="image/jpeg"/>
+
+<!-- Inline web manifest so no separate file is needed -->
+<script>
+const manifest={name:"The Dugout",short_name:"The Dugout",description:"Cubs & Brewers live tracker for CJ & Andrea",start_url:".",display:"standalone",background_color:"#0d1117",theme_color:"#ffc52f",icons:[{src:"assets/andrea%20and%20cj%20button.jpg",sizes:"512x512",type:"image/jpeg"}]};
+const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+const url=URL.createObjectURL(blob);
+const link=document.createElement('link');
+link.rel='manifest';link.href=url;
+document.currentScript.parentNode.insertBefore(link,document.currentScript);
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-/* ── RESET & BASE ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#090d14; --card:rgba(20, 25, 35, 0.45); --card2:rgba(30, 40, 60, 0.35);
-  --border:rgba(255,255,255,0.12); --border-light:rgba(255,255,255,0.22);
-  --text:#e8edf5; --muted:#cbd5e1;
-  --green:#22c55e;
-  
-  /* User Themes */
-  --u-andrea-1: #0a2351; --u-andrea-2: #ffc52f;
-  --u-cj-1: #0e3386; --u-cj-2: #cc3433;
-  --u-brennan-1: #27251f; --u-brennan-2: #fd5a1e;
-  --u-dominic-1: #0c2340; --u-dominic-2: #ffffff;
-  --u-mario-1: #002b5c; --u-mario-2: #e31937;
+  --bg:#0d1117;--card:rgba(22, 28, 38, 0.82);--card2:rgba(28, 36, 53, 0.75);
+  --border:rgba(255,255,255,0.08);--text:#e8edf5;--muted:#cbd5e1;
+  --green:#22c55e;--accent:#ffc52f;--btn-bg:#12284b;--btn-text:#ffc52f;
+  --btn-border:#ffc52f;--stripe:rgba(255,197,47,0.06);--hdr-border:#ffc52f;
 }
-body{
-  font-family:'Inter',system-ui,sans-serif;
-  background-color:var(--bg); color:var(--text); min-height:100vh;
-  background-image: url('assets/OD%20background.png');
-  background-size: cover;
-  background-position: center top;
-  background-attachment: fixed;
-}
-.glass{ 
-  background: var(--card);
-  backdrop-filter: blur(16px); 
-  -webkit-backdrop-filter: blur(16px); 
-  border: 1px solid var(--border);
-  border-top: 1px solid var(--border-light);
-  border-left: 1px solid var(--border-light);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
-}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;text-shadow:0 1px 4px rgba(0,0,0,0.85)}
+body::before{content:'';position:fixed;top:0;left:0;width:100vw;height:100vh;background-image:var(--bg-img);background-size:cover;background-position:center;z-index:-1;will-change:transform}
+.hdr, .viewer-wrap, .react-wrap, .gcard, .tbl-wrap, .no-data { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 
-/* ── HEADER ── */
-.hdr{
-  background:var(--card); border-bottom:1px solid var(--border);
-  position:sticky; top:0; z-index:100;
-  display:flex; justify-content:space-between; align-items:center;
-  padding:1rem 2rem;
-}
-.logo-wrap{
-  display:flex; flex-direction:column; align-items:center; line-height:1;
-}
-.logo-main{
-  font-family:'Graduate', serif; font-size: 2rem;
-  color: #fff; letter-spacing: 2px;
-  text-transform: uppercase;
-  text-shadow: 2px 2px 0 #cc3433, -1px -1px 0 #0e3386, 1px -1px 0 #0e3386, -1px 1px 0 #0e3386, 1px 1px 0 #0e3386;
-}
-.live-col{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
-.live-row{ display:flex; align-items:center; gap:4px; font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); }
-.pulse{ width:6px; height:6px; border-radius:50%; background:var(--green); animation:blink 2s infinite; }
+/* HEADER */
+.hdr{background:var(--card);border-bottom:3px solid var(--hdr-border);position:sticky;top:0;z-index:100;transition:border-color .3s}
+.hdr-inner{max-width:680px;margin:0 auto;display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem}
+.logo{width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .3s;font-family:'Oswald',sans-serif;font-weight:700;font-size:14px;color:#0d1117}
+.hdr-info{flex:1}
+.hdr-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;line-height:1.1}
+.hdr-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.live-col{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.live-row{display:flex;align-items:center;gap:4px;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--muted)}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+#hdr-time{font-size:11px;color:var(--muted)}
 
-/* ── LEADERBOARDS ── */
-.boards-section{ padding: 2rem; max-width: 1400px; margin: 0 auto; display:flex; gap:2rem; flex-wrap:wrap; }
-.board{ flex:1; min-width:320px; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-.board-header{
-  padding: 1rem; border-bottom:1px solid var(--border);
-  font-family:'Oswald',sans-serif; font-size:1.2rem; letter-spacing:1px; text-transform:uppercase;
-  display:flex; align-items:center; justify-content:space-between; background:var(--card2);
-}
-.board-header > div{display:flex; align-items:center; gap:8px;}
-.b-pip{width:8px; height:8px; border-radius:50%; background:#fff;}
-table{width:100%; border-collapse:collapse; font-size:13px; text-align:right;}
-th{ font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); padding:10px; border-bottom:1px solid var(--border); font-weight:400; background:rgba(0,0,0,0.2); }
-td{ padding:12px 10px; border-bottom:1px solid var(--border); color:var(--muted); }
-th:first-child, td:first-child{ text-align:left; }
-.team-name{ font-family:'Oswald',sans-serif; font-size:15px; color:#fff; letter-spacing:0.5px; }
-.bld{ color:#fff; font-weight:600; }
-.stk{ padding:2px 6px; border-radius:4px; font-family:'Oswald',sans-serif; font-size:10px; }
-.stk-w{ background:rgba(34,197,94,.12); color:#4ade80; }
-.stk-l{ background:rgba(239,68,68,.12); color:#f87171; }
+/* VIEWER TABS */
+.viewer-wrap{background:var(--card2);border-bottom:1px solid var(--border)}
+.viewer-inner{max-width:680px;margin:0 auto;padding:.625rem 1rem;display:flex;align-items:center;gap:.5rem}
+.vlbl{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.vbtn{padding:5px 20px;border-radius:4px;border:2px solid var(--border);font-family:'Oswald',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s}
+.vbtn:hover:not(.von){color:var(--text);border-color:rgba(255,255,255,.15)}
+.von{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-border)}
 
-.row-andrea{ border-left: 3px solid var(--u-andrea-2); }
-.row-cj{ border-left: 3px solid var(--u-cj-2); }
-.row-brennan{ border-left: 3px solid var(--u-brennan-2); }
-.row-dominic{ border-left: 3px solid var(--u-dominic-2); }
-.row-mario{ border-left: 3px solid var(--u-mario-2); }
+/* REACTIONS */
+.react-wrap{margin-top:1.5rem;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.react-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.rct-btn{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 4px;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text);cursor:pointer;transition:all .2s;text-align:center}
+.rct-btn:hover{background:var(--accent);color:#000;border-color:var(--accent)}
+.emoji-flake{position:fixed;top:-10vh;z-index:9999;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(120vh) rotate(360deg)}}
+@media(max-width:500px){.react-grid{grid-template-columns:repeat(2,1fr)}}
 
-/* ── MAIN GRID ── */
-.main-grid{
-  display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:1.5rem;
-  padding: 0 2rem 3rem; max-width:1400px; margin: 0 auto;
-}
-.user-col{
-  display:flex; flex-direction:column; gap:1rem;
-}
-.user-hdr{
-  background: var(--card); border:1px solid var(--border); border-radius:12px;
-  overflow:hidden; text-align:center; position:relative;
-}
-.uh-top{ height:6px; width:100%; }
-.uh-inner{ padding: 1.25rem 1rem; }
-.uh-name{ font-family:'Graduate', serif; font-size:1.4rem; letter-spacing:1px; margin-bottom:4px; }
-.uh-team{ font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); opacity: 0.9; }
+/* MAIN */
+main{max-width:680px;margin:0 auto;padding:1.25rem 1rem 3rem}
 
-/* ── GAME CARDS ── */
-.gcard{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1rem; position:relative;}
-.gcard-live{ border-color:var(--green) !important; box-shadow: 0 0 15px rgba(34,197,94,0.3); }
-.live-badge{ position:absolute; top:-8px; left:50%; transform:translateX(-50%); background:var(--green); color:#000; font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1px; padding:2px 8px; border-radius:12px; font-weight:700;}
+/* SECTIONS */
+.sec{margin-top:1.75rem}
+.sec:first-child{margin-top:.75rem}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.sec-title{display:flex;align-items:center;gap:7px;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
+.pip{width:6px;height:6px;border-radius:50%}
 
-.matchup{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:.5rem; text-align:center; }
-.tm{ display:flex; flex-direction:column; gap:2px; }
-.tm.home{text-align:right;} .tm.away{text-align:left;}
-.tm-abbr{ font-family:'Oswald',sans-serif; font-size:1.3rem; font-weight:700; }
-.tm-rec{ font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif;}
-.dim{ opacity:0.4; }
-.smid{ display:flex; flex-direction:column; align-items:center; gap:2px; min-width:60px; }
-.score{ font-family:'Oswald',sans-serif; font-size:1.6rem; font-weight:700; letter-spacing:1px; line-height:1; }
-.vs-txt{ font-size:12px; color:var(--muted); }
-.gstat{ font-family:'Oswald',sans-serif; font-size:11px; text-transform:uppercase; color:var(--muted); }
-.gstat.live{ color:var(--green); }
-.gfooter{ margin-top:.75rem; padding-top:.5rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; font-size:11px; color:var(--muted); }
-.gtba{ text-align:center; font-style:italic; font-size:13px; color:var(--muted); padding:1rem 0; }
-
-.sched-title{ font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem; text-align:center; }
-.sched-list{ display:flex; flex-direction:column; gap:8px; }
-.mini-game{ display:flex; justify-content:space-between; background:var(--card2); border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-size:12px; align-items:center;}
-.mg-date{ font-family:'Oswald',sans-serif; color:var(--muted); width:45px; }
-.mg-match{flex:1; text-align:center; font-weight:500;}
-.mg-time{ color:var(--muted); font-size:11px; text-align:right;}
-
-/* ── ROSTER & MODAL ── */
-.roster-sec{ max-width:1400px; margin:0 auto 2rem; padding: 0 2rem; }
-.roster-wrap{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.25rem; }
-.react-head{ display:flex; align-items:center; gap:8px; font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:1rem; }
-.roster-grid{ display:flex; justify-content:center; gap:2.5rem; flex-wrap:wrap; padding: 1rem 0; }
-.roster-thumb{ width:120px; height:150px; border-radius:18px; object-fit:cover; object-position:top; border:3px solid var(--border-light); cursor:pointer; transition:transform .2s, box-shadow .2s; box-shadow:0 6px 15px rgba(0,0,0,0.6); }
-.roster-thumb:hover{ transform:scale(1.08); box-shadow:0 10px 25px rgba(255,255,255,0.2); }
-
-.modal-overlay{ position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:999; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s; }
-.modal-overlay.open{ opacity:1; pointer-events:auto; }
-.modal-content{ max-width:450px; width:90%; border-radius:16px; padding:2rem; position:relative; transform:translateY(20px); transition:transform .3s; display:flex; flex-direction:column; gap:1.5rem; text-align:center; }
-.modal-overlay.open .modal-content{ transform:translateY(0); }
-.modal-close{ position:absolute; top:1rem; right:1.5rem; background:transparent; border:none; color:var(--muted); font-size:2rem; cursor:pointer; transition:color .2s; line-height:1; }
-.modal-close:hover{ color:#fff; }
-.modal-img{ width:300px; height:380px; border-radius:16px; object-fit:cover; object-position:top; border:4px solid var(--border-light); margin:0 auto; box-shadow:0 10px 35px rgba(0,0,0,0.8); }
-.modal-info{ font-family:'Oswald',sans-serif; }
-.modal-name{ font-size:2.2rem; letter-spacing:1px; line-height:1; margin-bottom:5px; text-shadow:0 2px 4px rgba(0,0,0,0.8); }
-.modal-team{ font-size:1.2rem; color:var(--text); letter-spacing:2px; text-transform:uppercase; margin-bottom:15px; }
-
-.modal-daily-tbl table{ width:100%; border-collapse:collapse; font-size:10px; margin-top:5px; }
-.modal-daily-tbl th{ color:var(--muted); font-weight:400; text-align:right; padding:4px; border-bottom:1px solid var(--border); }
-.modal-daily-tbl th:first-child{ text-align:left; }
-.modal-daily-tbl td{ color:var(--text); text-align:right; padding:6px 4px; border-bottom:1px solid var(--border); }
-.modal-daily-tbl td:first-child{ text-align:left; color:#fff; font-family:'Oswald',sans-serif; text-transform:uppercase; }
-.modal-daily-tbl .bld{ color:#fff; font-weight:700; }
-.modal-daily-tbl .dim{ opacity:0.4; }
-.modal-daily-tbl .team-name{ font-size:12px; font-weight:600; padding-right:5px; }
-
-/* ── REFRESH ── */
-.rbtn{ background:transparent; border:1px solid var(--border); color:var(--muted); padding:6px 12px; border-radius:6px; font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all .2s;}
-.rbtn:hover{ color:#fff; border-color:#fff; }
-.spin{width:12px; height:12px; border:2px solid rgba(255,255,255,.1); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; display:none;}
-.is-loading .spin{display:block;}
+/* REFRESH */
+.rbtn{display:flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:5px;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.rbtn:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.rbtn:active{transform:scale(.96)}
+.spin{width:10px;height:10px;border:1.5px solid rgba(255,255,255,.08);border-top-color:var(--muted);border-radius:50%;animation:spin .7s linear infinite;display:none}
+.is-loading .spin{display:block}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-footer{ text-align:center; padding:2rem 1rem; font-size:12px; color:var(--muted); border-top:1px solid var(--border); margin-top:2rem;}
-@media(max-width:768px){ body{ background-image: url('assets/OD%20phone%20background.png'); } .boards-section{ flex-direction:column; padding:1rem; } .main-grid, .roster-sec{ padding:0 1rem 2rem; } .hdr{ padding:1rem; flex-direction:column; gap:10px; } .roster-thumb{ width:90px; height:120px; } }
+/* GAME CARDS */
+.gcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.875rem 1rem;margin-bottom:.625rem;border-left:3px solid transparent}
+.gcard.gc-cubs{border-left-color:#cc3433}
+.gcard.gc-brew{border-left-color:var(--accent)}
+.gcard.gc-live{border-left-color:var(--green)}
+.live-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.1);color:var(--green);font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;padding:2px 8px;border-radius:20px;margin-bottom:.5rem}
+.lpulse{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
+.matchup{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.5rem}
+.tm{display:flex;flex-direction:column;gap:2px}
+.tm.home{text-align:right}
+.tm-abbr{font-family:'Oswald',sans-serif;font-size:1.2rem;font-weight:700;letter-spacing:1px;line-height:1}
+.tm-name{font-size:11px;color:var(--muted)}
+.tm-rec{font-size:11px;color:var(--muted);font-family:'Oswald',sans-serif}
+.dim{opacity:.35}
+.smid{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:70px}
+.score{font-family:'Oswald',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:2px;line-height:1;white-space:nowrap}
+.vs-txt{font-size:12px;color:var(--muted)}
+.gstat{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center}
+.gstat.live{color:var(--green)}
+.gfooter{margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.no-data{text-align:center;padding:1.5rem;color:var(--muted);font-style:italic;font-size:13px;background:var(--card);border-radius:10px;border:1px solid var(--border)}
+.err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:.75rem 1rem;color:#f87171;font-size:13px;text-align:center}
+
+/* STANDINGS */
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:.6rem .75rem;text-align:right;background:var(--card2);border-bottom:1px solid var(--border)}
+thead th:first-child{text-align:left}
+tbody td{padding:.55rem .75rem;text-align:right;color:var(--muted);border-bottom:1px solid var(--border)}
+tbody td:first-child{text-align:left;color:var(--text);font-family:'Oswald',sans-serif;font-size:.875rem;letter-spacing:.5px}
+tbody tr:last-child td{border-bottom:none}
+tbody td.bld{color:var(--text)}
+tr.hi-cubs td{background:rgba(14,51,134,.12)}
+tr.hi-cubs td:first-child{color:#7aaeff}
+tr.hi-brew td{background:var(--stripe)}
+tr.hi-brew td:first-child{color:var(--accent)}
+.stk{font-family:'Oswald',sans-serif;font-size:10px;padding:1px 7px;border-radius:3px;letter-spacing:.5px}
+.stk-w{background:rgba(34,197,94,.12);color:#4ade80}
+.stk-l{background:rgba(239,68,68,.1);color:#f87171}
+
+/* SCHEDULE */
+.dlbl{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:1rem 0 .375rem;padding-left:2px}
+
+/* DEBUG PANEL */
+.debug-wrap{max-width:680px;margin:.75rem auto 0;padding:0 1rem}
+.debug-toggle{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.debug-panel{display:none;background:#0a0f18;border:1px solid var(--border);border-radius:8px;padding:.75rem;margin-top:.5rem;font-family:monospace;font-size:11px;color:#6ee7b7;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+.debug-panel.open{display:block}
+
+footer{text-align:center;padding:1.5rem 1rem;font-size:11px;color:var(--muted);border-top:1px solid var(--border);max-width:680px;margin:0 auto}
+@media(max-width:400px){.tm-abbr{font-size:1rem}.score{font-size:1.25rem}.smid{min-width:58px}main{padding:1rem .75rem 3rem}.vbtn{padding:5px 14px}}
 </style>
 </head>
 <body>
 
-<div class="hdr glass">
-  <div class="logo-wrap">
-    <div class="logo-main">Office Dugout</div>
-  </div>
-  <div class="live-col">
-    <div class="live-row"><span class="pulse"></span>LIVE DATA FEED</div>
-    <div id="hdr-time" style="font-size:13px; font-weight:500;">–</div>
-  </div>
-</div>
-
-<div class="boards-section">
-  <!-- Standings -->
-  <div class="board glass">
-    <div class="board-header">
-      <div><div class="b-pip" style="background:#3b82f6;"></div>Season Standings</div>
-      <button class="rbtn" id="btn-refresh" onclick="refreshAll()"><div class="spin"></div>Refresh</button>
+<div class="hdr">
+  <div class="hdr-inner">
+    <div class="logo" id="hdr-logo"></div>
+    <div class="hdr-info">
+      <div class="hdr-title">The Dugout</div>
+      <div class="hdr-sub">Cubs &amp; Brewers Live Tracker</div>
     </div>
-    <table>
-      <thead><tr><th>Team</th><th>W</th><th>L</th><th>PCT</th><th>GB</th><th>STK</th></tr></thead>
-      <tbody id="tbl-standings"><tr><td colspan="6" style="text-align:center">Loading...</td></tr></tbody>
-    </table>
-  </div>
-  <!-- Daily Leader -->
-  <div class="board glass">
-    <div class="board-header">
-      <div><div class="b-pip" style="background:#ef4444;"></div>Daily Leader</div>
-      <span style="font-size:11px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0;">Sort: Runs > Hits</span>
-    </div>
-    <table>
-      <thead><tr><th>Team</th><th>Runs</th><th>Hits</th><th>Status</th></tr></thead>
-      <tbody id="tbl-daily"><tr><td colspan="4" style="text-align:center">Loading...</td></tr></tbody>
-    </table>
-  </div>
-</div>
-
-<div class="roster-sec">
-  <div class="roster-wrap glass">
-    <div class="react-head"><div class="b-pip" style="background:#a855f7; width:6px; height:6px;"></div>Team Roster</div>
-    <div class="roster-grid" id="roster-grid">
-      <!-- Populated by JS -->
+    <div class="live-col">
+      <div class="live-row"><span class="pulse"></span>LIVE FEED</div>
+      <div id="hdr-time">–</div>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="roster-modal" onclick="closeModal(event)">
-  <div class="modal-content glass" id="modal-body">
-    <!-- Populated by JS -->
+<div class="viewer-wrap">
+  <div class="viewer-inner">
+    <span class="vlbl">Viewing as</span>
+    <button class="vbtn" id="btn-cj" onclick="setViewer('cj')">CJ</button>
+    <button class="vbtn von" id="btn-andrea" onclick="setViewer('andrea')">Andrea</button>
   </div>
 </div>
 
-<div class="main-grid" id="users-grid">
-  <!-- Populated by JS -->
+<!-- Fact Section removed, layout naturally elevated -->
+
+<!-- DEBUG PANEL -->
+<div class="debug-wrap">
+  <button class="debug-toggle" onclick="toggleDebug()">▶ Debug Log</button>
+  <div class="debug-panel" id="debug-panel"></div>
 </div>
 
-<footer>Data via MLB Stats API · Auto-refreshes every 60s</footer>
+<main>
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title"><span class="pip" style="background:var(--green)"></span>Today's Scoreboard</div>
+      <button class="rbtn" id="rbtn" onclick="refreshAll()">
+        <div class="spin" id="spin"></div><span>Refresh</span>
+      </button>
+    </div>
+    <div id="scores-el"><div class="no-data">Loading…</div></div>
+  </div>
+
+  <div class="sec react-wrap">
+    <div class="sec-head" style="margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)">
+      <div class="sec-title"><span class="pip" style="background:#f43f5e"></span>Multimedia Reaction Engine</div>
+    </div>
+    <div class="react-grid">
+      <button class="rct-btn" onclick="playReac('win')">Winning</button>
+      <button class="rct-btn" onclick="playReac('lose')">Losing</button>
+      <button class="rct-btn" onclick="playReac('hr')">Home Runs</button>
+      <button class="rct-btn" onclick="playReac('badcall')">Bad Call</button>
+      <button class="rct-btn" onclick="playReac('wtf')">What?!</button>
+      <button class="rct-btn" onclick="playReac('unbelievable')">Unbelievable</button>
+    </div>
+    <!-- Emojis will spawn as overlay -->
+  </div>
+
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title"><span class="pip" style="background:var(--accent)" id="pip-gold"></span>NL Central Standings</div>
+    </div>
+    <div id="standings-el"><div class="no-data">Loading…</div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title"><span class="pip" style="background:#58a6ff"></span><span id="sched-lbl">Next 14 Days</span></div>
+    </div>
+    <div id="schedule-el"><div class="no-data">Loading…</div></div>
+  </div>
+</main>
+
+<footer>Data via MLB Stats API · Auto-refreshes every 60s · Made for CJ &amp; Andrea ❤</footer>
 
 <script>
-const USERS = [
-  { id: 'andrea', name: 'Andrea', teamName: 'Brewers', teamId: 158, primary: 'var(--u-andrea-1)', secondary: 'var(--u-andrea-2)', img: 'assets/andrea.jpg' },
-  { id: 'cj', name: 'CJ', teamName: 'Cubs', teamId: 112, primary: 'var(--u-cj-1)', secondary: 'var(--u-cj-2)', img: 'assets/cj.jpg' },
-  { id: 'brennan', name: 'Brennan', teamName: 'Giants', teamId: 137, primary: 'var(--u-brennan-1)', secondary: 'var(--u-brennan-2)', img: 'assets/Brennan.jpg' },
-  { id: 'dominic', name: 'Dominic', teamName: 'Yankees', teamId: 147, primary: 'var(--u-dominic-1)', secondary: 'var(--u-dominic-2)', img: 'assets/Dominic.jpg', glow: 'text-shadow: 0 0 10px rgba(255,255,255,0.7), 0 0 20px rgba(255,255,255,0.4);' },
-  { id: 'mario', name: 'Mario', teamName: 'Guardians', teamId: 114, primary: 'var(--u-mario-1)', secondary: 'var(--u-mario-2)', img: 'assets/Mario.jpg' }
-];
-const TEAM_IDS = USERS.map(u => u.teamId).join(',');
+/* ─── THEMES ─── */
+const THEMES={
+  andrea:{accent:'#ffc52f',hdr:'#ffc52f',btnBg:'#12284b',btnText:'#ffc52f',btnBorder:'#ffc52f',stripe:'rgba(255,197,47,0.06)',logo:'#0d1117', logoImg:'url("assets/andrea.jpg")', bgImg:'url("assets/Brewers%20field.jpg")', bgImgMobile:'url("assets/Brewers%20field%20mobile.jpg")'},
+  cj:{accent:'#4a8fe8',hdr:'#cc3433',btnBg:'#0e3386',btnText:'#ffffff',btnBorder:'#cc3433',stripe:'rgba(74,143,232,0.06)',logo:'#ffffff', logoImg:'url("assets/cj.jpg")', bgImg:'url("assets/Cubs%20field.jpg")', bgImgMobile:'url("assets/Cubs%20field%20mobile.jpg")'}
+};
 
-const MLB = 'https://statsapi.mlb.com/api/v1';
-
-function getTeamStyle(id, defColor='#fff') {
-  const matched = USERS.find(u => u.teamId === id);
-  if (!matched) return `color:${defColor};`;
-  return `color:${matched.secondary};${matched.glow||''}`;
+function applyTheme(v){
+  const t=THEMES[v],s=document.documentElement.style;
+  s.setProperty('--accent',t.accent);
+  s.setProperty('--btn-bg',t.btnBg);
+  s.setProperty('--btn-text',t.btnText);
+  s.setProperty('--btn-border',t.btnBorder);
+  s.setProperty('--stripe',t.stripe);
+  s.setProperty('--hdr-border',t.hdr);
+  
+  const isMobile = window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+  document.documentElement.style.setProperty('--bg-img', isMobile ? `${t.bgImgMobile}, ${t.bgImg}` : t.bgImg);
+  
+  const logoEl = document.getElementById('hdr-logo');
+  logoEl.style.backgroundImage = t.logoImg;
+  logoEl.style.backgroundSize = 'cover';
+  logoEl.style.backgroundPosition = 'center top';
+  logoEl.style.border = `2px solid ${t.accent}`;
+  
+  document.getElementById('pip-gold').style.background=t.accent;
+  // Update status bar color on iPhone
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', t.accent);
 }
 
-/* ── HELPERS ── */
+/* ─── REACTIONS ENGINE ─── */
+const EMOJIS = {
+  win: ['🏆','🎉','🍺','🙌'],
+  lose: ['💔','😭','📉','🤦','👎','☹️'],
+  hr: ['⚾','🚀','🔥','🎇'],
+  badcall: ['👨‍🦯','🗑️','😤','😡'],
+  wtf: ['🤯','❓','😵','🥶'],
+  unbelievable: ['😱','🚨','👀','🧨']
+};
+function playReac(key){
+  const set = EMOJIS[key];
+  if(!set) return;
+  for(let i=0;i<40;i++){
+    const e=document.createElement('div');
+    e.className='emoji-flake';
+    e.innerText=set[Math.floor(Math.random()*set.length)];
+    e.style.left=Math.random()*100+'vw';
+    e.style.fontSize=(Math.random()*1.5+1.5)+'rem';
+    e.style.animationDuration=(Math.random()*2+2)+'s';
+    e.style.animationDelay=(Math.random()*0.5)+'s';
+    document.body.appendChild(e);
+    setTimeout(()=>e.remove(), 4500);
+  }
+}
+
+let viewer='andrea';
+
+function setViewer(v){
+  viewer=v;
+  applyTheme(v);
+  document.getElementById('btn-cj').className='vbtn'+(v==='cj'?' von':'');
+  document.getElementById('btn-andrea').className='vbtn'+(v==='andrea'?' von':'');
+  document.getElementById('sched-lbl').textContent=v==='cj'?'Cubs — Next 14 Days':'Brewers — Next 14 Days';
+  document.getElementById('schedule-el').innerHTML='<div class="no-data">Loading\u2026</div>';
+  loadSchedule();
+}
+
+/* ─── DEBUG ─── */
+const debugLines=[];
+function dbg(msg){
+  const ts=new Date().toLocaleTimeString();
+  debugLines.push(`[${ts}] ${msg}`);
+  if(debugLines.length>50) debugLines.shift();
+  const p=document.getElementById('debug-panel');
+  p.textContent=debugLines.join('\n');
+  p.scrollTop=p.scrollHeight;
+}
+function toggleDebug(){
+  document.getElementById('debug-panel').classList.toggle('open');
+}
+
+/* ─── MLB STATS API ─── */
+const MLB='https://statsapi.mlb.com/api/v1';
+const CUBS_ID=112, BREW_ID=158;
+// NL Central division id = 205
+const NLC_IDS=new Set([112,158,138,113,134]); // Cubs,Brewers,Cardinals,Reds,Pirates
+
 function pad(n){return String(n).padStart(2,'0')}
 function isoDate(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function fmtDate(str){
   const d=new Date(str+'T12:00:00');
-  return d.toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
+  return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
 }
 function fmtTime(isoStr){
-  return new Date(isoStr).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  return new Date(isoStr).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
 }
 
-/* ── ROSTER & MODAL ── */
-function initRoster(){
-  const grid = document.getElementById('roster-grid');
-  grid.innerHTML = USERS.map(u => `
-    <img src="${u.img}" class="roster-thumb" style="border-color:${u.secondary}" onclick="openModal('${u.id}')" alt="${u.name}">
-  `).join('');
+function teamCls(awayId,homeId){
+  if(awayId===CUBS_ID||homeId===CUBS_ID) return 'gc-cubs';
+  if(awayId===BREW_ID||homeId===BREW_ID) return 'gc-brew';
+  return '';
 }
 
-function openModal(id) {
-  const u = USERS.find(x => x.id === id);
-  if(!u) return;
-  const body = document.getElementById('modal-body');
-  
-  const todayEl = document.getElementById(`today-${id}`);
-  const todayHtml = todayEl ? todayEl.innerHTML : '';
-
-  const dailyEl = document.getElementById('tbl-daily');
-  const dailyHtml = dailyEl ? `
-    <div class="modal-daily-tbl" style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; margin-top:15px; text-align:left;">
-      <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-        <div class="b-pip" style="background:#ef4444;width:6px;height:6px;"></div>Daily Leader
-      </div>
-      <table>
-        <thead><tr><th>Team</th><th>Runs</th><th>Hits</th><th>Status</th></tr></thead>
-        <tbody>${dailyEl.innerHTML}</tbody>
-      </table>
-    </div>
-  ` : '';
-
-  body.innerHTML = `
-    <button class="modal-close" onclick="closeModal(event)">&times;</button>
-    <img src="${u.img}" class="modal-img" style="border-color:${u.secondary}">
-    <div class="modal-info">
-      <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:5px;">
-        <div class="modal-name" style="color:${u.secondary};${u.glow||''} margin-bottom:0;">${u.name}</div>
-        <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" style="width:36px; height:36px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
-      </div>
-      <div class="modal-team">${u.teamName}</div>
-      <div style="text-align:left; max-width:100%; margin:0 auto; max-height: 40vh; overflow-y:auto; overflow-x:hidden; padding-right:10px;">
-        <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-          <div class="b-pip" style="background:var(--green);width:6px;height:6px;"></div>Today's Matchup
-        </div>
-        ${todayHtml}
-        ${dailyHtml}
-      </div>
-    </div>
-  `;
-  document.getElementById('roster-modal').classList.add('open');
-}
-function closeModal(e) {
-  if (e && (e.target.id === 'roster-modal' || e.target.classList.contains('modal-close'))) {
-    document.getElementById('roster-modal').classList.remove('open');
-  } else if (!e) {
-    document.getElementById('roster-modal').classList.remove('open');
-  }
-}
-
-/* ── INITIAL RENDER ── */
-function initLayout(){
-  const g = document.getElementById('users-grid');
-  let html = '';
-  USERS.forEach(u => {
-    html += `
-    <div class="user-col" id="col-${u.id}">
-      <div class="user-hdr glass" style="border-bottom: 3px solid ${u.secondary}">
-        <div class="uh-top" style="background:${u.primary}"></div>
-        <div class="uh-inner" style="display:flex; align-items:center; justify-content:center; gap:12px;">
-          <div style="text-align:right;">
-            <div class="uh-name" style="color:${u.secondary};${u.glow||''}">${u.name}</div>
-            <div class="uh-team" style="color:${u.secondary};${u.glow||''}">${u.teamName}</div>
-          </div>
-          <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" alt="logo" style="width:42px; height:42px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
-        </div>
-      </div>
-      <div id="today-${u.id}"><div class="gtba">Loading Today's Game...</div></div>
-      <div class="sched-title">Next 5 Days</div>
-      <div class="sched-list" id="sched-${u.id}"></div>
-      <div id="standings-${u.id}" style="margin-top:auto;"></div>
-    </div>`;
-  });
-  g.innerHTML = html;
-  initRoster();
-}
-
-/* ── FULL GAME RENDERER ── */
-function renderGame(g, isSchedule=false){
+function renderGame(g, showDate, showPitcher=false){
   const away=g.teams.away, home=g.teams.home;
   const awayId=away.team.id, homeId=home.team.id;
-  const aSty = getTeamStyle(awayId, '#fff');
-  const hSty = getTeamStyle(homeId, '#fff');
-  const status=g.status.abstractGameState; 
+  const status=g.status.abstractGameState; // Preview, Live, Final
   const isLive=status==='Live', isFinal=status==='Final';
   const awayS=away.score??'', homeS=home.score??'';
   const hasScore=isLive||isFinal;
   const awayW=isFinal&&parseInt(awayS)>parseInt(homeS);
   const homeW=isFinal&&parseInt(homeS)>parseInt(awayS);
-  
-  let ss='', sc='', badge='';
+  const awayRec=away.leagueRecord?`${away.leagueRecord.wins}-${away.leagueRecord.losses}`:'';
+  const homeRec=home.leagueRecord?`${home.leagueRecord.wins}-${home.leagueRecord.losses}`:'';
+  const cls=teamCls(awayId,homeId);
+  let ss='',sc='',pill='';
   if(isLive){
     const inn=g.linescore?.currentInningOrdinal||'';
     const half=g.linescore?.inningHalf||'';
-    ss=`${half} ${inn}`.trim(); sc='live';
-    badge=`<div class="live-badge">LIVE</div>`;
-  } else if(isFinal){ ss='Final'; } else { ss=fmtTime(g.gameDate); }
-
-  if(isSchedule){
-    // Compact row
-    return `<div class="mini-game">
-      <span class="mg-date">${fmtDate(g.gameDate.split('T')[0])}</span>
-      <span class="mg-match"><span style="${aSty}font-weight:${USERS.some(u=>u.teamId===awayId)?'700':'500'}">${away.team.abbreviation}</span> @ <span style="${hSty}font-weight:${USERS.some(u=>u.teamId===homeId)?'700':'500'}">${home.team.abbreviation}</span></span>
-      <span class="mg-time">${ss}</span>
-    </div>`;
+    ss=`${half} ${inn}`.trim();
+    sc='live';
+    pill='<div class="live-pill"><span class="lpulse"></span>LIVE</div>';
+  } else if(isFinal){
+    ss='Final';
+  } else {
+    ss=fmtTime(g.gameDate);
   }
-
-  let cardHtml = `<div class="gcard glass ${isLive?'gcard-live':''}">
-    ${badge}
-    <div class="matchup">
-      <div class="tm away">
-        <div class="tm-abbr ${isFinal&&!awayW?'dim':''}" style="${aSty}">${away.team.abbreviation||away.team.name}</div>
-        <div class="tm-rec">${away.leagueRecord?`${away.leagueRecord.wins}-${away.leagueRecord.losses}`:''}</div>
-      </div>
-      <div class="smid">
-        ${hasScore?`<div class="score">${awayS}–${homeS}</div>`:`<div class="vs-txt">vs</div>`}
-        <div class="gstat ${sc}">${ss}</div>
-      </div>
-      <div class="tm home">
-        <div class="tm-abbr ${isFinal&&!homeW?'dim':''}" style="${hSty}">${home.team.abbreviation||home.team.name}</div>
-        <div class="tm-rec">${home.leagueRecord?`${home.leagueRecord.wins}-${home.leagueRecord.losses}`:''}</div>
-      </div>
-    </div>
-    <div class="gfooter"><span>${g.venue?.name||''}</span></div>`;
-
-  if(!isSchedule){
-    let awayP = away.probablePitcher?.fullName || 'TBD';
-    let homeP = home.probablePitcher?.fullName || 'TBD';
-    if(awayP !== 'TBD' || homeP !== 'TBD') {
-        cardHtml += `<div style="font-size:10px;text-align:center;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);">
-          <div style="display:flex; justify-content:space-between;">
-            <span style="flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${awayP}</span>
-            <span style="opacity:0.5;margin:0 4px;">vs</span>
-            <span style="flex:1;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${homeP}</span>
-          </div>
-        </div>`;
+  const venue=g.venue?.name||'';
+  const dateStr=showDate?`<span>${fmtDate(g.gameDate.split('T')[0])}</span>`:'';
+  
+  let pitcherHtml = '';
+  if(showPitcher){
+    if(homeId === CUBS_ID && home.probablePitcher){
+      pitcherHtml = `<div style="font-size:10.5px;text-align:center;color:#4a8fe8;margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);text-transform:uppercase;letter-spacing:1px;font-family:'Oswald',sans-serif">Cubs Starter: ${home.probablePitcher.fullName}</div>`;
+    } else if(awayId === CUBS_ID && away.probablePitcher){
+      pitcherHtml = `<div style="font-size:10.5px;text-align:center;color:#4a8fe8;margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);text-transform:uppercase;letter-spacing:1px;font-family:'Oswald',sans-serif">Cubs Starter: ${away.probablePitcher.fullName}</div>`;
+    } else if(homeId === BREW_ID && home.probablePitcher){
+      pitcherHtml = `<div style="font-size:10.5px;text-align:center;color:#ffc52f;margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);text-transform:uppercase;letter-spacing:1px;font-family:'Oswald',sans-serif">Brewers Starter: ${home.probablePitcher.fullName}</div>`;
+    } else if(awayId === BREW_ID && away.probablePitcher){
+      pitcherHtml = `<div style="font-size:10.5px;text-align:center;color:#ffc52f;margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);text-transform:uppercase;letter-spacing:1px;font-family:'Oswald',sans-serif">Brewers Starter: ${away.probablePitcher.fullName}</div>`;
     }
   }
 
-  cardHtml += `</div>`;
-  return cardHtml;
+  return `<div class="gcard ${cls}${isLive?' gc-live':''}">
+    ${pill}
+    <div class="matchup">
+      <div class="tm away">
+        <div class="tm-abbr${isFinal&&!awayW?' dim':''}">${away.team.abbreviation||away.team.name}</div>
+        <div class="tm-name">${away.team.teamName||away.team.name}</div>
+        <div class="tm-rec">${awayRec}</div>
+      </div>
+      <div class="smid">
+        ${hasScore?`<div class="score">${awayS}&thinsp;–&thinsp;${homeS}</div>`:`<div class="vs-txt">vs</div>`}
+        <div class="gstat ${sc}">${ss}</div>
+      </div>
+      <div class="tm home">
+        <div class="tm-abbr${isFinal&&!homeW?' dim':''}">${home.team.abbreviation||home.team.name}</div>
+        <div class="tm-name">${home.team.teamName||home.team.name}</div>
+        <div class="tm-rec">${homeRec}</div>
+      </div>
+    </div>
+    <div class="gfooter"><span>${venue}</span>${dateStr}</div>
+    ${pitcherHtml}
+  </div>`;
 }
 
-/* ── SCORE RENDER & DAILY LEADER ── */
+/* ── SCORES ── */
 async function loadScores(){
-  const todayStr=isoDate(new Date());
-  const url=`${MLB}/schedule?sportId=1&date=${todayStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
-  try {
+  const el=document.getElementById('scores-el');
+  const today=isoDate(new Date());
+  const url=`${MLB}/schedule?sportId=1&date=${today}&teamId=${CUBS_ID},${BREW_ID}&hydrate=team,linescore,leagueRecord,probablePitcher`;
+  dbg(`SCORES fetch: ${url}`);
+  try{
     const r=await fetch(url);
-    if(!r.ok) throw new Error();
+    dbg(`SCORES status: ${r.status}`);
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
     const data=await r.json();
+    dbg(`SCORES dates: ${data.dates?.length}, totalGames: ${data.totalGames}`);
     const games=data.dates?.[0]?.games||[];
-
-    let dailyData = [];
-
-    USERS.forEach(u => {
-      // Find game for this user
-      let g = games.find(gm => gm.teams.away.team.id===u.teamId || gm.teams.home.team.id===u.teamId);
-      
-      let runs=0, hits=0, pending=true, matchTxt="No Game";
-      if(g){
-        document.getElementById(`today-${u.id}`).innerHTML = renderGame(g);
-        let tr = g.teams.away.team.id === u.teamId ? 'away' : 'home';
-        let st = g.status.abstractGameState;
-        if(st==='Live' || st==='Final'){
-           runs = g.teams[tr].score||0;
-           hits = g.linescore?.teams?.[tr]?.hits||0;
-           pending=false;
-           matchTxt = st==='Live' ? 'In Progress' : 'Final';
-        } else {
-           matchTxt = "Scheduled";
-        }
-      } else {
-        document.getElementById(`today-${u.id}`).innerHTML = `<div class="gtba">No Game Today</div>`;
-      }
-      
-      dailyData.push({ u, runs, hits, pending, matchTxt });
-    });
-
-    // Daily Sort
-    dailyData.sort((a,b)=>{
-      if(a.pending && !b.pending) return 1;
-      if(b.pending && !a.pending) return -1;
-      if(a.runs !== b.runs) return b.runs - a.runs;
-      return b.hits - a.hits;
-    });
-
-    let html = dailyData.map(d => `
-      <tr class="row-${d.u.id}">
-        <td><span class="team-name" style="color:${d.u.secondary};${d.u.glow||''}">${d.u.teamName}</span><br><span style="font-size:10px;text-transform:uppercase;">${d.u.name}</span></td>
-        <td class="bld ${!d.pending?'':'dim'}">${d.pending ? '—' : d.runs}</td>
-        <td class="${!d.pending?'':'dim'}">${d.pending ? '—' : d.hits}</td>
-        <td style="${d.pending?'font-style:italic;':''}">${d.pending?'Pending':d.matchTxt}</td>
-      </tr>
-    `).join('');
-    document.getElementById('tbl-daily').innerHTML = html;
-
-  } catch(e) {
-    document.getElementById('tbl-daily').innerHTML = '<tr><td colspan="4">Error loading data.</td></tr>';
+    dbg(`SCORES games found: ${games.length}`);
+    if(!games.length){el.innerHTML='<div class="no-data">No Cubs or Brewers games today.</div>';return;}
+    el.innerHTML=games.map(g=>renderGame(g,false,true)).join('');
+  }catch(e){
+    dbg(`SCORES ERROR: ${e.message}`);
+    el.innerHTML='<div class="err">Could not load scores. Check debug log.</div>';
   }
 }
 
 /* ── STANDINGS ── */
 async function loadStandings(){
+  const el=document.getElementById('standings-el');
   const yr=new Date().getFullYear();
-  const url=`${MLB}/standings?leagueId=103,104&season=${yr}&standingsTypes=regularSeason&hydrate=team,division`;
-  try {
+  // divisionId 205 = NL Central
+  const url=`${MLB}/standings?leagueId=104&season=${yr}&standingsTypes=regularSeason&hydrate=team,division&divisionId=205`;
+  dbg(`STANDINGS fetch: ${url}`);
+  try{
     const r=await fetch(url);
-    if(!r.ok) throw new Error();
+    dbg(`STANDINGS status: ${r.status}`);
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
     const data=await r.json();
-    
-    // 1. Setup column division standings for each user
-    USERS.forEach(u => {
-      let divGroup = data.records.find(gr => gr.teamRecords.some(tr => tr.team.id === u.teamId));
-      if(divGroup) {
-        let divName = divGroup.league?.name || 'Division';
-        if (divGroup.division?.nameShort) {
-            divName = divGroup.division.nameShort + ' Standings';
-        } else if (divGroup.division?.name) {
-            divName = divGroup.division.name + ' Standings';
-        }
-        
-        let divHtml = divGroup.teamRecords.map(tr => {
-          const pct = parseFloat(tr.winningPercentage||0).toFixed(3).replace(/^0/,'.');
-          const gb = tr.gamesBack==='-'||tr.gamesBack==='0'?'—':tr.gamesBack;
-          const isTarget = tr.team.id === u.teamId;
-          const teamName = tr.team.teamName || tr.team.name;
-          const trSty = getTeamStyle(tr.team.id, isTarget ? '#fff' : 'var(--muted)');
-          return `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding: 4px 0; border-bottom: 1px solid var(--border); font-weight:${isTarget ? '600' : 'normal'}; ${trSty}">
-              <span style="flex:1; text-align:left; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${teamName}">${teamName}</span>
-              <span style="width:20px; text-align:right; font-size:11px;">${tr.wins}</span>
-              <span style="width:20px; text-align:right; font-size:11px;">${tr.losses}</span>
-              <span style="width:34px; text-align:right; font-size:11px;">${pct}</span>
-              <span style="width:24px; text-align:right; font-size:11px;">${gb}</span>
-            </div>
-          `;
-        }).join('');
-        
-        const stEl = document.getElementById(`standings-${u.id}`);
-        if(stEl) {
-          stEl.innerHTML = `
-            <div style="margin-top:15px; padding: 12px; background:var(--card2); border-radius:8px; border:1px solid var(--border);">
-              <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); margin-bottom:6px; text-transform:uppercase;">${divName}</div>
-              <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px; color:var(--muted); text-transform:uppercase; padding-bottom:4px; border-bottom:1px solid var(--border);">
-                <span style="flex:1; text-align:left;">Team</span>
-                <span style="width:20px; text-align:right;">W</span>
-                <span style="width:20px; text-align:right;">L</span>
-                <span style="width:34px; text-align:right;">PCT</span>
-                <span style="width:24px; text-align:right;">GB</span>
-              </div>
-              <div style="display:flex; flex-direction:column;">
-                ${divHtml}
-              </div>
-            </div>
-          `;
-        }
-      }
-    });
+    dbg(`STANDINGS records: ${data.records?.length}`);
+    if(!data.records?.length) throw new Error('No records in response');
 
-    // 2. Setup combined standings leaderboard
-    let rows = [];
-    data.records.forEach(gr => {
-      gr.teamRecords.forEach(tr => {
-        let matched = USERS.find(u => u.teamId === tr.team.id);
-        if(matched) rows.push({...tr, user:matched});
-      });
-    });
+    // Find the NL Central record group
+    const nlc=data.records.find(rec=>
+      rec.division?.id===205||
+      rec.teamRecords?.some(t=>NLC_IDS.has(t.team.id))
+    );
+    if(!nlc) throw new Error('NL Central group not found');
+    dbg(`STANDINGS NLC teams: ${nlc.teamRecords?.length}`);
 
-    rows.sort((a,b) => parseFloat(b.winningPercentage||0) - parseFloat(a.winningPercentage||0));
+    const rows=[...nlc.teamRecords].sort((a,b)=>parseFloat(b.winningPercentage)-parseFloat(a.winningPercentage));
 
-    let html = rows.map(r => {
-      const pct = parseFloat(r.winningPercentage||0).toFixed(3).replace(/^0/,'.');
-      const gb=r.gamesBack==='-'||r.gamesBack==='0'?'—':r.gamesBack;
-      const streak=r.streak?.streakCode||'';
+    const html=rows.map(tr=>{
+      const id=tr.team.id;
+      const isCubs=id===CUBS_ID, isBrew=id===BREW_ID;
+      const rc=isCubs?'hi-cubs':isBrew?'hi-brew':'';
+      const streak=tr.streak?.streakCode||'';
       const sc=streak.startsWith('W')?'stk-w':'stk-l';
-      
-      return `<tr class="row-${r.user.id}">
-        <td><span class="team-name" style="color:${r.user.secondary};${r.user.glow||''}">${r.team.teamName}</span><br><span style="font-size:10px;text-transform:uppercase;">${r.user.name}</span></td>
-        <td class="bld">${r.wins}</td>
-        <td>${r.losses}</td>
+      const gb=tr.gamesBack==='-'||tr.gamesBack==='0'?'—':tr.gamesBack;
+      const pct=parseFloat(tr.winningPercentage).toFixed(3).replace(/^0/,'.');
+      const abbr=tr.team.abbreviation||tr.team.teamCode?.toUpperCase()||tr.team.name;
+      return `<tr class="${rc}">
+        <td>${abbr}</td>
+        <td class="bld">${tr.wins}</td>
+        <td>${tr.losses}</td>
         <td class="bld">${pct}</td>
         <td>${gb}</td>
-        <td>${streak?`<span class="stk ${sc}">${streak}</span>`:'—'}</td>
+        <td>${streak?`<span class="stk ${sc}">${streak}</span>`:''}</td>
       </tr>`;
     }).join('');
-    
-    document.getElementById('tbl-standings').innerHTML = html || '<tr><td colspan="6">No regular season data yet.</td></tr>';
-  } catch(e) {
-    document.getElementById('tbl-standings').innerHTML = '<tr><td colspan="6">Error loading standings.</td></tr>';
+
+    el.innerHTML=`<div class="tbl-wrap"><table>
+      <thead><tr><th>Team</th><th>W</th><th>L</th><th>PCT</th><th>GB</th><th>Stk</th></tr></thead>
+      <tbody>${html}</tbody>
+    </table></div>`;
+  }catch(e){
+    dbg(`STANDINGS ERROR: ${e.message}`);
+    el.innerHTML='<div class="err">Could not load standings. Check debug log.</div>';
   }
 }
 
 /* ── SCHEDULE ── */
 async function loadSchedule(){
-  const today=new Date(); today.setDate(today.getDate()+1); // Tomorrow
+  const el=document.getElementById('schedule-el');
+  const today=new Date(); today.setHours(0,0,0,0);
   const end=new Date(today); end.setDate(end.getDate()+14);
-  const startStr=isoDate(today), endStr=isoDate(end);
-  
-  const url=`${MLB}/schedule?sportId=1&startDate=${startStr}&endDate=${endStr}&teamId=${TEAM_IDS}&hydrate=team,leagueRecord&gameType=R`;
-  try {
+  const startStr=isoDate(today);
+  const endStr=isoDate(end);
+  const teamId=viewer==='cj'?CUBS_ID:BREW_ID;
+  const url=`${MLB}/schedule?sportId=1&startDate=${startStr}&endDate=${endStr}&teamId=${teamId}&hydrate=team,leagueRecord&gameType=R`;
+  dbg(`SCHEDULE fetch: ${url}`);
+  try{
     const r=await fetch(url);
-    if(!r.ok) throw new Error();
+    dbg(`SCHEDULE status: ${r.status}`);
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
     const data=await r.json();
-    const games = [];
-    (data.dates||[]).forEach(d => {
-      (d.games||[]).forEach(g => { games.push(g); });
-    });
+    dbg(`SCHEDULE dates: ${data.dates?.length}, totalGames: ${data.totalGames}`);
 
-    USERS.forEach(u => {
-      const uGames = games.filter(g => g.teams.away.team.id===u.teamId || g.teams.home.team.id===u.teamId);
-      const next5 = uGames.slice(0,5);
-      if(next5.length===0){
-        document.getElementById(`sched-${u.id}`).innerHTML = '<div class="gtba">No upcoming games</div>';
-      } else {
-        document.getElementById(`sched-${u.id}`).innerHTML = next5.map(g => renderGame(g, true)).join('');
+    const games=[];
+    const seen=new Set();
+    for(const d of (data.dates||[])){
+      for(const g of (d.games||[])){
+        if(!seen.has(g.gamePk)){seen.add(g.gamePk);games.push({...g,_dateStr:d.date});}
       }
-    });
+    }
+    dbg(`SCHEDULE unique games: ${games.length}`);
 
-  } catch(e) {
-    USERS.forEach(u => {
-      document.getElementById(`sched-${u.id}`).innerHTML = '<div class="gtba">Error loading...</div>';
-    });
+    if(!games.length){el.innerHTML='<div class="no-data">No games in the next 14 days.</div>';return;}
+
+    // Group by date
+    const byDate={};
+    for(const g of games){
+      const k=g._dateStr;
+      (byDate[k]=byDate[k]||[]).push(g);
+    }
+
+    let html='';
+    for(const[k,gs] of Object.entries(byDate)){
+      html+=`<div class="dlbl">${fmtDate(k)}</div>`;
+      html+=gs.map(g=>renderGame(g,false)).join('');
+    }
+    el.innerHTML=html;
+  }catch(e){
+    dbg(`SCHEDULE ERROR: ${e.message}`);
+    el.innerHTML='<div class="err">Could not load schedule. Check debug log.</div>';
   }
 }
 
-/* ── CLOCK & REFRESH ── */
+/* ── CLOCK ── */
 function tick(){document.getElementById('hdr-time').textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
 tick(); setInterval(tick,10000);
 
+/* ── REFRESH ── */
 async function refreshAll(){
-  const btn = document.getElementById('btn-refresh'); if(btn) btn.classList.add('is-loading');
-  await Promise.all([loadScores(), loadStandings(), loadSchedule()]);
-  if(btn) btn.classList.remove('is-loading');
+  const btn=document.getElementById('rbtn');
+  btn.classList.add('is-loading');
+  dbg('--- Refresh triggered ---');
+  await Promise.all([loadScores(),loadStandings(),loadSchedule()]);
+  btn.classList.remove('is-loading');
 }
 
-initLayout();
+/* ── INIT ── */
+setViewer('andrea');
 refreshAll();
-setInterval(loadScores, 60000);
-
+setInterval(()=>loadScores(),60000);
 </script>
 </body>
 </html>

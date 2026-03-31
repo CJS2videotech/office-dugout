@@ -144,13 +144,13 @@ th:first-child, td:first-child{ text-align:left; }
 .roster-thumb{ width:120px; height:150px; border-radius:18px; object-fit:cover; object-position:top; border:3px solid var(--border-light); cursor:pointer; transition:transform .2s, box-shadow .2s; box-shadow:0 6px 15px rgba(0,0,0,0.6); }
 .roster-thumb:hover{ transform:scale(1.08); box-shadow:0 10px 25px rgba(255,255,255,0.2); }
 
-.modal-overlay{ position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:999; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s; }
+.modal-overlay{ position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:999; display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; opacity:0; pointer-events:none; transition:opacity .3s; padding: 2rem 0; }
 .modal-overlay.open{ opacity:1; pointer-events:auto; }
-.modal-content{ max-width:450px; width:90%; border-radius:16px; padding:2rem; position:relative; transform:translateY(20px); transition:transform .3s; display:flex; flex-direction:column; gap:1.5rem; text-align:center; }
+.modal-content{ max-width:450px; width:90%; margin:auto; border-radius:16px; padding:2rem; position:relative; transform:translateY(20px); transition:transform .3s; display:flex; flex-direction:column; gap:1.5rem; text-align:center; }
 .modal-overlay.open .modal-content{ transform:translateY(0); }
-.modal-close{ position:absolute; top:1rem; right:1.5rem; background:transparent; border:none; color:var(--muted); font-size:2rem; cursor:pointer; transition:color .2s; line-height:1; }
-.modal-close:hover{ color:#fff; }
-.modal-img{ width:300px; height:380px; border-radius:16px; object-fit:cover; object-position:top; border:4px solid var(--border-light); margin:0 auto; box-shadow:0 10px 35px rgba(0,0,0,0.8); }
+.modal-close{ position:absolute; top:0.75rem; right:0.75rem; background:rgba(0,0,0,0.6); border:none; color:#fff; font-size:2rem; cursor:pointer; transition:background .2s; line-height:1; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:10; }
+.modal-close:hover{ background:rgba(255,255,255,0.2); }
+.modal-img{ width:280px; height:340px; max-width:100%; border-radius:16px; object-fit:cover; object-position:top; border:4px solid var(--border-light); margin:0 auto; box-shadow:0 10px 35px rgba(0,0,0,0.8); }
 .modal-info{ font-family:'Oswald',sans-serif; }
 .modal-name{ font-size:2.2rem; letter-spacing:1px; line-height:1; margin-bottom:5px; text-shadow:0 2px 4px rgba(0,0,0,0.8); }
 .modal-team{ font-size:1.2rem; color:var(--text); letter-spacing:2px; text-transform:uppercase; margin-bottom:15px; }
@@ -172,7 +172,7 @@ th:first-child, td:first-child{ text-align:left; }
 @keyframes spin{to{transform:rotate(360deg)}}
 
 footer{ text-align:center; padding:2rem 1rem; font-size:12px; color:var(--muted); border-top:1px solid var(--border); margin-top:2rem;}
-@media(max-width:768px){ body{ background-image: url('assets/OD%20phone%20background.png'); } .boards-section{ flex-direction:column; padding:1rem; } .main-grid, .roster-sec{ padding:0 1rem 2rem; } .hdr{ padding:1rem; flex-direction:column; gap:10px; } .roster-thumb{ width:90px; height:120px; } }
+@media(max-width:768px){ body{ background-image: url('assets/OD%20phone%20background.png'); } .boards-section{ flex-direction:column; padding:1rem; } .main-grid, .roster-sec{ padding:0 1rem 2rem; } .hdr{ padding:1rem; flex-direction:column; gap:10px; } .roster-thumb{ width:90px; height:120px; } .modal-content{ padding:1.5rem 1rem; gap:1rem; } .modal-img{ width:200px; height:260px; } .modal-overlay{ padding: 1rem 0; } }
 </style>
 </head>
 <body>

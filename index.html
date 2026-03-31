@@ -242,6 +242,7 @@ const USERS = [
   { id: 'mario', name: 'Mario', teamName: 'Guardians', teamId: 114, primary: 'var(--u-mario-1)', secondary: 'var(--u-mario-2)', img: 'assets/Mario.jpg' }
 ];
 const TEAM_IDS = USERS.map(u => u.teamId).join(',');
+let currentWinnerId = null;
 
 const MLB = 'https://statsapi.mlb.com/api/v1';
 
@@ -262,11 +263,71 @@ function fmtTime(isoStr){
   return new Date(isoStr).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
 }
 
+/* ── TROPHY LOGIC ── */
+async function fetchDailyWinner(dateStr) {
+  const url = `${MLB}/schedule?sportId=1&date=${dateStr}&teamId=${TEAM_IDS}&hydrate=team,linescore`;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const data = await r.json();
+    const games = data.dates?.[0]?.games || [];
+    let scores = [];
+    USERS.forEach(u => {
+      let g = games.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
+      if (g && g.status.abstractGameState === 'Final') {
+        let tr = g.teams.away.team.id === u.teamId ? 'away' : 'home';
+        let runs = g.teams[tr].score || 0;
+        let hits = g.linescore?.teams?.[tr]?.hits || 0;
+        scores.push({ id: u.id, runs: parseInt(runs), hits: parseInt(hits) });
+      }
+    });
+    if (scores.length === 0) return null;
+    scores.sort((a,b) => b.runs !== a.runs ? b.runs - a.runs : b.hits - a.hits);
+    return scores[0].id;
+  } catch (e) { return null; }
+}
+
+async function determineTrophyWinner(todayGames) {
+    let numFinal = 0, numLive = 0, numPreview = 0, total = 0;
+    USERS.forEach(u => {
+      let g = todayGames.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
+      if(g) {
+         total++;
+         const st = g.status.abstractGameState;
+         if(st==='Final') numFinal++;
+         else if(st==='Live' || st==='In Progress') numLive++;
+         else numPreview++;
+      }
+    });
+
+    if (total > 0 && numFinal === total) {
+       return await fetchDailyWinner(isoDate(new Date()));
+    } else if (numLive === 0 && numFinal === 0) {
+       let yd = new Date();
+       yd.setDate(yd.getDate() - 1);
+       return await fetchDailyWinner(isoDate(yd));
+    }
+    return null;
+}
+
+function setTrophy(winnerId) {
+    currentWinnerId = winnerId;
+    document.querySelectorAll('.trophy-badge').forEach(el => el.style.display = 'none');
+    if (!winnerId) return;
+    const rBadge = document.getElementById(`trophy-roster-${winnerId}`);
+    if (rBadge) rBadge.style.display = 'flex';
+    const cBadge = document.getElementById(`trophy-col-${winnerId}`);
+    if (cBadge) cBadge.style.display = 'inline-block';
+}
+
 /* ── ROSTER & MODAL ── */
 function initRoster(){
   const grid = document.getElementById('roster-grid');
   grid.innerHTML = USERS.map(u => `
-    <img src="${u.img}" class="roster-thumb" style="border-color:${u.secondary}" onclick="openModal('${u.id}')" alt="${u.name}">
+    <div style="position:relative; display:inline-block;">
+      <div class="trophy-badge" id="trophy-roster-${u.id}" style="display:none; position:absolute; top:-15px; right:-15px; font-size:28px; filter:drop-shadow(0 0 15px rgba(255,215,0,1)); z-index:10; justify-content:center; align-items:center;">🏆</div>
+      <img src="${u.img}" class="roster-thumb" style="border-color:${u.secondary}" onclick="openModal('${u.id}')" alt="${u.name}">
+    </div>
   `).join('');
 }
 
@@ -296,7 +357,7 @@ function openModal(id) {
     <img src="${u.img}" class="modal-img" style="border-color:${u.secondary}">
     <div class="modal-info">
       <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:5px;">
-        <div class="modal-name" style="color:${u.secondary};${u.glow||''} margin-bottom:0;">${u.name}</div>
+        <div class="modal-name" style="color:${u.secondary};${u.glow||''} margin-bottom:0;">${u.name} ${currentWinnerId === u.id ? `<span style="font-size:32px; filter:drop-shadow(0 0 15px rgba(255,215,0,1)); margin-left:8px; vertical-align:middle;">🏆</span>` : ''}</div>
         <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" style="width:36px; height:36px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
       </div>
       <div class="modal-team">${u.teamName}</div>
@@ -330,7 +391,7 @@ function initLayout(){
         <div class="uh-top" style="background:${u.primary}"></div>
         <div class="uh-inner" style="display:flex; align-items:center; justify-content:center; gap:12px;">
           <div style="text-align:right;">
-            <div class="uh-name" style="color:${u.secondary};${u.glow||''}">${u.name}</div>
+            <div class="uh-name" style="color:${u.secondary};${u.glow||''}">${u.name} <span class="trophy-badge" id="trophy-col-${u.id}" style="display:none; margin-left:6px; font-size:16px; filter:drop-shadow(0 0 10px rgba(255,215,0,0.8));">🏆</span></div>
             <div class="uh-team" style="color:${u.secondary};${u.glow||''}">${u.teamName}</div>
           </div>
           <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" alt="logo" style="width:42px; height:42px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
@@ -465,6 +526,9 @@ async function loadScores(){
       </tr>
     `).join('');
     document.getElementById('tbl-daily').innerHTML = html;
+
+    const wid = await determineTrophyWinner(games);
+    setTrophy(wid);
 
   } catch(e) {
     document.getElementById('tbl-daily').innerHTML = '<tr><td colspan="4">Error loading data.</td></tr>';

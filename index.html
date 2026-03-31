@@ -316,8 +316,8 @@ function setTrophy(winnerId) {
     if (!winnerId) return;
     const rBadge = document.getElementById(`trophy-roster-${winnerId}`);
     if (rBadge) rBadge.style.display = 'flex';
-    const cBadge = document.getElementById(`trophy-col-${winnerId}`);
-    if (cBadge) cBadge.style.display = 'inline-block';
+    const dBadge = document.getElementById(`trophy-daily-${winnerId}`);
+    if (dBadge) dBadge.style.display = 'inline-block';
 }
 
 /* ── ROSTER & MODAL ── */
@@ -391,7 +391,7 @@ function initLayout(){
         <div class="uh-top" style="background:${u.primary}"></div>
         <div class="uh-inner" style="display:flex; align-items:center; justify-content:center; gap:12px;">
           <div style="text-align:right;">
-            <div class="uh-name" style="color:${u.secondary};${u.glow||''}">${u.name} <span class="trophy-badge" id="trophy-col-${u.id}" style="display:none; margin-left:6px; font-size:16px; filter:drop-shadow(0 0 10px rgba(255,215,0,0.8));">🏆</span></div>
+            <div class="uh-name" style="color:${u.secondary};${u.glow||''}">${u.name}</div>
             <div class="uh-team" style="color:${u.secondary};${u.glow||''}">${u.teamName}</div>
           </div>
           <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" alt="logo" style="width:42px; height:42px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
@@ -519,7 +519,7 @@ async function loadScores(){
 
     let html = dailyData.map(d => `
       <tr class="row-${d.u.id}">
-        <td><span class="team-name" style="color:${d.u.secondary};${d.u.glow||''}">${d.u.teamName}</span><br><span style="font-size:10px;text-transform:uppercase;">${d.u.name}</span></td>
+        <td><span class="team-name" style="color:${d.u.secondary};${d.u.glow||''}">${d.u.teamName} <span class="trophy-badge" id="trophy-daily-${d.u.id}" style="display:none; font-size:14px; margin-left:4px; filter:drop-shadow(0 0 8px rgba(255,215,0,0.8));">🏆</span></span><br><span style="font-size:10px;text-transform:uppercase;">${d.u.name}</span></td>
         <td class="bld ${!d.pending?'':'dim'}">${d.pending ? '—' : d.runs}</td>
         <td class="${!d.pending?'':'dim'}">${d.pending ? '—' : d.hits}</td>
         <td style="${d.pending?'font-style:italic;':''}">${d.pending?'Pending':d.matchTxt}</td>

@@ -31,10 +31,17 @@
 body{
   font-family:'Inter',system-ui,sans-serif;
   background-color:var(--bg); color:var(--text); min-height:100vh;
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: -10;
   background-image: url('assets/OD%20background.png');
   background-size: cover;
   background-position: center top;
-  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 .glass{ 
   background: var(--card);
@@ -172,7 +179,7 @@ th:first-child, td:first-child{ text-align:left; }
 @keyframes spin{to{transform:rotate(360deg)}}
 
 footer{ text-align:center; padding:2rem 1rem; font-size:12px; color:var(--muted); border-top:1px solid var(--border); margin-top:2rem;}
-@media(max-width:768px){ body{ background-image: url('assets/OD%20phone%20background.jpg'); } .boards-section{ flex-direction:column; padding:1rem; } .main-grid, .roster-sec{ padding:0 1rem 2rem; } .hdr{ padding:1rem; flex-direction:column; gap:10px; } .roster-thumb{ width:90px; height:120px; } .modal-content{ padding:1.5rem 1rem; gap:1rem; max-height:85vh; overflow-y:auto; } .modal-img{ width:150px; height:190px; } .modal-overlay{ align-items:flex-start; padding:10vh 0; overflow-y:auto; } .modal-close{ position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.5rem; text-shadow:none; z-index:10; border:none; line-height:1; } }
+@media(max-width:768px){ body::before{ background-image: url('assets/OD%20phone%20background.jpg'); background-position: center; } .boards-section{ flex-direction:column; padding:1rem; } .main-grid, .roster-sec{ padding:0 1rem 2rem; } .hdr{ padding:1rem; flex-direction:column; gap:10px; } .roster-thumb{ width:90px; height:120px; } .modal-content{ padding:1.5rem 1rem; gap:1rem; max-height:85vh; overflow-y:auto; } .modal-img{ width:150px; height:190px; } .modal-overlay{ align-items:flex-start; padding:10vh 0; overflow-y:auto; } .modal-close{ position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.5rem; text-shadow:none; z-index:10; border:none; line-height:1; } }
 </style>
 </head>
 <body>
@@ -337,7 +344,7 @@ function initRoster(){
   grid.innerHTML = USERS.map(u => `
     <div style="position:relative; display:inline-block;">
       <div class="trophy-badge" id="trophy-roster-${u.id}" style="display:none; position:absolute; top:-15px; right:-15px; font-size:28px; filter:drop-shadow(0 0 15px rgba(255,215,0,1)); z-index:10; justify-content:center; align-items:center;">🏆</div>
-      <img src="${u.img}" class="roster-thumb" style="border-color:${u.secondary}" onerror="this.onerror=null; this.src=this.src.includes('.jpg') ? this.src.replace('.jpg','.png') : this.src.replace('.png','.jpg');" onclick="openModal('${u.id}')" alt="${u.name}">
+      <img src="${u.img}" class="roster-thumb" style="border-color:${u.secondary}" onclick="openModal('${u.id}')" alt="${u.name}">
     </div>
   `).join('');
 }
@@ -378,7 +385,7 @@ function openModal(id) {
 
   body.innerHTML = `
     <button class="modal-close" onclick="closeModal(event)">&times;</button>
-    <img src="${u.img}" class="modal-img" style="border-color:${u.secondary}" onerror="this.onerror=null; this.src=this.src.includes('.jpg') ? this.src.replace('.jpg','.png') : this.src.replace('.png','.jpg');">
+    <img src="${u.img}" class="modal-img" style="border-color:${u.secondary}">
     <div class="modal-info">
       <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:5px;">
         <div class="modal-name" style="color:${u.secondary};${u.glow||''} margin-bottom:0;">${u.name} ${currentWinnerId === u.id ? `<span style="font-size:32px; filter:drop-shadow(0 0 15px rgba(255,215,0,1)); margin-left:8px; vertical-align:middle;">🏆</span>` : ''}</div>

@@ -172,7 +172,7 @@ th:first-child, td:first-child{ text-align:left; }
 @keyframes spin{to{transform:rotate(360deg)}}
 
 footer{ text-align:center; padding:2rem 1rem; font-size:12px; color:var(--muted); border-top:1px solid var(--border); margin-top:2rem;}
-@media(max-width:768px){ body{ background-image: url('assets/OD%20phone%20background.png'); } .boards-section{ flex-direction:column; padding:1rem; } .main-grid, .roster-sec{ padding:0 1rem 2rem; } .hdr{ padding:1rem; flex-direction:column; gap:10px; } .roster-thumb{ width:90px; height:120px; } .modal-content{ padding:1.5rem 1rem; gap:1rem; } .modal-img{ width:200px; height:260px; } .modal-overlay{ padding: 1rem 0; } }
+@media(max-width:768px){ body{ background-image: url('assets/OD%20phone%20background.jpg'); } .boards-section{ flex-direction:column; padding:1rem; } .main-grid, .roster-sec{ padding:0 1rem 2rem; } .hdr{ padding:1rem; flex-direction:column; gap:10px; } .roster-thumb{ width:90px; height:120px; } .modal-content{ padding:1.5rem 1rem; gap:1rem; max-height:85vh; overflow-y:auto; } .modal-img{ width:150px; height:190px; } .modal-overlay{ align-items:flex-start; padding:10vh 0; overflow-y:auto; } .modal-close{ position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.5rem; text-shadow:none; z-index:10; border:none; line-height:1; } }
 </style>
 </head>
 <body>
@@ -239,7 +239,7 @@ const USERS = [
   { id: 'cj', name: 'CJ', teamName: 'Cubs', teamId: 112, primary: 'var(--u-cj-1)', secondary: 'var(--u-cj-2)', img: 'assets/cj.jpg' },
   { id: 'brennan', name: 'Brennan', teamName: 'Giants', teamId: 137, primary: 'var(--u-brennan-1)', secondary: 'var(--u-brennan-2)', img: 'assets/Brennan.jpg' },
   { id: 'dominic', name: 'Dominic', teamName: 'Yankees', teamId: 147, primary: 'var(--u-dominic-1)', secondary: 'var(--u-dominic-2)', img: 'assets/Dominic.jpg', glow: 'text-shadow: 0 0 10px rgba(255,255,255,0.7), 0 0 20px rgba(255,255,255,0.4);' },
-  { id: 'mario', name: 'Mario', teamName: 'Guardians', teamId: 114, primary: 'var(--u-mario-1)', secondary: 'var(--u-mario-2)', img: 'assets/Mario.jpg' }
+  { id: 'mario', name: 'Mario', teamName: 'Guardians', teamId: 114, primary: 'var(--u-mario-1)', secondary: 'var(--u-mario-2)', img: 'assets/Mario.png' }
 ];
 const TEAM_IDS = USERS.map(u => u.teamId).join(',');
 let currentWinnerId = null;
@@ -272,17 +272,28 @@ async function fetchDailyWinner(dateStr) {
     const data = await r.json();
     const games = data.dates?.[0]?.games || [];
     let scores = [];
-    USERS.forEach(u => {
+    await Promise.all(USERS.map(async u => {
       let g = games.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
       if (g && g.status.abstractGameState === 'Final') {
         let tr = g.teams.away.team.id === u.teamId ? 'away' : 'home';
         let runs = g.teams[tr].score || 0;
         let hits = g.linescore?.teams?.[tr]?.hits || 0;
-        scores.push({ id: u.id, runs: parseInt(runs), hits: parseInt(hits) });
+        let att = 0;
+        try {
+           const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
+           const bx = await rBox.json();
+           const attObj = bx.info?.find(i => i.label === 'Att' || i.label === 'Attendance');
+           if(attObj) att = parseInt(attObj.value.replace(/\\D/g, '')) || 0;
+        } catch(e) {}
+        scores.push({ id: u.id, runs: parseInt(runs), hits: parseInt(hits), att });
       }
-    });
+    }));
     if (scores.length === 0) return null;
-    scores.sort((a,b) => b.runs !== a.runs ? b.runs - a.runs : b.hits - a.hits);
+    scores.sort((a,b) => {
+        if (b.runs !== a.runs) return b.runs - a.runs;
+        if (b.hits !== a.hits) return b.hits - a.hits;
+        return b.att - a.att;
+    });
     return scores[0].id;
   } catch (e) { return null; }
 }
@@ -326,7 +337,7 @@ function initRoster(){
   grid.innerHTML = USERS.map(u => `
     <div style="position:relative; display:inline-block;">
       <div class="trophy-badge" id="trophy-roster-${u.id}" style="display:none; position:absolute; top:-15px; right:-15px; font-size:28px; filter:drop-shadow(0 0 15px rgba(255,215,0,1)); z-index:10; justify-content:center; align-items:center;">🏆</div>
-      <img src="${u.img}" class="roster-thumb" style="border-color:${u.secondary}" onclick="openModal('${u.id}')" alt="${u.name}">
+      <img src="${u.img}" class="roster-thumb" style="border-color:${u.secondary}" onerror="this.onerror=null; this.src=this.src.includes('.jpg') ? this.src.replace('.jpg','.png') : this.src.replace('.png','.jpg');" onclick="openModal('${u.id}')" alt="${u.name}">
     </div>
   `).join('');
 }
@@ -367,7 +378,7 @@ function openModal(id) {
 
   body.innerHTML = `
     <button class="modal-close" onclick="closeModal(event)">&times;</button>
-    <img src="${u.img}" class="modal-img" style="border-color:${u.secondary}">
+    <img src="${u.img}" class="modal-img" style="border-color:${u.secondary}" onerror="this.onerror=null; this.src=this.src.includes('.jpg') ? this.src.replace('.jpg','.png') : this.src.replace('.png','.jpg');">
     <div class="modal-info">
       <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:5px;">
         <div class="modal-name" style="color:${u.secondary};${u.glow||''} margin-bottom:0;">${u.name} ${currentWinnerId === u.id ? `<span style="font-size:32px; filter:drop-shadow(0 0 15px rgba(255,215,0,1)); margin-left:8px; vertical-align:middle;">🏆</span>` : ''}</div>
@@ -446,7 +457,7 @@ function renderGame(g, isSchedule=false){
   if(isSchedule){
     // Compact row
     return `<div class="mini-game">
-      <span class="mg-date">${fmtDate(g.gameDate.split('T')[0])}</span>
+      <span class="mg-date">${new Date(g.gameDate).toLocaleDateString('en-US',{month:'numeric',day:'numeric'})}</span>
       <span class="mg-match"><span style="${aSty}font-weight:${USERS.some(u=>u.teamId===awayId)?'700':'500'}">${away.team.abbreviation}</span> @ <span style="${hSty}font-weight:${USERS.some(u=>u.teamId===homeId)?'700':'500'}">${home.team.abbreviation}</span></span>
       <span class="mg-time">${ss}</span>
     </div>`;
@@ -500,20 +511,27 @@ async function loadScores(){
 
     let dailyData = [];
 
-    USERS.forEach(u => {
+    await Promise.all(USERS.map(async u => {
       // Find game for this user
       let g = games.find(gm => gm.teams.away.team.id===u.teamId || gm.teams.home.team.id===u.teamId);
       
-      let runs=0, hits=0, pending=true, matchTxt="No Game";
+      let runs=0, hits=0, att=0, pending=true, matchTxt="No Game";
       if(g){
         document.getElementById(`today-${u.id}`).innerHTML = renderGame(g);
         let tr = g.teams.away.team.id === u.teamId ? 'away' : 'home';
         let st = g.status.abstractGameState;
-        if(st==='Live' || st==='Final'){
+        if(st==='Live' || st==='Final' || st==='In Progress'){
            runs = g.teams[tr].score||0;
            hits = g.linescore?.teams?.[tr]?.hits||0;
            pending=false;
-           matchTxt = st==='Live' ? 'In Progress' : 'Final';
+           matchTxt = st==='Live' || st==='In Progress' ? 'In Progress' : 'Final';
+           
+           try {
+             const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
+             const bx = await rBox.json();
+             const attObj = bx.info?.find(i => i.label === 'Att' || i.label === 'Attendance');
+             if(attObj) att = parseInt(attObj.value.replace(/\\D/g, '')) || 0;
+           } catch(e) {}
         } else {
            matchTxt = "Scheduled";
         }
@@ -521,15 +539,16 @@ async function loadScores(){
         document.getElementById(`today-${u.id}`).innerHTML = `<div class="gtba">No Game Today</div>`;
       }
       
-      dailyData.push({ u, runs, hits, pending, matchTxt });
-    });
+      dailyData.push({ u, runs, hits, att, pending, matchTxt });
+    }));
 
     // Daily Sort
     dailyData.sort((a,b)=>{
       if(a.pending && !b.pending) return 1;
       if(b.pending && !a.pending) return -1;
       if(a.runs !== b.runs) return b.runs - a.runs;
-      return b.hits - a.hits;
+      if(a.hits !== b.hits) return b.hits - a.hits;
+      return b.att - a.att;
     });
 
     let html = dailyData.map(d => `

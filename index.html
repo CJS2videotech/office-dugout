@@ -117,6 +117,13 @@ th:first-child, td:first-child{ text-align:left; }
 .uh-name{ font-family:'Graduate', serif; font-size:1.4rem; letter-spacing:1px; margin-bottom:4px; }
 .uh-team{ font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); opacity: 0.9; }
 
+/* ── FLIP CARD ENGINE ── */
+.dl-scene { perspective: 1000px; width: 100%; position: relative; }
+.dl-inner { transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; position: relative; width: 100%; }
+.dl-inner.is-flipped { transform: rotateY(180deg); }
+.dl-front, .dl-back { backface-visibility: hidden; width: 100%; top: 0; left: 0; }
+.dl-back { transform: rotateY(-180deg); position: absolute; background: var(--bg); border: 1px solid var(--border-light); border-radius: 8px;}
+
 /* ── GAME CARDS ── */
 .gcard{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1rem; position:relative;}
 .gcard-live{ border-color:var(--green) !important; box-shadow: 0 0 15px rgba(34,197,94,0.3); }
@@ -208,14 +215,30 @@ footer{ text-align:center; padding:2rem 1rem; font-size:12px; color:var(--muted)
   </div>
   <!-- Daily Leader -->
   <div class="board glass">
-    <div class="board-header">
-      <div><div class="b-pip" style="background:#ef4444;"></div>Daily Leader</div>
-      <span style="font-size:11px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0;">Sort: Runs > Hits</span>
+    <div class="board-header" style="justify-content:space-between; align-items:flex-start;">
+      <div>
+         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div class="b-pip" style="background:#ef4444;"></div><span id="dl-title">Daily Leader</span></div>
+         <div style="font-size:10px; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; margin-left:12px;">Sort: Runs > Hits > Att</div>
+      </div>
+      <button class="rbtn" id="btn-toggle-dl" onclick="toggleDailyLeader()" style="padding:4px 8px; font-size:10px;">↺ YESTERDAY</button>
     </div>
-    <table>
-      <thead><tr><th>Team</th><th>Runs</th><th>Hits</th><th>Status</th></tr></thead>
-      <tbody id="tbl-daily"><tr><td colspan="4" style="text-align:center">Loading...</td></tr></tbody>
-    </table>
+    
+    <div class="dl-scene">
+      <div class="dl-inner" id="dl-flipper">
+        <div class="dl-front">
+          <table style="margin-top:0;">
+            <thead><tr><th>Team</th><th>Runs</th><th>Hits</th><th>Status</th></tr></thead>
+            <tbody id="tbl-daily-front"><tr><td colspan="4" style="text-align:center">Loading...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="dl-back">
+          <table style="margin-top:0;">
+            <thead><tr><th>Team</th><th>Runs</th><th>Hits</th><th>Status</th></tr></thead>
+            <tbody id="tbl-daily-back"><tr><td colspan="4" style="text-align:center">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -250,6 +273,10 @@ const USERS = [
 ];
 const TEAM_IDS = USERS.map(u => u.teamId).join(',');
 let currentWinnerId = null;
+let yesterdayWinnerId = null;
+const seasonTrophies = {};
+USERS.forEach(u => seasonTrophies[u.id] = 0);
+const SEASON_START = '2026-03-20';
 
 const MLB = 'https://statsapi.mlb.com/api/v1';
 
@@ -271,6 +298,25 @@ function fmtTime(isoStr){
 }
 
 /* ── TROPHY LOGIC ── */
+function calcWinnerFromGames(games) {
+  let scores = [];
+  USERS.forEach(u => {
+    let g = games.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
+    if (g && g.status.abstractGameState === 'Final') {
+      let tr = g.teams.away.team.id === u.teamId ? 'away' : 'home';
+      let runs = g.teams[tr].score || 0;
+      let hits = g.linescore?.teams?.[tr]?.hits || 0;
+      scores.push({ id: u.id, runs: parseInt(runs), hits: parseInt(hits) });
+    }
+  });
+  if (scores.length === 0) return null;
+  scores.sort((a,b) => {
+    if (b.runs !== a.runs) return b.runs - a.runs;
+    return b.hits - a.hits;
+  });
+  return scores[0].id;
+}
+
 async function fetchDailyWinner(dateStr) {
   const url = `${MLB}/schedule?sportId=1&date=${dateStr}&teamId=${TEAM_IDS}&hydrate=team,linescore`;
   try {
@@ -278,31 +324,35 @@ async function fetchDailyWinner(dateStr) {
     if (!r.ok) return null;
     const data = await r.json();
     const games = data.dates?.[0]?.games || [];
-    let scores = [];
-    await Promise.all(USERS.map(async u => {
-      let g = games.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
-      if (g && g.status.abstractGameState === 'Final') {
-        let tr = g.teams.away.team.id === u.teamId ? 'away' : 'home';
-        let runs = g.teams[tr].score || 0;
-        let hits = g.linescore?.teams?.[tr]?.hits || 0;
-        let att = 0;
-        try {
-           const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
-           const bx = await rBox.json();
-           const attObj = bx.info?.find(i => i.label === 'Att' || i.label === 'Attendance');
-           if(attObj) att = parseInt(attObj.value.replace(/\\D/g, '')) || 0;
-        } catch(e) {}
-        scores.push({ id: u.id, runs: parseInt(runs), hits: parseInt(hits), att });
-      }
-    }));
-    if (scores.length === 0) return null;
-    scores.sort((a,b) => {
-        if (b.runs !== a.runs) return b.runs - a.runs;
-        if (b.hits !== a.hits) return b.hits - a.hits;
-        return b.att - a.att;
-    });
-    return scores[0].id;
+    return calcWinnerFromGames(games);
   } catch (e) { return null; }
+}
+
+async function loadSeasonTrophies() {
+  USERS.forEach(u => seasonTrophies[u.id] = 0);
+  const start = new Date(SEASON_START + 'T12:00:00');
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const startStr = isoDate(start);
+  const endStr = isoDate(yesterday);
+  if (start > yesterday) return;
+  try {
+    const url = `${MLB}/schedule?sportId=1&startDate=${startStr}&endDate=${endStr}&teamId=${TEAM_IDS}&hydrate=team,linescore&gameType=R`;
+    const r = await fetch(url);
+    if (!r.ok) return;
+    const data = await r.json();
+    const dateMap = {};
+    (data.dates || []).forEach(d => { dateMap[d.date] = d.games || []; });
+    let curr = new Date(start);
+    while (curr <= yesterday) {
+      const ds = isoDate(curr);
+      const dayGames = dateMap[ds];
+      if (dayGames && dayGames.length > 0) {
+        const w = calcWinnerFromGames(dayGames);
+        if (w && seasonTrophies.hasOwnProperty(w)) seasonTrophies[w]++;
+      }
+      curr.setDate(curr.getDate() + 1);
+    }
+  } catch(e) { console.log('Season trophy scan error', e); }
 }
 
 async function determineTrophyWinner(todayGames) {
@@ -328,14 +378,54 @@ async function determineTrophyWinner(todayGames) {
     return null;
 }
 
+function setYesterdayTrophy(winnerId) {
+    yesterdayWinnerId = winnerId;
+    document.querySelectorAll('[id^="trophy-daily-back-"]').forEach(el => el.style.display = 'none');
+    if (!winnerId) return;
+    const bBadge = document.getElementById(`trophy-daily-back-${winnerId}`);
+    if (bBadge) bBadge.style.display = 'inline-block';
+}
+
+let dlIsFlipped = false;
+function toggleDailyLeader() {
+    dlIsFlipped = !dlIsFlipped;
+    document.getElementById('dl-flipper').classList.toggle('is-flipped');
+    const title = document.getElementById('dl-title');
+    const btn = document.getElementById('btn-toggle-dl');
+    if(dlIsFlipped) {
+       title.innerHTML = `Yesterday <span style="font-size:10px;font-weight:400;color:var(--muted); opacity:0.6;">(Finals)</span>`;
+       btn.innerHTML = '↺ LIVE FEED';
+    } else {
+       title.innerHTML = `Daily Leader`;
+       btn.innerHTML = '↺ YESTERDAY';
+    }
+}
+
+let flippedState = {};
+function toggleGameCard(id) {
+   flippedState[id] = !flippedState[id];
+   const inner = document.getElementById(`flip-inner-${id}`);
+   const title = document.getElementById(`matchup-title-${id}`);
+   const btn = document.getElementById(`btn-flip-${id}`);
+   if(inner) inner.classList.toggle('is-flipped');
+   if(flippedState[id]) {
+       if(title) title.innerHTML = `Yesterday <span style="font-size:10px;opacity:0.6;font-weight:400;text-transform:none;">(Final)</span>`;
+       if(btn) btn.innerHTML = '↺ TODAY';
+   } else {
+       if(title) title.innerHTML = `Today's Matchup`;
+       if(btn) btn.innerHTML = '↺ YEST';
+   }
+}
+
 function setTrophy(winnerId) {
     currentWinnerId = winnerId;
-    document.querySelectorAll('.trophy-badge').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('[id^="trophy-roster-"]').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('[id^="trophy-daily-front-"]').forEach(el => el.style.display = 'none');
     if (!winnerId) return;
     const rBadge = document.getElementById(`trophy-roster-${winnerId}`);
     if (rBadge) rBadge.style.display = 'flex';
-    const dBadge = document.getElementById(`trophy-daily-${winnerId}`);
-    if (dBadge) dBadge.style.display = 'inline-block';
+    const fBadge = document.getElementById(`trophy-daily-front-${winnerId}`);
+    if (fBadge) fBadge.style.display = 'inline-block';
 }
 
 /* ── ROSTER & MODAL ── */
@@ -370,11 +460,11 @@ function openModal(id) {
   const standingsEl = document.getElementById(`standings-${id}`);
   const standingsHtml = standingsEl ? standingsEl.innerHTML : '';
 
-  const dailyEl = document.getElementById('tbl-daily');
+  const dailyEl = document.getElementById(dlIsFlipped ? 'tbl-daily-back' : 'tbl-daily-front');
   const dailyHtml = dailyEl ? `
     <div class="modal-daily-tbl" style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; margin-top:15px; text-align:left;">
-      <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-        <div class="b-pip" style="background:#ef4444;width:6px;height:6px;"></div>Daily Leader
+      <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
+        <div style="display:flex;align-items:center;gap:6px;"><div class="b-pip" style="background:#ef4444;width:6px;height:6px;"></div>Daily Leader ${dlIsFlipped?'(Yest)':''}</div>
       </div>
       <table>
         <thead><tr><th>Team</th><th>Runs</th><th>Hits</th><th>Status</th></tr></thead>
@@ -382,6 +472,13 @@ function openModal(id) {
       </table>
     </div>
   ` : '';
+
+  const tCount = seasonTrophies[u.id] || 0;
+  const trophyCountHtml = `<div style="display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:12px; padding:8px 16px; background:linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,180,0,0.05)); border:1px solid rgba(255,215,0,0.3); border-radius:20px; width:fit-content; margin-left:auto; margin-right:auto;">
+    <span style="font-size:22px; filter:drop-shadow(0 0 8px rgba(255,215,0,0.8));">🏆</span>
+    <span style="font-family:'Oswald',sans-serif; font-size:18px; color:#ffd700; letter-spacing:1px; font-weight:600;">× ${tCount}</span>
+    <span style="font-family:'Inter',sans-serif; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Season Wins</span>
+  </div>`;
 
   body.innerHTML = `
     <button class="modal-close" onclick="closeModal(event)">&times;</button>
@@ -392,6 +489,7 @@ function openModal(id) {
         <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" style="width:36px; height:36px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
       </div>
       <div class="modal-team">${u.teamName}</div>
+      ${trophyCountHtml}
       <div style="text-align:left; max-width:100%; margin:0 auto;">
         <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
           <div class="b-pip" style="background:var(--green);width:6px;height:6px;"></div>Today's Matchup
@@ -430,7 +528,16 @@ function initLayout(){
           <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" alt="logo" style="width:42px; height:42px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
         </div>
       </div>
-      <div id="today-${u.id}"><div class="gtba">Loading Today's Game...</div></div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin: 12px 0 6px;">
+         <div class="sched-title" id="matchup-title-${u.id}" style="margin:0; text-align:left;">Today's Matchup</div>
+         <button class="rbtn" id="btn-flip-${u.id}" onclick="toggleGameCard('${u.id}')" style="padding:2px 6px; font-size:9px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:4px; cursor:pointer; color:var(--muted); text-transform:uppercase;">↺ YEST</button>
+      </div>
+      <div class="dl-scene" style="margin-bottom:12px;">
+        <div class="dl-inner" id="flip-inner-${u.id}">
+          <div class="dl-front" id="today-${u.id}"><div class="gtba">Loading Today's Game...</div></div>
+          <div class="dl-back" id="yesterday-${u.id}"><div class="gtba">Loading Yesterday's Game...</div></div>
+        </div>
+      </div>
       <div class="sched-title">Next 5 Days</div>
       <div class="sched-list" id="sched-${u.id}"></div>
       <div id="standings-${u.id}" style="margin-top:auto;"></div>
@@ -507,24 +614,12 @@ function renderGame(g, isSchedule=false){
 }
 
 /* ── SCORE RENDER & DAILY LEADER ── */
-async function loadScores(){
-  const todayStr=isoDate(new Date());
-  const url=`${MLB}/schedule?sportId=1&date=${todayStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
-  try {
-    const r=await fetch(url);
-    if(!r.ok) throw new Error();
-    const data=await r.json();
-    const games=data.dates?.[0]?.games||[];
-
+async function buildDailyList(apiGames, prefix) {
     let dailyData = [];
-
     await Promise.all(USERS.map(async u => {
-      // Find game for this user
-      let g = games.find(gm => gm.teams.away.team.id===u.teamId || gm.teams.home.team.id===u.teamId);
-      
+      let g = apiGames.find(gm => gm.teams.away.team.id===u.teamId || gm.teams.home.team.id===u.teamId);
       let runs=0, hits=0, att=0, pending=true, matchTxt="No Game";
       if(g){
-        document.getElementById(`today-${u.id}`).innerHTML = renderGame(g);
         let tr = g.teams.away.team.id === u.teamId ? 'away' : 'home';
         let st = g.status.abstractGameState;
         if(st==='Live' || st==='Final' || st==='In Progress'){
@@ -532,7 +627,6 @@ async function loadScores(){
            hits = g.linescore?.teams?.[tr]?.hits||0;
            pending=false;
            matchTxt = st==='Live' || st==='In Progress' ? 'In Progress' : 'Final';
-           
            try {
              const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
              const bx = await rBox.json();
@@ -542,14 +636,10 @@ async function loadScores(){
         } else {
            matchTxt = "Scheduled";
         }
-      } else {
-        document.getElementById(`today-${u.id}`).innerHTML = `<div class="gtba">No Game Today</div>`;
       }
-      
       dailyData.push({ u, runs, hits, att, pending, matchTxt });
     }));
 
-    // Daily Sort
     dailyData.sort((a,b)=>{
       if(a.pending && !b.pending) return 1;
       if(b.pending && !a.pending) return -1;
@@ -558,21 +648,60 @@ async function loadScores(){
       return b.att - a.att;
     });
 
-    let html = dailyData.map(d => `
+    return dailyData.map(d => `
       <tr class="row-${d.u.id}">
-        <td><span class="team-name" style="color:${d.u.secondary};${d.u.glow||''}">${d.u.teamName} <span class="trophy-badge" id="trophy-daily-${d.u.id}" style="display:none; font-size:14px; margin-left:4px; filter:drop-shadow(0 0 8px rgba(255,215,0,0.8));">🏆</span></span><br><span style="font-size:10px;text-transform:uppercase;">${d.u.name}</span></td>
+        <td><span class="team-name" style="color:${d.u.secondary};${d.u.glow||''}">${d.u.teamName} <span class="trophy-badge" id="trophy-daily-${prefix}-${d.u.id}" style="display:none; font-size:14px; margin-left:4px; filter:drop-shadow(0 0 8px rgba(255,215,0,0.8));">🏆</span></span><br><span style="font-size:10px;text-transform:uppercase;">${d.u.name}</span></td>
         <td class="bld ${!d.pending?'':'dim'}">${d.pending ? '—' : d.runs}</td>
         <td class="${!d.pending?'':'dim'}">${d.pending ? '—' : d.hits}</td>
         <td style="${d.pending?'font-style:italic;':''}">${d.pending?'Pending':d.matchTxt}</td>
       </tr>
     `).join('');
-    document.getElementById('tbl-daily').innerHTML = html;
+}
+
+async function loadScores(){
+  const todayStr=isoDate(new Date());
+  const url=`${MLB}/schedule?sportId=1&date=${todayStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
+  try {
+    const r=await fetch(url);
+    if(!r.ok) throw new Error();
+    const data=await r.json();
+    const games=data.dates?.[0]?.games||[];
+
+    USERS.forEach(u => {
+      let g = games.find(gm => gm.teams.away.team.id===u.teamId || gm.teams.home.team.id===u.teamId);
+      const el = document.getElementById(`today-${u.id}`);
+      if(el) {
+          if(g) el.innerHTML = renderGame(g);
+          else el.innerHTML = `<div class="gtba">No Game Today</div>`;
+      }
+    });
+
+    document.getElementById('tbl-daily-front').innerHTML = await buildDailyList(games, 'front');
+
+    let yd = new Date(); yd.setDate(yd.getDate()-1);
+    const yurl=`${MLB}/schedule?sportId=1&date=${isoDate(yd)}&teamId=${TEAM_IDS}&hydrate=team,linescore`;
+    fetch(yurl).then(async yr => {
+       const ydata = await yr.json();
+       const ygames = ydata.dates?.[0]?.games||[];
+       document.getElementById('tbl-daily-back').innerHTML = await buildDailyList(ygames, 'back');
+       const yw = calcWinnerFromGames(ygames);
+       setYesterdayTrophy(yw);
+       
+       USERS.forEach(u => {
+          let yg = ygames.find(gm => gm.teams.away.team.id===u.teamId || gm.teams.home.team.id===u.teamId);
+          const yEl = document.getElementById(`yesterday-${u.id}`);
+          if(yEl) {
+              if(yg) yEl.innerHTML = renderGame(yg);
+              else yEl.innerHTML = `<div class="gtba">No Game Yesterday</div>`;
+          }
+       });
+    }).catch(e=>{});
 
     const wid = await determineTrophyWinner(games);
     setTrophy(wid);
 
   } catch(e) {
-    document.getElementById('tbl-daily').innerHTML = '<tr><td colspan="4">Error loading data.</td></tr>';
+    document.getElementById('tbl-daily-front').innerHTML = '<tr><td colspan="4">Error loading data.</td></tr>';
   }
 }
 
@@ -707,6 +836,7 @@ tick(); setInterval(tick,10000);
 async function refreshAll(){
   const btn = document.getElementById('btn-refresh'); if(btn) btn.classList.add('is-loading');
   await Promise.all([loadScores(), loadStandings(), loadSchedule()]);
+  await loadSeasonTrophies();
   if(btn) btn.classList.remove('is-loading');
 }
 

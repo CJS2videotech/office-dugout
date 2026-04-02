@@ -4,19 +4,21 @@
 
 ## 🌟 Features
 
-*   **5-User Team Hub:** Distinctly tracks 5 users (Andrea, CJ, Brennan, Dominic, Mario) and their favorite teams (Brewers, Cubs, Giants, Yankees, Guardians).
-*   **Dynamic Theming:** Every team's abbreviation or name dynamically adopts its designated team color (e.g., Cubs in Red, Brewers in Yellow). The Yankees even get a custom glowing-white text effect to stand out cleanly.
-*   **Live Game Tracking:** Fetches and displays live scores, current inning status, and Probable Pitcher metadata that refreshes automatically every 60 seconds.
-*   **Interactive Team Roster:** A sleek, animated team roster at the bottom of the page that, when clicked, opens a premium frosted-glass modal featuring the employee's high-res portrait, real-time matchup information, and full division standings.
-*   **Season & Daily Leaderboards:** Two comprehensive global boards comparing the 5 teams' total season Win % alongside their daily aggregate Runs and Hits. 
-*   **Zero Dependencies:** Built entirely with vanilla HTML, CSS, and JavaScript. It runs entirely on the client side without needing Node.js or a backend.
+*   **5-User Team Hub:** Distinctly tracks 5 users (Andrea, CJ, Brennan, Dominic, Mario) and their favorite teams.
+*   **Dynamic Theming:** Every team's abbreviation dynamically adopts its designated team color. The Yankees receive a custom glowing-white textual effect.
+*   **3D Interactive Flip-Cards:** Individual game column blocks and the Daily Leaderboard utilize native GPU-accelerated 3D CSS to physically spin around. Users can click `↺ YEST` to instantly flip the card and check their team's final box-score from yesterday without leaving the page.
+*   **Custom User Map Guide:** Features a modal overlay containing a visual breakdown of the page interface that accepts completely custom user screenshots.
+*   **Gamified Trophy Engine:**
+    *   **Daily Leader:** Ranks teams internally by prioritizing `Runs > Hits > Stadium Attendance`. The daily winner automatically receives a golden 🏆 badge next to their name.
+    *   **Season Tracker:** A headless engine calculates the "Daily Leader" for *every single day* since Opening Day completely in the background without needing a database, placing a permanent `🏆 x N Season Wins` counter inside each user's Profile Modal.
+*   **Zero Dependencies:** Built entirely with vanilla HTML, CSS, and JavaScript.
 
 ## 🚀 Deployment (GitHub Pages)
 
 Deploying to GitHub Pages takes less than a minute.
 
 1.  **Repository Setup:** Ensure `index.html` is at the very root of your repository.
-2.  **Asset Handling:** This app utilizes local assets for its roster pictures and responsive backgrounds. Ensure there is an `assets/` directory directly alongside `index.html` with the following files (Note: **Linux servers are case-sensitive** so these must match exactly):
+2.  **Asset Handling:** This app utilizes local assets for its pictures and responsive backgrounds. Ensure there is an `assets/` directory targeting these exact names (Note: **Linux servers are case-sensitive**):
     *   `andrea.jpg`
     *   `cj.jpg`
     *   `Brennan.jpg`
@@ -25,11 +27,12 @@ Deploying to GitHub Pages takes less than a minute.
     *   `Button OD team.png`
     *   `OD background.png`
     *   `OD phone background.jpg`
-3.  **Deploy:** Go to your GitHub repository -> **Settings** -> **Pages**.
-4.  **Launch:** Set the branch source to `main` (or `master`) and save. Within a few moments, your dynamic dashboard will be live online!
+    *   `instructions.png` (Used for the UI Guide popup)
+3.  **Deploy:** Go to your GitHub repository -> **Settings** -> **Pages**, set source to `main` branch, and save.
 
 ## ⚙️ How it Works
 
-The Office Dugout dashboard achieves its zero-dependency architecture by querying directly into the `statsapi.mlb.com` endpoints:
-*   `/schedule`: Fetches the games spanning the next 14 days and today's live runs/hits per team layout.
-*   `/standings`: Fetches the live season records and divisional standings hydration matrices to build the global leaderboard.
+The Office Dugout achieves its zero-dependency persistence by running dynamic headless queries against `statsapi.mlb.com`:
+*   `/schedule`: Fetches active live runs/hits, the next 14 days, and ghost-loads the *Previous* 24 hours to seamlessly hydrate the back panels of the 3D flip-cards.
+*   `Date Ranges`: Executes a single bulk query fetching the entire season layout since March 20th to generate the all-time Trophy tally.
+*   `/standings`: Fetches the live season records and divisional matrices to build the global leaderboard.

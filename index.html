@@ -195,9 +195,12 @@ footer{ text-align:center; padding:2rem 1rem; font-size:12px; color:var(--muted)
   <div class="logo-wrap">
     <div class="logo-main">Office Dugout</div>
   </div>
-  <div class="live-col">
-    <div class="live-row"><span class="pulse"></span>LIVE DATA FEED</div>
-    <div id="hdr-time" style="font-size:13px; font-weight:500;">–</div>
+  <div class="live-col" style="flex-direction:row; gap:20px; align-items:center;">
+    <button class="rbtn" onclick="openInstructions()" style="padding: 6px 12px; font-weight:bold; color:#fff; border-color:var(--border-light); background:rgba(255,255,255,0.05);"><span style="margin-right:4px;">?</span> GUIDE</button>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:3px;">
+      <div class="live-row"><span class="pulse"></span>LIVE DATA FEED</div>
+      <div id="hdr-time" style="font-size:13px; font-weight:500;">–</div>
+    </div>
   </div>
 </div>
 
@@ -254,6 +257,19 @@ footer{ text-align:center; padding:2rem 1rem; font-size:12px; color:var(--muted)
 <div class="modal-overlay" id="roster-modal" onclick="closeModal(event)">
   <div class="modal-content glass" id="modal-body">
     <!-- Populated by JS -->
+  </div>
+</div>
+
+<div class="modal-overlay" id="instructions-modal" onclick="closeInstructions(event)">
+  <div class="modal-content glass" style="max-width: 800px; padding: 1.5rem; width: 95%;">
+    <button class="modal-close" onclick="closeInstructions(event)">&times;</button>
+    <div style="text-align:left; font-family:'Oswald',sans-serif; font-size:1.2rem; letter-spacing:1px; text-transform:uppercase; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+      <div class="b-pip" style="background:#3b82f6;"></div> User Guide
+    </div>
+    <img src="assets/instructions.png" alt="Instructions" style="width:100%; border-radius:10px; border:2px solid var(--border-light); max-height: 65vh; object-fit: contain; background: #000;">
+    <div style="text-align:center; margin-top:10px; font-size:11px; color:var(--muted); font-style:italic;">
+      You can customize this layout map anytime simply by taking a screenshot and saving it as "instructions.png" inside the "assets" folder!
+    </div>
   </div>
 </div>
 
@@ -508,6 +524,17 @@ function closeModal(e) {
     document.getElementById('roster-modal').classList.remove('open');
   } else if (!e) {
     document.getElementById('roster-modal').classList.remove('open');
+  }
+}
+
+function openInstructions() {
+  document.getElementById('instructions-modal').classList.add('open');
+}
+function closeInstructions(e) {
+  if (e && (e.target.id === 'instructions-modal' || e.target.classList.contains('modal-close'))) {
+    document.getElementById('instructions-modal').classList.remove('open');
+  } else if (!e) {
+    document.getElementById('instructions-modal').classList.remove('open');
   }
 }
 

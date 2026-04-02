@@ -10,7 +10,7 @@
 *   **Custom User Map Guide:** Features a modal overlay containing a visual breakdown of the page interface that accepts completely custom user screenshots.
 *   **Gamified Trophy Engine:**
     *   **Daily Leader:** Ranks teams internally by prioritizing `Runs > Hits > Stadium Attendance`. The daily winner automatically receives a golden 🏆 badge next to their name.
-    *   **Season Tracker:** A headless engine calculates the "Daily Leader" for *every single day* since Opening Day completely in the background without needing a database, placing a permanent `🏆 x N Season Wins` counter inside each user's Profile Modal.
+    *   **Season Tracker:** A headless engine calculates the "Daily Leader" for *every single day* since Opening Day completely in the background without needing a database, placing a permanent `🏆 x N Daily Wins` counter inside each user's Profile Modal.
 *   **Zero Dependencies:** Built entirely with vanilla HTML, CSS, and JavaScript.
 
 ## 🚀 Deployment (GitHub Pages)

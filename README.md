@@ -4,14 +4,17 @@
 
 ## 🌟 Features
 
-*   **5-User Team Hub:** Distinctly tracks 5 users (Andrea, CJ, Brennan, Dominic, Mario) and their favorite teams.
-*   **Dynamic Theming:** Every team's abbreviation dynamically adopts its designated team color. The Yankees receive a custom glowing-white textual effect.
-*   **3D Interactive Flip-Cards:** Individual game column blocks and the Daily Leaderboard utilize native GPU-accelerated 3D CSS to physically spin around. Users can click `↺ YEST` to instantly flip the card and check their team's final box-score from yesterday without leaving the page.
-*   **Custom User Map Guide:** Features a modal overlay containing a visual breakdown of the page interface that accepts completely custom user screenshots.
-*   **Gamified Trophy Engine:**
-    *   **Daily Leader:** Ranks teams internally by prioritizing `Runs > Hits > Stadium Attendance`. The daily winner automatically receives a golden 🏆 badge next to their name.
-    *   **Season Tracker:** A headless engine calculates the "Daily Leader" for *every single day* since Opening Day completely in the background without needing a database, placing a permanent `🏆 x N Daily Wins` counter inside each user's Profile Modal.
-*   **Zero Dependencies:** Built entirely with vanilla HTML, CSS, and JavaScript.
+*   **5-User Team Hub:** Distinctly tracks 5 users (Andrea, CJ, Brennan, Dominic, Mario) and their favorite teams (Brewers, Cubs, Giants, Yankees, Guardians).
+*   **Daily Picks Engine:** 
+    *   **Live Game Dropdowns:** Users can select "Today", "Tomorrow", or "Yesterday" to dynamically fetch games directly from the MLB API.
+    *   **Unlimited Picking:** Make independent picks for every game of the day, featuring complete support for doubleheaders.
+    *   **Auto-Grading:** Because picks are natively tied to MLB Game IDs, the dashboard silently evaluates the final box score of your picks using live MLB data—automatically tracking and updating your pick status to WON or LOST without requiring manual admin input.
+*   **Daily Picks Leaderboard:** A sleek standalone panel ranking the 5 users based on their active Daily Picks Win/Loss Record, Win Percentage, and Active Streak (🔥). The #1 ranked predictor earns the coveted Daily Picks Trophy (🏆).
+*   **Yesterday's Recap Mode:** Selecting "Yesterday" on the Date dropdown intelligently disables new input forms to prevent predictions in the past, and transforms the Recent Picks sheet into a neat recap of yesterday's predictions and outcomes.
+*   **The Dugout Chatter:** A fully fleshed-out message board attached right under the leaderboard. Read and write real-time banter. It features integrated persistence so your trash-talk is preserved perfectly across dashboard reboots.
+*   **3D Interactive Flip-Cards:** Individual game column blocks and the Daily Leaderboard utilize native GPU-accelerated 3D CSS to physically spin around. Users can click `↺ YEST` to instantly flip the card and check their team's final box-score from yesterday.
+*   **Gamified Trophy Engine (In-Game Stats):** Ranks teams internally by prioritizing `Runs > Hits > Stadium Attendance`. The daily winner automatically receives a golden 🏆 badge next to their name. A headless engine tracks the complete season since Opening Day to place a permanent `🏆 x N` counter inside each user's Profile Modal.
+*   **Zero Dependencies:** Built completely with vanilla HTML/CSS/JS.
 
 ## 🚀 Deployment (GitHub Pages)
 
@@ -32,7 +35,8 @@ Deploying to GitHub Pages takes less than a minute.
 
 ## ⚙️ How it Works
 
-The Office Dugout achieves its zero-dependency persistence by running dynamic headless queries against `statsapi.mlb.com`:
-*   `/schedule`: Fetches active live runs/hits, the next 14 days, and ghost-loads the *Previous* 24 hours to seamlessly hydrate the back panels of the 3D flip-cards.
-*   `Date Ranges`: Executes a single bulk query fetching the entire season layout since March 20th to generate the all-time Trophy tally.
-*   `/standings`: Fetches the live season records and divisional matrices to build the global leaderboard.
+The Office Dugout seamlessly meshes engaging frontend features with the real world without needing user authentication or a backend cloud database. 
+
+It accomplishes this in two ways:
+1. **API Hydration:** Queries dynamic headless endpoints against `statsapi.mlb.com` to fetch schedules, rosters, box scores, doubleheaders, and standings to populate the deep stats models.
+2. **Local Persistence:** Your Daily Picks predictions, Win/Loss Records, and Chatter Messages are saved beautifully directly into your browser's persistent `localStorage`. Just keep opening the dashboard on your machine, and your state will instantly reload.

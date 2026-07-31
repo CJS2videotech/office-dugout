@@ -209,22 +209,62 @@ th:first-child, td:first-child{ text-align:left; }
 
 footer{ text-align:center; padding:2rem 1rem; font-size:12px; color:var(--muted); border-top:1px solid var(--border); margin-top:2rem;}
 @media(max-width:768px){ body::before{ background-image: url('assets/OD%20phone%20background.jpg'); background-position: center; } .boards-section{ flex-direction:column; padding:1rem; } .main-grid, .roster-sec{ padding:0 1rem 2rem; } .hdr{ padding:1rem; flex-direction:column; gap:10px; } .roster-thumb{ width:90px; height:120px; } .modal-content{ padding:1.5rem 1rem; gap:1rem; max-height:85vh; overflow-y:auto; } .modal-img{ width:150px; height:190px; } .modal-overlay{ align-items:flex-start; padding:10vh 0; overflow-y:auto; } .modal-close{ position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.5rem; text-shadow:none; z-index:10; border:none; line-height:1; } }
+
+/* ── TOGGLE SWITCH CSS ── */
+.switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.1); transition: .3s; border-radius: 20px; border: 1px solid var(--border); }
+.slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: var(--muted); transition: .3s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--green); }
+input:checked + .slider:before { transform: translateX(14px); background-color: #000; }
+.ticker-box { transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s; }
+.ticker-box:hover { transform: translateY(-2px); border-color: var(--border-light); background: rgba(255,255,255,0.12); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
 </style>
 </head>
 <body>
 
-<div class="hdr glass">
-  <div class="logo-wrap">
-    <div class="logo-main">Office Dugout</div>
+<div class="hdr glass" style="flex-direction:column; gap:12px; padding: 1rem 2rem;">
+  <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+    <div class="logo-wrap">
+      <div class="logo-main">Office Dugout</div>
+    </div>
+    
+    <div class="live-col" style="flex-direction:row; gap:15px; align-items:center;">
+      <button class="rbtn" id="btn-auth-trigger" onclick="openAuthModal()" style="padding: 6px 12px; font-weight:bold; color:var(--green); border-color:var(--green); background:rgba(34,197,94,0.05);">SIGN IN</button>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:3px;">
+        <div class="live-row"><span class="pulse"></span>LIVE DATA FEED</div>
+        <div id="hdr-time" style="font-size:13px; font-weight:500;">–</div>
+      </div>
+    </div>
   </div>
   
-  <div id="hdr-ticker" style="flex:1; display:flex; justify-content:center; gap:8px; flex-wrap:wrap; padding:0 15px;"></div>
+  <div id="hdr-ticker" style="width:100%; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;"></div>
+</div>
 
-  <div class="live-col" style="flex-direction:row; gap:20px; align-items:center;">
-    <button class="rbtn" onclick="openInstructions()" style="padding: 6px 12px; font-weight:bold; color:#fff; border-color:var(--border-light); background:rgba(255,255,255,0.05);"><span style="margin-right:4px;">?</span> GUIDE</button>
-    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:3px;">
-      <div class="live-row"><span class="pulse"></span>LIVE DATA FEED</div>
-      <div id="hdr-time" style="font-size:13px; font-weight:500;">–</div>
+<!-- Authentication Modal -->
+<div class="modal-overlay" id="auth-modal" onclick="closeAuthModal(event)">
+  <div class="modal-content glass" style="max-width: 400px; padding: 2rem;">
+    <button class="modal-close" onclick="closeAuthModal(event)">&times;</button>
+    <div style="font-family:'Oswald',sans-serif; font-size:1.5rem; letter-spacing:1px; text-transform:uppercase; margin-bottom:1rem; display:flex; align-items:center; justify-content:center; gap:8px;">
+      <div class="b-pip" style="background:var(--green);"></div> Friend Sign In
+    </div>
+    
+    <div id="auth-error-msg" style="color:#f87171; font-size:12px; margin-bottom:10px; display:none; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px; border:1px solid rgba(239,68,68,0.2);"></div>
+
+    <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+      <div style="margin-bottom:1rem; text-align:left;">
+        <label class="dp-label">Email Address</label>
+        <input type="email" id="auth-email" required class="dp-select" placeholder="you@example.com" style="background:rgba(0,0,0,0.6); font-family:inherit; text-align:left;">
+      </div>
+      <div style="margin-bottom:1.5rem; text-align:left;">
+        <label class="dp-label">Password</label>
+        <input type="password" id="auth-password" required class="dp-select" placeholder="••••••••" style="background:rgba(0,0,0,0.6); font-family:inherit; text-align:left;">
+      </div>
+      <button type="submit" class="dp-btn" id="auth-submit-btn">Sign In</button>
+    </form>
+    
+    <div style="font-size:11px; color:var(--muted); margin-top:15px; line-height:1.4;">
+      Sign in to sync your picks and view preferences live! Default local fallback active when logged out.
     </div>
   </div>
 </div>
@@ -379,24 +419,299 @@ footer{ text-align:center; padding:2rem 1rem; font-size:12px; color:var(--muted)
 
 <footer>Data via MLB Stats API · Auto-refreshes every 60s</footer>
 
-<script>
+<script type="module">
+// ── FIREBASE MODULE INTEGRATION ──
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// Replace these values with your personal Firebase project settings.
+// If unmodified, the app will gracefully fall back to LocalStorage mode.
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+let app = null;
+let auth = null;
+let db = null;
+let firebaseActive = false;
+let currentUser = null;
+let userPreferences = {};
+
+if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    firebaseActive = true;
+    console.log("Firebase integrated and active.");
+  } catch (e) {
+    console.error("Firebase initialization failed, falling back to LocalStorage:", e);
+  }
+} else {
+  console.log("No Firebase config detected. Running in Local Offline fallback mode.");
+}
+
 const USERS = [
-  { id: 'andrea', name: 'Andrea', teamName: 'Brewers', teamId: 158, primary: 'var(--u-andrea-1)', secondary: 'var(--u-andrea-2)', img: 'assets/andrea.jpg' },
-  { id: 'cj', name: 'CJ', teamName: 'Cubs', teamId: 112, primary: 'var(--u-cj-1)', secondary: 'var(--u-cj-2)', img: 'assets/cj.jpg' },
-  { id: 'brennan', name: 'Brennan', teamName: 'Giants', teamId: 137, primary: 'var(--u-brennan-1)', secondary: 'var(--u-brennan-2)', img: 'assets/Brennan.jpg' },
-  { id: 'dominic', name: 'Dominic', teamName: 'Yankees', teamId: 147, primary: 'var(--u-dominic-1)', secondary: 'var(--u-dominic-2)', img: 'assets/Dominic.jpg', glow: 'text-shadow: 0 0 10px rgba(255,255,255,0.7), 0 0 20px rgba(255,255,255,0.4);' },
-  { id: 'mario', name: 'Mario', teamName: 'Guardians', teamId: 114, primary: 'var(--u-mario-1)', secondary: 'var(--u-mario-2)', img: 'assets/Mario.png' }
+  { id: 'andrea', name: 'Andrea', email: 'andrea@example.com', teamName: 'Brewers', teamId: 158, primary: 'var(--u-andrea-1)', secondary: 'var(--u-andrea-2)', img: 'assets/andrea.jpg' },
+  { id: 'cj', name: 'CJ', email: 'cj@example.com', teamName: 'Cubs', teamId: 112, primary: 'var(--u-cj-1)', secondary: 'var(--u-cj-2)', img: 'assets/cj.jpg' },
+  { id: 'brennan', name: 'Brennan', email: 'brennan@example.com', teamName: 'Giants', teamId: 137, primary: 'var(--u-brennan-1)', secondary: 'var(--u-brennan-2)', img: 'assets/Brennan.jpg' },
+  { id: 'dominic', name: 'Dominic', email: 'dominic@example.com', teamName: 'Yankees', teamId: 147, primary: 'var(--u-dominic-1)', secondary: 'var(--u-dominic-2)', img: 'assets/Dominic.jpg', glow: 'text-shadow: 0 0 10px rgba(255,255,255,0.7), 0 0 20px rgba(255,255,255,0.4);' },
+  { id: 'mario', name: 'Mario', email: 'mario@example.com', teamName: 'Guardians', teamId: 114, primary: 'var(--u-mario-1)', secondary: 'var(--u-mario-2)', img: 'assets/Mario.png' }
 ];
-const TEAM_IDS = USERS.map(u => u.teamId).join(',');
+
+let TEAM_IDS = USERS.map(u => u.teamId).join(',');
 let currentWinnerId = null;
 let yesterdayWinnerId = null;
+let currentGames = [];
+let gameRosterLastOpened = {};
 const seasonTrophies = {};
 USERS.forEach(u => seasonTrophies[u.id] = 0);
 const SEASON_START = '2026-03-20';
 
+const MLB_TEAMS = [
+  { id: 109, name: 'D-backs', abbr: 'AZ' },
+  { id: 144, name: 'Braves', abbr: 'ATL' },
+  { id: 110, name: 'Orioles', abbr: 'BAL' },
+  { id: 111, name: 'Red Sox', abbr: 'BOS' },
+  { id: 112, name: 'Cubs', abbr: 'CHC' },
+  { id: 145, name: 'White Sox', abbr: 'CWS' },
+  { id: 113, name: 'Reds', abbr: 'CIN' },
+  { id: 114, name: 'Guardians', abbr: 'CLE' },
+  { id: 115, name: 'Rockies', abbr: 'COL' },
+  { id: 116, name: 'Tigers', abbr: 'DET' },
+  { id: 117, name: 'Astros', abbr: 'HOU' },
+  { id: 118, name: 'Royals', abbr: 'KC' },
+  { id: 108, name: 'Angels', abbr: 'LAA' },
+  { id: 119, name: 'Dodgers', abbr: 'LAD' },
+  { id: 146, name: 'Marlins', abbr: 'MIA' },
+  { id: 158, name: 'Brewers', abbr: 'MIL' },
+  { id: 142, name: 'Twins', abbr: 'MIN' },
+  { id: 121, name: 'Mets', abbr: 'NYM' },
+  { id: 147, name: 'Yankees', abbr: 'NYY' },
+  { id: 133, name: 'Athletics', abbr: 'ATH' },
+  { id: 143, name: 'Phillies', abbr: 'PHI' },
+  { id: 134, name: 'Pirates', abbr: 'PIT' },
+  { id: 135, name: 'Padres', abbr: 'SD' },
+  { id: 137, name: 'Giants', abbr: 'SF' },
+  { id: 136, name: 'Mariners', abbr: 'SEA' },
+  { id: 138, name: 'Cardinals', abbr: 'STL' },
+  { id: 139, name: 'Rays', abbr: 'TB' },
+  { id: 140, name: 'Rangers', abbr: 'TEX' },
+  { id: 141, name: 'Blue Jays', abbr: 'TOR' },
+  { id: 120, name: 'Nationals', abbr: 'WSH' }
+];
+
 /* ── DAILY PICKS LOGIC ── */
 let dpHistory = JSON.parse(localStorage.getItem('officeDailyPicks')) || [];
 let dpAvailableGames = []; 
+
+// ── AUTHENTICATION HANDLERS ──
+function openAuthModal() {
+  document.getElementById("auth-modal").classList.add("open");
+}
+function closeAuthModal(e) {
+  if (e && (e.target.id === 'auth-modal' || e.target.classList.contains('modal-close'))) {
+    document.getElementById('auth-modal').classList.remove('open');
+  } else if (!e) {
+    document.getElementById('auth-modal').classList.remove('open');
+  }
+}
+
+async function handleAuthSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById("auth-email").value;
+  const password = document.getElementById("auth-password").value;
+  const errorMsg = document.getElementById("auth-error-msg");
+  const submitBtn = document.getElementById("auth-submit-btn");
+  
+  if (!firebaseActive) {
+    alert("App running in Local Offline mode. Paste your real firebaseConfig parameters in the index.html script block to enable Cloud Sign In.");
+    return;
+  }
+  
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Signing In...";
+  errorMsg.style.display = "none";
+  
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    closeAuthModal();
+  } catch (error) {
+    console.error("Auth error:", error);
+    errorMsg.textContent = error.message.replace("Firebase: ", "");
+    errorMsg.style.display = "block";
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Sign In";
+  }
+}
+
+async function handleSignOut() {
+  if (confirm("Are you sure you want to sign out?")) {
+    if (firebaseActive) {
+      await signOut(auth).catch(e => console.error("Sign out error", e));
+    }
+  }
+}
+
+// ── USER SETTINGS HANDLERS ──
+async function loadUserPreferences(uid) {
+  if (!firebaseActive) return;
+  try {
+    const userDocRef = doc(db, "users", uid);
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      userPreferences = data.uiPreferences || {};
+      
+      if (data.favoriteTeamId) {
+        const localProfile = USERS.find(u => u.email === auth.currentUser.email);
+        if (localProfile) {
+          localProfile.teamId = parseInt(data.favoriteTeamId);
+          localProfile.teamName = data.favoriteTeamName || localProfile.teamName;
+          TEAM_IDS = USERS.map(user => user.teamId).join(',');
+        }
+      }
+    } else {
+      const localProfile = USERS.find(u => u.email === auth.currentUser.email);
+      await setDoc(userDocRef, {
+        email: auth.currentUser.email,
+        favoriteTeamId: localProfile ? localProfile.teamId : 112,
+        favoriteTeamName: localProfile ? localProfile.teamName : "Cubs",
+        uiPreferences: { sortFirst: false, compact: false }
+      });
+    }
+  } catch (e) {
+    console.error("Error loading user preferences:", e);
+  }
+}
+
+async function saveUserData(data) {
+  if (!firebaseActive || !currentUser) return;
+  try {
+    const userDocRef = doc(db, "users", currentUser.uid);
+    await setDoc(userDocRef, data, { merge: true });
+  } catch (e) {
+    console.error("Error saving user data:", e);
+  }
+}
+
+async function updateFavoriteTeam(newTeamId) {
+  const profile = USERS.find(u => currentUser && u.email === currentUser.email);
+  if (!profile) return;
+  
+  const team = MLB_TEAMS.find(t => t.id === parseInt(newTeamId));
+  if (!team) return;
+  
+  profile.teamId = team.id;
+  profile.teamName = team.name;
+  TEAM_IDS = USERS.map(user => user.teamId).join(',');
+  
+  await saveUserData({
+    favoriteTeamId: team.id,
+    favoriteTeamName: team.name
+  });
+  
+  initLayout();
+  refreshAll();
+}
+
+async function toggleSortFirst(checked) {
+  userPreferences.sortFirst = checked;
+  await saveUserData({ uiPreferences: { sortFirst: checked } });
+  initLayout();
+}
+
+async function toggleCompactView(checked) {
+  userPreferences.compact = checked;
+  await saveUserData({ uiPreferences: { compact: checked } });
+  initLayout();
+}
+
+// ── DAILY PICKS DATABASE SYNC ──
+let picksUnsubscribe = null;
+function subscribeToPicks() {
+  if (!firebaseActive) return;
+  if (picksUnsubscribe) picksUnsubscribe();
+  
+  const picksRef = collection(db, "picks");
+  picksUnsubscribe = onSnapshot(picksRef, (snapshot) => {
+    dpHistory = [];
+    snapshot.forEach((docSnap) => {
+      dpHistory.push(docSnap.data());
+    });
+    renderLeaderboard();
+    renderRecentPicks();
+  });
+}
+
+// Monitor Auth Changes
+if (firebaseActive) {
+  onAuthStateChanged(auth, async (user) => {
+    const authBtn = document.getElementById("btn-auth-trigger");
+    if (user) {
+      currentUser = user;
+      console.log("Logged in as:", user.email);
+      
+      await loadUserPreferences(user.uid);
+      
+      const profile = USERS.find(u => u.email === user.email);
+      if (profile) {
+        const dpWho = document.getElementById("dp-who");
+        if (dpWho) {
+          dpWho.value = profile.id;
+          dpWho.disabled = true;
+        }
+        if (authBtn) {
+          authBtn.textContent = `${profile.name.toUpperCase()} (SIGN OUT)`;
+          authBtn.style.color = profile.secondary;
+          authBtn.style.borderColor = profile.secondary;
+          authBtn.onclick = handleSignOut;
+        }
+      }
+      subscribeToPicks();
+    } else {
+      currentUser = null;
+      userPreferences = {};
+      
+      const dpWho = document.getElementById("dp-who");
+      if (dpWho) {
+        dpWho.value = "";
+        dpWho.disabled = false;
+      }
+      if (authBtn) {
+        authBtn.textContent = "SIGN IN";
+        authBtn.style.color = "var(--green)";
+        authBtn.style.borderColor = "var(--green)";
+        authBtn.style.background = "rgba(34,197,94,0.05)";
+        authBtn.onclick = openAuthModal;
+      }
+      
+      if (picksUnsubscribe) {
+        picksUnsubscribe();
+        picksUnsubscribe = null;
+      }
+      
+      dpHistory = JSON.parse(localStorage.getItem('officeDailyPicks')) || [];
+      renderLeaderboard();
+      renderRecentPicks();
+    }
+    initLayout();
+    refreshAll();
+  });
+} else {
+  // Bind simple modal events for local fallback
+  const authBtn = document.getElementById("btn-auth-trigger");
+  if (authBtn) {
+    authBtn.onclick = openAuthModal;
+  }
+}
 
 async function loadGamesForDate() {
   const dateVal = document.getElementById('dp-date').value;
@@ -464,7 +779,7 @@ function populateWinners() {
 
 function savePicks() { localStorage.setItem('officeDailyPicks', JSON.stringify(dpHistory)); renderRecentPicks(); }
 
-function submitDailyPick() {
+async function submitDailyPick() {
   const who = document.getElementById('dp-who').value;
   const dateVal = document.getElementById('dp-date').value;
   const gamePk = document.getElementById('dp-game').value;
@@ -486,19 +801,32 @@ function submitDailyPick() {
   const isAway = g.teams.away.team.id == winnerId;
   const teamName = isAway ? g.teams.away.team.name : g.teams.home.team.name;
   
-  const existingIndex = dpHistory.findIndex(p => p.who === user.id && p.gamePk === parseInt(gamePk));
   let gh = g.gameNumber > 1 ? ` (Gm ${g.gameNumber})` : '';
   const pick = { id: Date.now(), who: user.id, whoName: user.name, dateStr, gamePk: parseInt(gamePk), teamId: parseInt(winnerId), teamName: teamName + gh, status: 'Pending' };
   
-  if (existingIndex >= 0) {
-      alert('Updating previous pick for this game');
-      dpHistory[existingIndex] = pick;
+  if (firebaseActive && currentUser) {
+    const docId = `${dateStr}_${user.id}`;
+    try {
+      await setDoc(doc(db, "picks", docId), {
+        ...pick,
+        uid: currentUser.uid,
+        timestamp: new Date().toISOString()
+      });
+    } catch (e) {
+      console.error("Error writing pick to Firestore:", e);
+      alert("Database error: Could not sync pick.");
+    }
   } else {
-      dpHistory.push(pick);
+    const existingIndex = dpHistory.findIndex(p => p.who === user.id && p.gamePk === parseInt(gamePk));
+    if (existingIndex >= 0) {
+        alert('Updating previous pick for this game');
+        dpHistory[existingIndex] = pick;
+    } else {
+        dpHistory.push(pick);
+    }
+    savePicks();
+    renderLeaderboard();
   }
-  
-  savePicks();
-  renderLeaderboard();
   
   // reset inputs
   document.getElementById('dp-game').value = '';
@@ -584,7 +912,7 @@ function renderRecentPicks(filterDate = null) {
 
 function evaluatePicks(games, targetDate) {
   let changed = false;
-  dpHistory.forEach(p => {
+  dpHistory.forEach(async p => {
     if(p.status !== 'Pending' || p.dateStr !== targetDate) return;
     const g = games.find(gm => gm.teams.away.team.id === p.teamId || gm.teams.home.team.id === p.teamId);
     if(g && (g.status.abstractGameState === 'Final' || g.status.abstractGameState === 'Completed Early')) {
@@ -594,9 +922,16 @@ function evaluatePicks(games, targetDate) {
        if (awayS === homeS) didWin = false; 
        p.status = didWin ? 'Win' : 'Loss';
        changed = true;
+       
+       if (firebaseActive) {
+         const docId = `${p.dateStr}_${p.who}`;
+         await updateDoc(doc(db, "picks", docId), {
+           status: p.status
+         }).catch(e => console.error("Error updating pick outcome:", e));
+       }
     }
   });
-  if(changed) {
+  if(changed && !firebaseActive) {
     savePicks();
     renderLeaderboard();
   }
@@ -619,10 +954,21 @@ function getDpStats(userId) {
 const MLB = 'https://statsapi.mlb.com/api/v1';
 
 function getTeamStyle(id, defColor='#fff') {
-
   const matched = USERS.find(u => u.teamId === id);
   if (!matched) return `color:${defColor};`;
   return `color:${matched.secondary};${matched.glow||''}`;
+}
+
+function getTeamAbbr(team) {
+  if (!team) return '';
+  if (team.abbreviation) return team.abbreviation;
+  const found = MLB_TEAMS.find(t => t.id === team.id);
+  if (found && found.abbr) return found.abbr;
+  if (team.name) {
+    const parts = team.name.split(' ');
+    return parts[parts.length - 1].substring(0, 3).toUpperCase();
+  }
+  return 'TBD';
 }
 
 /* ── HELPERS ── */
@@ -840,6 +1186,57 @@ function openModal(id) {
     </div>
   </div>`;
 
+  const isMe = currentUser && (currentUser.email === u.email || (currentUser.email && USERS.find(x => x.email === currentUser.email)?.id === id));
+  let settingsHtml = '';
+  if (isMe) {
+    const options = MLB_TEAMS.map(t => `<option value="${t.id}" ${t.id === u.teamId ? 'selected' : ''}>${t.name}</option>`).join('');
+    settingsHtml = `
+      <div style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; margin-top:15px; text-align:left;">
+        <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+          <div class="b-pip" style="background:${u.secondary}; width:6px; height:6px;"></div> Personal Settings
+        </div>
+        <div style="margin-bottom:10px;">
+          <label class="dp-label">Favorite MLB Team</label>
+          <div class="select-wrap">
+            <select id="settings-team" class="dp-select" onchange="updateFavoriteTeam(this.value)">
+              ${options}
+            </select>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+          <span style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px;">Sort My Column First</span>
+          <label class="switch">
+            <input type="checkbox" id="settings-sort-first" ${userPreferences.sortFirst ? 'checked' : ''} onchange="toggleSortFirst(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+          <span style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px;">Compact View (Hide Standings)</span>
+          <label class="switch">
+            <input type="checkbox" id="settings-compact" ${userPreferences.compact ? 'checked' : ''} onchange="toggleCompactView(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    `;
+  }
+
+  let oppUserBtn = '';
+  if (currentGames && currentGames.length > 0) {
+    const g = currentGames.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
+    if (g) {
+      const oppTeamId = g.teams.away.team.id === u.teamId ? g.teams.home.team.id : g.teams.away.team.id;
+      const oppUser = USERS.find(other => other.teamId === oppTeamId && other.id !== u.id);
+      if (oppUser) {
+        oppUserBtn = `
+          <button onclick="openModal('${oppUser.id}')" class="rbtn" style="width:100%; margin-top:10px; margin-bottom:4px; padding:8px 12px; justify-content:center; background:rgba(255,255,255,0.06); border:1px solid ${oppUser.secondary}; color:${oppUser.secondary}; font-weight:700; font-family:'Oswald',sans-serif; letter-spacing:1px; border-radius:8px;">
+            ⇄ SWITCH TO ${oppUser.name.toUpperCase()}'S CARD (${oppUser.teamName.toUpperCase()})
+          </button>
+        `;
+      }
+    }
+  }
+
   body.innerHTML = `
     <button class="modal-close" onclick="closeModal(event)">&times;</button>
     <img src="${u.img}" class="modal-img" style="border-color:${u.secondary}">
@@ -855,8 +1252,10 @@ function openModal(id) {
           <div class="b-pip" style="background:var(--green);width:6px;height:6px;"></div>Today's Matchup
         </div>
         ${todayHtml}
+        ${oppUserBtn}
         ${schedHtml}
         ${standingsHtml}
+        ${settingsHtml}
         ${dailyHtml}
       </div>
     </div>
@@ -886,10 +1285,27 @@ function closeInstructions(e) {
 function initLayout(){
   const g = document.getElementById('users-grid');
   let html = '';
-  USERS.forEach(u => {
+  
+  let usersToRender = [...USERS];
+  let loggedInUser = null;
+  if (currentUser) {
+    loggedInUser = USERS.find(u => u.email === currentUser.email);
+  }
+  
+  if (loggedInUser && userPreferences.sortFirst) {
+    usersToRender = [
+      loggedInUser,
+      ...usersToRender.filter(u => u.id !== loggedInUser.id)
+    ];
+  }
+  
+  usersToRender.forEach(u => {
+    const isCompact = loggedInUser && u.id === loggedInUser.id && userPreferences.compact;
+    const standingsStyle = isCompact ? 'display:none;' : '';
+    
     html += `
     <div class="user-col" id="col-${u.id}">
-      <div class="user-hdr glass" style="border-bottom: 3px solid ${u.secondary}">
+      <div class="user-hdr glass" style="border-bottom: 3px solid ${u.secondary}; ${loggedInUser && u.id === loggedInUser.id ? 'box-shadow: 0 0 15px ' + u.secondary + ';' : ''}">
         <div class="uh-top" style="background:${u.primary}"></div>
         <div class="uh-inner" style="display:flex; align-items:center; justify-content:center; gap:12px;">
           <div style="text-align:right;">
@@ -911,7 +1327,7 @@ function initLayout(){
       </div>
       <div class="sched-title">Next 5 Days</div>
       <div class="sched-list" id="sched-${u.id}"></div>
-      <div id="standings-${u.id}" style="margin-top:auto;"></div>
+      <div id="standings-${u.id}" style="margin-top:auto; ${standingsStyle}"></div>
     </div>`;
   });
   g.innerHTML = html;
@@ -946,7 +1362,7 @@ function renderGame(g, isSchedule=false){
     // Compact row
     return `<div class="mini-game">
       <span class="mg-date">${new Date(g.gameDate).toLocaleDateString('en-US',{month:'numeric',day:'numeric'})}</span>
-      <span class="mg-match"><span style="${aSty}font-weight:${USERS.some(u=>u.teamId===awayId)?'700':'500'}">${away.team.abbreviation}</span> @ <span style="${hSty}font-weight:${USERS.some(u=>u.teamId===homeId)?'700':'500'}">${home.team.abbreviation}</span></span>
+      <span class="mg-match"><span style="${aSty}font-weight:${USERS.some(u=>u.teamId===awayId)?'700':'500'}">${getTeamAbbr(away.team)}</span> @ <span style="${hSty}font-weight:${USERS.some(u=>u.teamId===homeId)?'700':'500'}">${getTeamAbbr(home.team)}</span></span>
       <span class="mg-time">${ss}</span>
     </div>`;
   }
@@ -955,7 +1371,7 @@ function renderGame(g, isSchedule=false){
     ${badge}
     <div class="matchup">
       <div class="tm away">
-        <div class="tm-abbr ${isFinal&&!awayW?'dim':''}" style="${aSty}">${away.team.abbreviation||away.team.name}</div>
+        <div class="tm-abbr ${isFinal&&!awayW?'dim':''}" style="${aSty}">${getTeamAbbr(away.team)}</div>
         <div class="tm-rec">${away.leagueRecord?`${away.leagueRecord.wins}-${away.leagueRecord.losses}`:''}</div>
       </div>
       <div class="smid">
@@ -963,7 +1379,7 @@ function renderGame(g, isSchedule=false){
         <div class="gstat ${sc}">${ss}</div>
       </div>
       <div class="tm home">
-        <div class="tm-abbr ${isFinal&&!homeW?'dim':''}" style="${hSty}">${home.team.abbreviation||home.team.name}</div>
+        <div class="tm-abbr ${isFinal&&!homeW?'dim':''}" style="${hSty}">${getTeamAbbr(home.team)}</div>
         <div class="tm-rec">${home.leagueRecord?`${home.leagueRecord.wins}-${home.leagueRecord.losses}`:''}</div>
       </div>
     </div>
@@ -987,8 +1403,28 @@ function renderGame(g, isSchedule=false){
   return cardHtml;
 }
 
+function openGameRoster(awayId, homeId, gamePk) {
+  const matchedH = USERS.find(u => u.teamId === homeId);
+  const matchedA = USERS.find(u => u.teamId === awayId);
+
+  if (matchedH && matchedA) {
+    // Both teams are Office Dugout members (e.g. Yankees vs Cubs).
+    // Home team gets the card first. Subsequent taps toggle between home and away team cards.
+    const key = gamePk || `${awayId}_${homeId}`;
+    const lastOpened = gameRosterLastOpened[key] || 'away';
+    const nextUser = (lastOpened === 'away') ? matchedH : matchedA;
+    gameRosterLastOpened[key] = (lastOpened === 'away') ? 'home' : 'away';
+    openModal(nextUser.id);
+  } else if (matchedH) {
+    openModal(matchedH.id);
+  } else if (matchedA) {
+    openModal(matchedA.id);
+  }
+}
+
 /* ── SCORE RENDER & DAILY LEADER ── */
 function renderMiniTicker(games) {
+    currentGames = games;
     const ticker = document.getElementById('hdr-ticker');
     if (!ticker) return;
     
@@ -1034,13 +1470,21 @@ function renderMiniTicker(games) {
             statusText = tm.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'}).replace(/^0/,'');
         }
 
-        return `<div style="display:flex; flex-direction:column; justify-content:center; background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:6px; padding:6px; font-size:11px; font-family:'Oswald',sans-serif; min-width:65px; line-height:1.2; letter-spacing:0.5px;">
+        const matchedUser = matchedH || matchedA;
+        let titleAttr = '';
+        if (matchedH && matchedA) {
+            titleAttr = `title="Click to view ${matchedH.name}'s (${matchedH.teamName}) / ${matchedA.name}'s (${matchedA.teamName}) card"`;
+        } else if (matchedUser) {
+            titleAttr = `title="Click to view ${matchedUser.name}'s ${matchedUser.teamName} roster"`;
+        }
+
+        return `<div class="ticker-box" onclick="openGameRoster(${away.team.id}, ${home.team.id}, ${g.gamePk})" ${titleAttr} style="display:flex; flex-direction:column; justify-content:center; background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:8px; padding:6px 12px; font-size:11px; font-family:'Oswald',sans-serif; min-width:75px; line-height:1.2; letter-spacing:0.5px; cursor:pointer;">
             <div style="display:flex; justify-content:space-between; gap:12px;">
-              <span style="${aSty}">${away.team.abbreviation || away.team.name.substring(0,3).toUpperCase()}</span>
+              <span style="${aSty}">${getTeamAbbr(away.team)}</span>
               <span style="color:#fff; font-weight:600;">${awayScore !== '-' ? awayScore : ''}</span>
             </div>
             <div style="display:flex; justify-content:space-between; gap:12px; margin-top:2px;">
-              <span style="${hSty}">${home.team.abbreviation || home.team.name.substring(0,3).toUpperCase()}</span>
+              <span style="${hSty}">${getTeamAbbr(home.team)}</span>
               <span style="color:#fff; font-weight:600;">${homeScore !== '-' ? homeScore : ''}</span>
             </div>
             <div style="text-align:center; color:${statusColor}; font-size:9px; margin-top:4px; text-transform:uppercase; font-family:'Inter',sans-serif; font-weight:600;">
@@ -1155,7 +1599,6 @@ async function loadStandings(){
     if(!r.ok) throw new Error();
     const data=await r.json();
     
-    // 1. Setup column division standings for each user
     USERS.forEach(u => {
       let divGroup = data.records.find(gr => gr.teamRecords.some(tr => tr.team.id === u.teamId));
       if(divGroup) {
@@ -1204,7 +1647,6 @@ async function loadStandings(){
       }
     });
 
-    // 2. Setup combined standings leaderboard
     let rows = [];
     data.records.forEach(gr => {
       gr.teamRecords.forEach(tr => {
@@ -1239,11 +1681,11 @@ async function loadStandings(){
 
 /* ── SCHEDULE ── */
 async function loadSchedule(){
-  const today=new Date(); today.setDate(today.getDate()+1); // Tomorrow
+  const today=new Date(); today.setDate(today.getDate()+1);
   const end=new Date(today); end.setDate(end.getDate()+14);
   const startStr=isoDate(today), endStr=isoDate(end);
   
-  const url=`${MLB}/schedule?sportId=1&startDate=${startStr}&endDate=${endStr}&teamId=${TEAM_IDS}&hydrate=team,leagueRecord&gameType=R`;
+  const url=`${MLB}/schedule?sportId=1&startDate=${startStr}&endDate=${endStr}&teamId=${TEAM_IDS}&gameType=R&hydrate=team`;
   try {
     const r=await fetch(url);
     if(!r.ok) throw new Error();
@@ -1281,10 +1723,30 @@ async function refreshAll(){
   if(btn) btn.classList.remove('is-loading');
 }
 
+// ── BIND MODULE HANDLERS TO GLOBAL WINDOW OBJECT ──
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.handleAuthSubmit = handleAuthSubmit;
+window.handleSignOut = handleSignOut;
+window.updateFavoriteTeam = updateFavoriteTeam;
+window.toggleSortFirst = toggleSortFirst;
+window.toggleCompactView = toggleCompactView;
+window.openInstructions = openInstructions;
+window.closeInstructions = closeInstructions;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.toggleDailyLeader = toggleDailyLeader;
+window.toggleGameCard = toggleGameCard;
+window.submitDailyPick = submitDailyPick;
+window.clearPicks = clearPicks;
+window.refreshAll = refreshAll;
+window.loadGamesForDate = loadGamesForDate;
+window.populateWinners = populateWinners;
+window.openGameRoster = openGameRoster;
+
 initLayout();
 refreshAll();
 setInterval(loadScores, 60000);
-
 </script>
 </body>
 </html>

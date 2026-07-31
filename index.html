@@ -225,10 +225,10 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--border-light);
   color: #fff;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
   font-family: 'Oswald', sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -247,25 +247,25 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 1rem;
+  padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 1rem;
-  gap: 10px;
+  margin-bottom: 1.25rem;
+  gap: 15px;
   flex-wrap: wrap;
 }
 .bs-team-block {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 .bs-team-logo {
-  width: 44px;
-  height: 44px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+  width: 52px;
+  height: 52px;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6));
 }
 .bs-score-main {
   font-family: 'Oswald', sans-serif;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
   letter-spacing: 2px;
   line-height: 1;
@@ -273,25 +273,25 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
 .bs-table-wrap {
   width: 100%;
   overflow-x: auto;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   background: var(--card2);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: 10px;
+  padding: 12px;
 }
 .bs-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 13px;
   text-align: right;
 }
 .bs-table th {
   font-family: 'Oswald', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--muted);
-  padding: 6px 8px;
+  padding: 10px 10px;
   border-bottom: 1px solid var(--border);
   font-weight: 400;
 }
@@ -299,42 +299,45 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
   text-align: left;
 }
 .bs-table td {
-  padding: 6px 8px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--border);
   color: var(--muted);
 }
 .bs-table td:first-child {
   text-align: left;
   color: #fff;
+  font-weight: 500;
 }
 .bs-table tr:last-child td {
   border-bottom: none;
 }
 .bs-table .tot-row td {
   font-weight: 700;
+  font-size: 14px;
   color: #fff;
-  background: rgba(255,255,255,0.05);
-  border-top: 1px solid var(--border-light);
+  background: rgba(255,255,255,0.06);
+  border-top: 2px solid var(--border-light);
+  padding: 10px 10px;
 }
 .bs-subhead {
   font-family: 'Oswald', sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #fff;
-  margin: 1rem 0 0.5rem;
+  margin: 1.25rem 0 0.5rem;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 .bs-tab-btn {
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.4);
   border: 1px solid var(--border);
   color: var(--muted);
-  padding: 6px 14px;
-  border-radius: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
   font-family: 'Oswald', sans-serif;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
@@ -343,7 +346,159 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
 .bs-tab-btn.active, .bs-tab-btn:hover {
   background: var(--card2);
   color: #fff;
-  border-color: var(--border-light);
+  border-color: var(--green);
+  box-shadow: 0 0 10px rgba(34,197,94,0.2);
+}
+
+/* ── LINESCORE DEDICATED STYLES ── */
+.ls-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 1.25rem;
+  background: rgba(13, 20, 36, 0.85);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 2px 6px rgba(0,0,0,0.4);
+}
+.ls-table-wrap::-webkit-scrollbar {
+  height: 8px;
+}
+.ls-table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+.ls-table-wrap::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+.ls-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.ls-table th {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 8px;
+  text-align: center;
+  font-weight: 500;
+}
+.ls-team-th {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: #0b111e;
+  text-align: left !important;
+  padding-left: 12px !important;
+  min-width: 160px;
+  box-shadow: 3px 0 8px rgba(0,0,0,0.5);
+  border-right: 1px solid var(--border);
+  vertical-align: middle;
+}
+.ls-team-td {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: #0b111e;
+  text-align: left !important;
+  padding: 8px 12px !important;
+  min-width: 160px;
+  box-shadow: 3px 0 8px rgba(0,0,0,0.5);
+  border-right: 1px solid var(--border);
+  vertical-align: middle;
+}
+.ls-team-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.ls-inn-th {
+  min-width: 44px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+}
+.ls-inn-td {
+  min-width: 44px;
+  text-align: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #cbd5e1;
+  padding: 10px 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 6px;
+}
+.ls-inn-td.has-runs {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+.ls-inn-td.big-inn {
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(34,197,94,0.3);
+}
+.ls-summary-th {
+  min-width: 50px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 10px 8px;
+}
+.ls-sum-r-th { color: #4ade80; background: rgba(34, 197, 94, 0.15); border-radius: 6px 6px 0 0; }
+.ls-sum-h-th { color: #38bdf8; background: rgba(56, 189, 248, 0.15); border-radius: 6px 6px 0 0; }
+.ls-sum-e-th { color: #f87171; background: rgba(248, 113, 113, 0.15); border-radius: 6px 6px 0 0; }
+
+.ls-sum-r-td {
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.25);
+  border: 1px solid rgba(34, 197, 94, 0.5);
+  border-radius: 8px;
+  text-align: center;
+  padding: 8px;
+}
+.ls-sum-h-td {
+  font-family: 'Oswald', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 8px;
+  text-align: center;
+  padding: 8px;
+}
+.ls-sum-e-td {
+  font-family: 'Oswald', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.2);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  border-radius: 8px;
+  text-align: center;
+  padding: 8px;
+}
+.ls-legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+  padding: 8px 6px 2px;
+  border-top: 1px dashed var(--border);
+  flex-wrap: wrap;
 }
 </style>
 </head>
@@ -527,7 +682,7 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
 </div>
 
 <div class="modal-overlay" id="boxscore-modal" onclick="closeBoxScore(event)">
-  <div class="modal-content glass" id="boxscore-body" style="max-width: 850px; width: 95%; max-height: 85vh; overflow-y: auto; padding: 1.5rem; text-align: left;">
+  <div class="modal-content glass" id="boxscore-body" style="max-width: 1150px; width: 95%; max-height: 88vh; overflow-y: auto; padding: 2rem; text-align: left;">
     <!-- Populated by JS -->
   </div>
 </div>
@@ -1620,7 +1775,7 @@ function renderBoxScoreContent(gamePk, box, line) {
   let maxInnings = Math.max(9, line?.innings?.length || 9);
   let thInnings = '';
   for (let i = 1; i <= maxInnings; i++) {
-    thInnings += `<th>${i}</th>`;
+    thInnings += `<th class="ls-inn-th">${i}</th>`;
   }
 
   let awayInningTds = '';
@@ -1630,44 +1785,63 @@ function renderBoxScoreContent(gamePk, box, line) {
     const inn = line?.innings?.[i];
     const aR = inn?.away?.runs !== undefined ? inn.away.runs : '-';
     const hR = inn?.home?.runs !== undefined ? inn.home.runs : '-';
-    awayInningTds += `<td>${aR}</td>`;
-    homeInningTds += `<td>${hR}</td>`;
+
+    const aCls = (typeof aR === 'number' && aR > 1) ? 'ls-inn-td big-inn' : ((typeof aR === 'number' && aR > 0) ? 'ls-inn-td has-runs' : 'ls-inn-td');
+    const hCls = (typeof hR === 'number' && hR > 1) ? 'ls-inn-td big-inn' : ((typeof hR === 'number' && hR > 0) ? 'ls-inn-td has-runs' : 'ls-inn-td');
+
+    awayInningTds += `<td class="${aCls}">${aR}</td>`;
+    homeInningTds += `<td class="${hCls}">${hR}</td>`;
   }
 
-  const awayH = line?.teams?.away?.hits ?? '-';
-  const awayE = line?.teams?.away?.errors ?? '-';
-  const homeH = line?.teams?.home?.hits ?? '-';
-  const homeE = line?.teams?.home?.errors ?? '-';
+  const awayH = line?.teams?.away?.hits ?? (awayTeam.teamStats?.batting?.hits ?? '-');
+  const awayE = line?.teams?.away?.errors ?? (awayTeam.teamStats?.fielding?.errors ?? '-');
+  const homeH = line?.teams?.home?.hits ?? (homeTeam.teamStats?.batting?.hits ?? '-');
+  const homeE = line?.teams?.home?.errors ?? (homeTeam.teamStats?.fielding?.errors ?? '-');
 
   const linescoreHtml = `
-    <div class="bs-table-wrap">
-      <table class="bs-table">
+    <div class="ls-table-wrap">
+      <table class="ls-table">
         <thead>
           <tr>
-            <th>Team</th>
+            <th class="ls-team-th">Team</th>
             ${thInnings}
-            <th style="color:#fff;">R</th>
-            <th style="color:#fff;">H</th>
-            <th style="color:#fff;">E</th>
+            <th class="ls-summary-th ls-sum-r-th" title="Total Runs Scored">R</th>
+            <th class="ls-summary-th ls-sum-h-th" title="Total Hits">H</th>
+            <th class="ls-summary-th ls-sum-e-th" title="Total Errors">E</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><span style="${getTeamStyle(awayTeam.team.id)}">${awayName}</span></td>
+            <td class="ls-team-td">
+              <div class="ls-team-cell">
+                <img src="https://www.mlbstatic.com/team-logos/${awayTeam.team.id}.svg" style="width:24px; height:24px; flex-shrink:0; ${awayTeam.team.id===147?'filter:brightness(0) invert(1)':''}">
+                <span style="${getTeamStyle(awayTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; overflow:hidden; text-overflow:ellipsis;">${awayName}</span>
+              </div>
+            </td>
             ${awayInningTds}
-            <td style="font-weight:700; color:#fff;">${awayScore}</td>
-            <td>${awayH}</td>
-            <td>${awayE}</td>
+            <td class="ls-sum-r-td">${awayScore}</td>
+            <td class="ls-sum-h-td">${awayH}</td>
+            <td class="ls-sum-e-td">${awayE}</td>
           </tr>
           <tr>
-            <td><span style="${getTeamStyle(homeTeam.team.id)}">${homeName}</span></td>
+            <td class="ls-team-td">
+              <div class="ls-team-cell">
+                <img src="https://www.mlbstatic.com/team-logos/${homeTeam.team.id}.svg" style="width:24px; height:24px; flex-shrink:0; ${homeTeam.team.id===147?'filter:brightness(0) invert(1)':''}">
+                <span style="${getTeamStyle(homeTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; overflow:hidden; text-overflow:ellipsis;">${homeName}</span>
+              </div>
+            </td>
             ${homeInningTds}
-            <td style="font-weight:700; color:#fff;">${homeScore}</td>
-            <td>${homeH}</td>
-            <td>${homeE}</td>
+            <td class="ls-sum-r-td">${homeScore}</td>
+            <td class="ls-sum-h-td">${homeH}</td>
+            <td class="ls-sum-e-td">${homeE}</td>
           </tr>
         </tbody>
       </table>
+      <div class="ls-legend">
+        <span><strong>Innings 1–${maxInnings}</strong> = Runs scored per inning</span>
+        <span><span style="color:#4ade80; font-weight:700;">R</span> = Total Runs &bull; <span style="color:#38bdf8; font-weight:700;">H</span> = Total Hits &bull; <span style="color:#f87171; font-weight:700;">E</span> = Total Errors</span>
+        <span style="font-style:italic;">Scroll horizontally &rarr;</span>
+      </div>
     </div>
   `;
 

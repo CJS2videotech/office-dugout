@@ -219,6 +219,132 @@ input:checked + .slider { background-color: var(--green); }
 input:checked + .slider:before { transform: translateX(14px); background-color: #000; }
 .ticker-box { transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s; }
 .ticker-box:hover { transform: translateY(-2px); border-color: var(--border-light); background: rgba(255,255,255,0.12); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+
+/* ── BOX SCORE MODAL & BUTTONS ── */
+.boxscore-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-light);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.boxscore-btn:hover {
+  background: var(--green);
+  color: #000;
+  border-color: var(--green);
+  box-shadow: 0 0 10px rgba(34,197,94,0.4);
+  transform: translateY(-1px);
+}
+.bs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.bs-team-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bs-team-logo {
+  width: 44px;
+  height: 44px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+}
+.bs-score-main {
+  font-family: 'Oswald', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+.bs-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+}
+.bs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: right;
+}
+.bs-table th {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+.bs-table th:first-child {
+  text-align: left;
+}
+.bs-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+}
+.bs-table td:first-child {
+  text-align: left;
+  color: #fff;
+}
+.bs-table tr:last-child td {
+  border-bottom: none;
+}
+.bs-table .tot-row td {
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+  border-top: 1px solid var(--border-light);
+}
+.bs-subhead {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #fff;
+  margin: 1rem 0 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bs-tab-btn {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bs-tab-btn.active, .bs-tab-btn:hover {
+  background: var(--card2);
+  color: #fff;
+  border-color: var(--border-light);
+}
 </style>
 </head>
 <body>
@@ -396,6 +522,12 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
 
 <div class="modal-overlay" id="roster-modal" onclick="closeModal(event)">
   <div class="modal-content glass" id="modal-body">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<div class="modal-overlay" id="boxscore-modal" onclick="closeBoxScore(event)">
+  <div class="modal-content glass" id="boxscore-body" style="max-width: 850px; width: 95%; max-height: 85vh; overflow-y: auto; padding: 1.5rem; text-align: left;">
     <!-- Populated by JS -->
   </div>
 </div>
@@ -1383,7 +1515,10 @@ function renderGame(g, isSchedule=false){
         <div class="tm-rec">${home.leagueRecord?`${home.leagueRecord.wins}-${home.leagueRecord.losses}`:''}</div>
       </div>
     </div>
-    <div class="gfooter"><span>${g.venue?.name||''}</span></div>`;
+    <div class="gfooter" style="display:flex; justify-content:space-between; align-items:center;">
+      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:55%;">${g.venue?.name||''}</span>
+      ${g.gamePk ? `<button onclick="openBoxScore(${g.gamePk}, event)" class="boxscore-btn">📊 Box Score</button>` : ''}
+    </div>`;
 
   if(!isSchedule){
     let awayP = away.probablePitcher?.fullName || 'TBD';
@@ -1401,6 +1536,329 @@ function renderGame(g, isSchedule=false){
 
   cardHtml += `</div>`;
   return cardHtml;
+}
+
+/* ── BOX SCORE MODAL ENGINE ── */
+async function openBoxScore(gamePk, e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  const modal = document.getElementById('boxscore-modal');
+  const body = document.getElementById('boxscore-body');
+  if (!modal || !body) return;
+  
+  modal.classList.add('open');
+  body.innerHTML = `
+    <button class="modal-close" onclick="closeBoxScore(event)">&times;</button>
+    <div style="text-align:center; padding: 3rem 0; color:var(--muted); font-family:'Oswald',sans-serif; letter-spacing:1px; display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <div class="spin" style="display:block; width:28px; height:28px; border-width:3px;"></div>
+      LOADING POST-GAME BOX SCORE...
+    </div>
+  `;
+
+  try {
+    const [rBox, rLine] = await Promise.all([
+      fetch(`${MLB}/game/${gamePk}/boxscore`),
+      fetch(`${MLB}/game/${gamePk}/linescore`)
+    ]);
+
+    if (!rBox.ok) throw new Error("Could not fetch boxscore");
+    const box = await rBox.json();
+    const line = rLine.ok ? await rLine.json() : null;
+
+    renderBoxScoreContent(gamePk, box, line);
+  } catch (err) {
+    console.error("Boxscore load error:", err);
+    body.innerHTML = `
+      <button class="modal-close" onclick="closeBoxScore(event)">&times;</button>
+      <div style="text-align:center; padding:2rem; color:#f87171;">
+        <div style="font-family:'Oswald',sans-serif; font-size:1.4rem; margin-bottom:8px;">Unable to Load Box Score</div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:15px;">Data may be temporarily unavailable from MLB Stats API.</div>
+        <button onclick="openBoxScore(${gamePk})" class="rbtn" style="margin:0 auto; padding:6px 16px;">Try Again</button>
+      </div>
+    `;
+  }
+}
+
+function closeBoxScore(e) {
+  if (e && (e.target.id === 'boxscore-modal' || e.target.classList.contains('modal-close'))) {
+    document.getElementById('boxscore-modal').classList.remove('open');
+  } else if (!e) {
+    document.getElementById('boxscore-modal').classList.remove('open');
+  }
+}
+
+function switchBsTeamTab(team) {
+  const btnAway = document.getElementById('bs-tab-away');
+  const btnHome = document.getElementById('bs-tab-home');
+  const cntAway = document.getElementById('bs-content-away');
+  const cntHome = document.getElementById('bs-content-home');
+  
+  if (team === 'away') {
+    btnAway.classList.add('active');
+    btnHome.classList.remove('active');
+    cntAway.style.display = 'block';
+    cntHome.style.display = 'none';
+  } else {
+    btnHome.classList.add('active');
+    btnAway.classList.remove('active');
+    cntHome.style.display = 'block';
+    cntAway.style.display = 'none';
+  }
+}
+
+function renderBoxScoreContent(gamePk, box, line) {
+  const body = document.getElementById('boxscore-body');
+  if (!body) return;
+
+  const awayTeam = box.teams.away;
+  const homeTeam = box.teams.home;
+  const awayName = awayTeam.team.name;
+  const homeName = homeTeam.team.name;
+
+  const awayScore = line?.teams?.away?.runs ?? (awayTeam.teamStats?.batting?.runs ?? '-');
+  const homeScore = line?.teams?.home?.runs ?? (homeTeam.teamStats?.batting?.runs ?? '-');
+
+  let maxInnings = Math.max(9, line?.innings?.length || 9);
+  let thInnings = '';
+  for (let i = 1; i <= maxInnings; i++) {
+    thInnings += `<th>${i}</th>`;
+  }
+
+  let awayInningTds = '';
+  let homeInningTds = '';
+
+  for (let i = 0; i < maxInnings; i++) {
+    const inn = line?.innings?.[i];
+    const aR = inn?.away?.runs !== undefined ? inn.away.runs : '-';
+    const hR = inn?.home?.runs !== undefined ? inn.home.runs : '-';
+    awayInningTds += `<td>${aR}</td>`;
+    homeInningTds += `<td>${hR}</td>`;
+  }
+
+  const awayH = line?.teams?.away?.hits ?? '-';
+  const awayE = line?.teams?.away?.errors ?? '-';
+  const homeH = line?.teams?.home?.hits ?? '-';
+  const homeE = line?.teams?.home?.errors ?? '-';
+
+  const linescoreHtml = `
+    <div class="bs-table-wrap">
+      <table class="bs-table">
+        <thead>
+          <tr>
+            <th>Team</th>
+            ${thInnings}
+            <th style="color:#fff;">R</th>
+            <th style="color:#fff;">H</th>
+            <th style="color:#fff;">E</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span style="${getTeamStyle(awayTeam.team.id)}">${awayName}</span></td>
+            ${awayInningTds}
+            <td style="font-weight:700; color:#fff;">${awayScore}</td>
+            <td>${awayH}</td>
+            <td>${awayE}</td>
+          </tr>
+          <tr>
+            <td><span style="${getTeamStyle(homeTeam.team.id)}">${homeName}</span></td>
+            ${homeInningTds}
+            <td style="font-weight:700; color:#fff;">${homeScore}</td>
+            <td>${homeH}</td>
+            <td>${homeE}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  let decisions = [];
+  [awayTeam, homeTeam].forEach(t => {
+    (t.pitchers || []).forEach(pid => {
+      const p = t.players?.['ID' + pid] || t.players?.[pid];
+      if (p && p.stats?.pitching?.note) {
+        decisions.push(`<strong>${p.person?.fullName || 'Pitcher'}</strong> ${p.stats.pitching.note}`);
+      }
+    });
+  });
+
+  const decisionHtml = decisions.length > 0 ? `
+    <div style="font-size:11px; color:var(--muted); background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:6px; margin-bottom:1rem; border:1px solid var(--border);">
+      <span style="font-family:'Oswald',sans-serif; color:#fff; text-transform:uppercase; letter-spacing:1px; margin-right:6px;">Decisions:</span> ${decisions.join(' &nbsp;|&nbsp; ')}
+    </div>
+  ` : '';
+
+  function buildBattingTable(teamObj) {
+    const batters = teamObj.batters || [];
+    if (batters.length === 0) return '<div style="font-size:11px; color:var(--muted); padding:8px;">No batting statistics available</div>';
+    
+    let totAB = 0, totR = 0, totH = 0, totRBI = 0, totBB = 0, totSO = 0;
+    
+    let rows = batters.map(pid => {
+      const p = teamObj.players?.['ID' + pid] || teamObj.players?.[pid];
+      if (!p) return '';
+      const b = p.stats?.batting || {};
+      const ab = b.atBats || 0;
+      const r = b.runs || 0;
+      const h = b.hits || 0;
+      const rbi = b.rbi || 0;
+      const bb = b.baseOnBalls || 0;
+      const so = b.strikeOuts || 0;
+      const avg = p.seasonStats?.batting?.avg || b.avg || '.---';
+      const pos = p.position?.abbreviation || '';
+
+      totAB += ab; totR += r; totH += h; totRBI += rbi; totBB += bb; totSO += so;
+
+      return `<tr>
+        <td>${p.person?.fullName || 'Player'} <span style="font-size:10px; color:var(--muted); font-weight:normal;">${pos}</span></td>
+        <td>${ab}</td>
+        <td>${r}</td>
+        <td style="font-weight:600; color:#fff;">${h}</td>
+        <td style="font-weight:600; color:var(--green);">${rbi}</td>
+        <td>${bb}</td>
+        <td>${so}</td>
+        <td style="color:var(--muted);">${avg}</td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <div class="bs-table-wrap">
+        <table class="bs-table">
+          <thead>
+            <tr>
+              <th>Batter</th>
+              <th>AB</th>
+              <th>R</th>
+              <th>H</th>
+              <th>RBI</th>
+              <th>BB</th>
+              <th>SO</th>
+              <th>AVG</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+            <tr class="tot-row">
+              <td>TOTALS</td>
+              <td>${totAB}</td>
+              <td>${totR}</td>
+              <td>${totH}</td>
+              <td>${totRBI}</td>
+              <td>${totBB}</td>
+              <td>${totSO}</td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function buildPitchingTable(teamObj) {
+    const pitchers = teamObj.pitchers || [];
+    if (pitchers.length === 0) return '<div style="font-size:11px; color:var(--muted); padding:8px;">No pitching statistics available</div>';
+    
+    let rows = pitchers.map(pid => {
+      const p = teamObj.players?.['ID' + pid] || teamObj.players?.[pid];
+      if (!p) return '';
+      const pitch = p.stats?.pitching || {};
+      const ip = pitch.inningsPitched || '0.0';
+      const h = pitch.hits || 0;
+      const r = pitch.runs || 0;
+      const er = pitch.earnedRuns || 0;
+      const bb = pitch.baseOnBalls || 0;
+      const so = pitch.strikeOuts || 0;
+      const hr = pitch.homeRuns || 0;
+      const era = p.seasonStats?.pitching?.era || pitch.era || '-.--';
+      const note = pitch.note ? ` <span style="color:var(--green); font-size:10px; font-weight:700;">${pitch.note}</span>` : '';
+
+      return `<tr>
+        <td>${p.person?.fullName || 'Pitcher'}${note}</td>
+        <td>${ip}</td>
+        <td>${h}</td>
+        <td>${r}</td>
+        <td>${er}</td>
+        <td>${bb}</td>
+        <td style="font-weight:600; color:#fff;">${so}</td>
+        <td>${hr}</td>
+        <td style="color:var(--muted);">${era}</td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <div class="bs-table-wrap">
+        <table class="bs-table">
+          <thead>
+            <tr>
+              <th>Pitcher</th>
+              <th>IP</th>
+              <th>H</th>
+              <th>R</th>
+              <th>ER</th>
+              <th>BB</th>
+              <th>SO</th>
+              <th>HR</th>
+              <th>ERA</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  body.innerHTML = `
+    <button class="modal-close" onclick="closeBoxScore(event)">&times;</button>
+    
+    <div class="bs-header">
+      <div class="bs-team-block">
+        <img src="https://www.mlbstatic.com/team-logos/${awayTeam.team.id}.svg" class="bs-team-logo" style="${awayTeam.team.id === 147 ? 'filter:brightness(0) invert(1)' : ''}">
+        <div>
+          <div style="font-family:'Oswald',sans-serif; font-size:1.3rem; ${getTeamStyle(awayTeam.team.id)}">${awayName}</div>
+          <div style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase;">AWAY</div>
+        </div>
+      </div>
+      
+      <div style="text-align:center;">
+        <div class="bs-score-main">${awayScore} – ${homeScore}</div>
+        <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--green); text-transform:uppercase; margin-top:4px;">POST-GAME BOX SCORE</div>
+      </div>
+      
+      <div class="bs-team-block" style="flex-direction:row-reverse; text-align:right;">
+        <img src="https://www.mlbstatic.com/team-logos/${homeTeam.team.id}.svg" class="bs-team-logo" style="${homeTeam.team.id === 147 ? 'filter:brightness(0) invert(1)' : ''}">
+        <div>
+          <div style="font-family:'Oswald',sans-serif; font-size:1.3rem; ${getTeamStyle(homeTeam.team.id)}">${homeName}</div>
+          <div style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase;">HOME</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+      <div class="b-pip" style="background:#3b82f6; width:6px; height:6px;"></div> Linescore
+    </div>
+    ${linescoreHtml}
+    ${decisionHtml}
+
+    <div style="display:flex; gap:10px; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:10px;">
+      <button id="bs-tab-away" class="bs-tab-btn active" onclick="switchBsTeamTab('away')">${awayName} Box Score</button>
+      <button id="bs-tab-home" class="bs-tab-btn" onclick="switchBsTeamTab('home')">${homeName} Box Score</button>
+    </div>
+
+    <div id="bs-content-away">
+      <div class="bs-subhead"><div class="b-pip" style="background:var(--green); width:6px; height:6px;"></div> ${awayName} Batting</div>
+      ${buildBattingTable(awayTeam)}
+      <div class="bs-subhead"><div class="b-pip" style="background:#3b82f6; width:6px; height:6px;"></div> ${awayName} Pitching</div>
+      ${buildPitchingTable(awayTeam)}
+    </div>
+
+    <div id="bs-content-home" style="display:none;">
+      <div class="bs-subhead"><div class="b-pip" style="background:var(--green); width:6px; height:6px;"></div> ${homeName} Batting</div>
+      ${buildBattingTable(homeTeam)}
+      <div class="bs-subhead"><div class="b-pip" style="background:#3b82f6; width:6px; height:6px;"></div> ${homeName} Pitching</div>
+      ${buildPitchingTable(homeTeam)}
+    </div>
+  `;
 }
 
 function openGameRoster(awayId, homeId, gamePk) {
@@ -1743,6 +2201,9 @@ window.refreshAll = refreshAll;
 window.loadGamesForDate = loadGamesForDate;
 window.populateWinners = populateWinners;
 window.openGameRoster = openGameRoster;
+window.openBoxScore = openBoxScore;
+window.closeBoxScore = closeBoxScore;
+window.switchBsTeamTab = switchBsTeamTab;
 
 initLayout();
 refreshAll();

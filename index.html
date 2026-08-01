@@ -500,8 +500,66 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
   border-top: 1px dashed var(--border);
   flex-wrap: wrap;
 }
-@media (max-width: 650px) {
-  .ls-table-wrap { overflow-x: auto; }
+
+/* ── RESPONSIVE MOBILE LINESCORE (100% FIT, NO SCROLL) ── */
+.ls-team-name-abbr {
+  display: none;
+}
+.ls-team-cell img {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+@media (max-width: 768px) {
+  .ls-team-name-full {
+    display: none !important;
+  }
+  .ls-team-name-abbr {
+    display: inline-block !important;
+  }
+  .ls-table-wrap {
+    padding: 10px 6px;
+    margin-bottom: 1.25rem;
+    overflow-x: hidden;
+  }
+  .ls-table {
+    border-spacing: 2px;
+  }
+  .ls-team-th, .ls-team-td {
+    width: 17%;
+    padding: 6px 4px !important;
+  }
+  .ls-team-cell {
+    gap: 4px;
+  }
+  .ls-team-cell img {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  .ls-inn-th {
+    font-size: 11px;
+    padding: 6px 1px;
+  }
+  .ls-inn-td {
+    font-size: 13px;
+    padding: 8px 1px;
+    border-radius: 4px;
+  }
+  .ls-summary-th {
+    width: 8%;
+    font-size: 11px;
+    padding: 6px 1px;
+  }
+  .ls-sum-r-td, .ls-sum-h-td, .ls-sum-e-td {
+    width: 8%;
+    font-size: 15px;
+    padding: 6px 1px;
+    border-radius: 6px;
+  }
+  .ls-legend {
+    font-size: 10px;
+    padding-top: 6px;
+  }
 }
 </style>
 </head>
@@ -1771,6 +1829,8 @@ function renderBoxScoreContent(gamePk, box, line) {
   const homeTeam = box.teams.home;
   const awayName = awayTeam.team.name;
   const homeName = homeTeam.team.name;
+  const awayAbbr = getTeamAbbr(awayTeam.team);
+  const homeAbbr = getTeamAbbr(homeTeam.team);
 
   const awayScore = line?.teams?.away?.runs ?? (awayTeam.teamStats?.batting?.runs ?? '-');
   const homeScore = line?.teams?.home?.runs ?? (homeTeam.teamStats?.batting?.runs ?? '-');
@@ -1817,8 +1877,9 @@ function renderBoxScoreContent(gamePk, box, line) {
           <tr>
             <td class="ls-team-td">
               <div class="ls-team-cell">
-                <img src="https://www.mlbstatic.com/team-logos/${awayTeam.team.id}.svg" style="width:24px; height:24px; flex-shrink:0; ${awayTeam.team.id===147?'filter:brightness(0) invert(1)':''}">
-                <span style="${getTeamStyle(awayTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; overflow:hidden; text-overflow:ellipsis;">${awayName}</span>
+                <img src="https://www.mlbstatic.com/team-logos/${awayTeam.team.id}.svg" style="${awayTeam.team.id===147?'filter:brightness(0) invert(1)':''}">
+                <span class="ls-team-name-full" style="${getTeamStyle(awayTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${awayName}</span>
+                <span class="ls-team-name-abbr" style="${getTeamStyle(awayTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:13px;">${awayAbbr}</span>
               </div>
             </td>
             ${awayInningTds}
@@ -1829,8 +1890,9 @@ function renderBoxScoreContent(gamePk, box, line) {
           <tr>
             <td class="ls-team-td">
               <div class="ls-team-cell">
-                <img src="https://www.mlbstatic.com/team-logos/${homeTeam.team.id}.svg" style="width:24px; height:24px; flex-shrink:0; ${homeTeam.team.id===147?'filter:brightness(0) invert(1)':''}">
-                <span style="${getTeamStyle(homeTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; overflow:hidden; text-overflow:ellipsis;">${homeName}</span>
+                <img src="https://www.mlbstatic.com/team-logos/${homeTeam.team.id}.svg" style="${homeTeam.team.id===147?'filter:brightness(0) invert(1)':''}">
+                <span class="ls-team-name-full" style="${getTeamStyle(homeTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${homeName}</span>
+                <span class="ls-team-name-abbr" style="${getTeamStyle(homeTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:13px;">${homeAbbr}</span>
               </div>
             </td>
             ${homeInningTds}

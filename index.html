@@ -637,6 +637,7 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
     </div>
     
     <div class="live-col" style="flex-direction:row; gap:15px; align-items:center;">
+      <button class="rbtn" id="btn-hdr-prev-boxscores" onclick="openPreviousDayBoxScoresModal()" style="padding:6px 12px; font-weight:bold; color:#38bdf8; border-color:#38bdf8; background:rgba(56,189,248,0.08);">📅 YESTERDAY'S BOX SCORES</button>
       <button class="rbtn" id="btn-auth-trigger" onclick="openAuthModal()" style="padding: 6px 12px; font-weight:bold; color:var(--green); border-color:var(--green); background:rgba(34,197,94,0.05);">SIGN IN</button>
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:3px;">
         <div class="live-row"><span class="pulse"></span>LIVE DATA FEED</div>
@@ -645,6 +646,12 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
     </div>
   </div>
   
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:2px;">
+    <div style="display:flex; gap:4px; background:rgba(0,0,0,0.4); padding:3px; border-radius:6px; border:1px solid var(--border);">
+      <button id="btn-ticker-today" class="rbtn" onclick="switchTickerDate('today')" style="padding:3px 10px; font-size:10px; background:var(--green); color:#000; font-weight:bold;">TODAY'S TICKER</button>
+      <button id="btn-ticker-yesterday" class="rbtn" onclick="switchTickerDate('yesterday')" style="padding:3px 10px; font-size:10px; background:transparent; color:var(--muted);">YESTERDAY'S TICKER</button>
+    </div>
+  </div>
   <div id="hdr-ticker" style="width:100%; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;"></div>
 </div>
 
@@ -681,7 +688,10 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
   <div class="board glass">
     <div class="board-header">
       <div><div class="b-pip" style="background:#3b82f6;"></div>Season Standings</div>
-      <button class="rbtn" id="btn-refresh" onclick="refreshAll()"><div class="spin"></div>Refresh</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="rbtn" id="btn-prev-boxscores" onclick="openPreviousDayBoxScoresModal()"><span style="font-size:12px;">📅</span> Yesterday's Box Scores</button>
+        <button class="rbtn" id="btn-refresh" onclick="refreshAll()"><div class="spin"></div>Refresh</button>
+      </div>
     </div>
     <table>
       <thead><tr><th>Team</th><th>W</th><th>L</th><th>PCT</th><th>GB</th><th>STK</th></tr></thead>
@@ -813,6 +823,12 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
   </div>
 </div>
 
+<div class="modal-overlay" id="prev-boxscores-modal" onclick="closePrevBoxScoresModal(event)">
+  <div class="modal-content glass" id="prev-boxscores-body" style="max-width: 900px; width: 95%; max-height: 88vh; overflow-y: auto; padding: 2rem; text-align: left;">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
 <div class="modal-overlay" id="instructions-modal" onclick="closeInstructions(event)">
   <div class="modal-content glass" style="max-width: 800px; padding: 1.5rem; width: 95%;">
     <button class="modal-close" onclick="closeInstructions(event)">&times;</button>
@@ -882,6 +898,9 @@ let TEAM_IDS = USERS.map(u => u.teamId).join(',');
 let currentWinnerId = null;
 let yesterdayWinnerId = null;
 let currentGames = [];
+let yesterdayGames = [];
+let activeTickerMode = 'today';
+let prevBoxScoresDate = null;
 let gameRosterLastOpened = {};
 const seasonTrophies = {};
 USERS.forEach(u => seasonTrophies[u.id] = 0);
@@ -1797,8 +1816,11 @@ function renderGame(g, isSchedule=false){
       </div>
     </div>
     <div class="gfooter" style="display:flex; justify-content:space-between; align-items:center;">
-      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:55%;">${g.venue?.name||''}</span>
-      ${g.gamePk ? `<button onclick="openBoxScore(${g.gamePk}, event)" class="boxscore-btn">📊 Box Score</button>` : ''}
+      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:45%;">${g.venue?.name||''}</span>
+      <div style="display:flex; gap:6px; align-items:center;">
+        ${!hasScore ? `<button onclick="openYesterdayBoxScoreForGame(${awayId}, ${homeId}, event)" class="boxscore-btn" style="background:rgba(255,255,255,0.06); border-color:var(--border-light);" title="View Yesterday's completed Box Score for this team">📅 Yest Box Score</button>` : ''}
+        ${g.gamePk ? `<button onclick="openBoxScore(${g.gamePk}, event)" class="boxscore-btn">📊 Box Score</button>` : ''}
+      </div>
     </div>`;
 
   if(!isSchedule){
@@ -2111,9 +2133,26 @@ function renderBoxScoreContent(gamePk, box, line) {
     `;
   }
 
+  const isViewingToday = (currentGames || []).some(g => g.gamePk === gamePk);
+  const isViewingYesterday = (yesterdayGames || []).some(g => g.gamePk === gamePk);
+
   body.innerHTML = `
     <button class="modal-close" onclick="closeBoxScore(event)">&times;</button>
     
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px;">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <button onclick="openTodayBoxScoreForGame(${awayTeam.team.id}, ${homeTeam.team.id}, event)" class="boxscore-btn" style="${isViewingToday ? 'background:var(--green); color:#000; font-weight:bold; border-color:var(--green);' : 'background:rgba(34,197,94,0.12); border-color:var(--green); color:var(--green);'} padding:6px 12px;">
+          📅 Today's Box Score (${awayAbbr}/${homeAbbr})
+        </button>
+        <button onclick="openYesterdayBoxScoreForGame(${awayTeam.team.id}, ${homeTeam.team.id}, event)" class="boxscore-btn" style="${isViewingYesterday ? 'background:#38bdf8; color:#000; font-weight:bold; border-color:#38bdf8;' : 'background:rgba(56,189,248,0.12); border-color:#38bdf8; color:#38bdf8;'} padding:6px 12px;">
+          📅 Yesterday's Box Score (${awayAbbr}/${homeAbbr})
+        </button>
+      </div>
+      <button onclick="openPreviousDayBoxScoresModal()" class="boxscore-btn" style="background:rgba(255,255,255,0.08); padding:6px 12px;">
+        📋 All Previous Day Box Scores
+      </button>
+    </div>
+
     <div class="bs-header">
       <div class="bs-team-block">
         <img src="https://www.mlbstatic.com/team-logos/${awayTeam.team.id}.svg" class="bs-team-logo" style="${awayTeam.team.id === 147 ? 'filter:brightness(0) invert(1)' : ''}">
@@ -2185,13 +2224,12 @@ function openGameRoster(awayId, homeId, gamePk) {
 
 /* ── SCORE RENDER & DAILY LEADER ── */
 function renderMiniTicker(games) {
-    currentGames = games;
     const ticker = document.getElementById('hdr-ticker');
     if (!ticker) return;
     
     let uniqueGames = [];
     let seen = new Set();
-    games.forEach(g => {
+    (games || []).forEach(g => {
         if (!seen.has(g.gamePk)) {
             seen.add(g.gamePk);
             uniqueGames.push(g);
@@ -2199,7 +2237,7 @@ function renderMiniTicker(games) {
     });
 
     if (uniqueGames.length === 0) {
-        ticker.innerHTML = '<div style="font-size:11px; color:var(--muted); font-style:italic;">No games today</div>';
+        ticker.innerHTML = '<div style="font-size:11px; color:var(--muted); font-style:italic;">No games</div>';
         return;
     }
 
@@ -2255,6 +2293,174 @@ function renderMiniTicker(games) {
     }).join('');
 }
 
+function switchTickerDate(mode) {
+  activeTickerMode = mode;
+  const btnToday = document.getElementById('btn-ticker-today');
+  const btnYest = document.getElementById('btn-ticker-yesterday');
+  if (mode === 'yesterday') {
+    if (btnToday) { btnToday.style.background = 'transparent'; btnToday.style.color = 'var(--muted)'; btnToday.style.fontWeight = 'normal'; }
+    if (btnYest) { btnYest.style.background = 'var(--green)'; btnYest.style.color = '#000'; btnYest.style.fontWeight = 'bold'; }
+    renderMiniTicker(yesterdayGames);
+  } else {
+    if (btnYest) { btnYest.style.background = 'transparent'; btnYest.style.color = 'var(--muted)'; btnYest.style.fontWeight = 'normal'; }
+    if (btnToday) { btnToday.style.background = 'var(--green)'; btnToday.style.color = '#000'; btnToday.style.fontWeight = 'bold'; }
+    renderMiniTicker(currentGames);
+  }
+}
+
+function closePrevBoxScoresModal(e) {
+  if (e && (e.target.id === 'prev-boxscores-modal' || e.target.classList.contains('modal-close'))) {
+    document.getElementById('prev-boxscores-modal').classList.remove('open');
+  } else if (!e) {
+    document.getElementById('prev-boxscores-modal').classList.remove('open');
+  }
+}
+
+async function openPreviousDayBoxScoresModal(targetDateStr) {
+  const modal = document.getElementById('prev-boxscores-modal');
+  const body = document.getElementById('prev-boxscores-body');
+  if (!modal || !body) return;
+  modal.classList.add('open');
+
+  if (!targetDateStr) {
+    let yd = new Date(); yd.setDate(yd.getDate() - 1);
+    targetDateStr = isoDate(yd);
+  }
+  prevBoxScoresDate = targetDateStr;
+
+  body.innerHTML = `
+    <button class="modal-close" onclick="closePrevBoxScoresModal(event)">&times;</button>
+    <div style="text-align:center; padding: 3rem 0; color:var(--muted); font-family:'Oswald',sans-serif; letter-spacing:1px; display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <div class="spin" style="display:block; width:28px; height:28px; border-width:3px;"></div>
+      LOADING PREVIOUS DAY BOX SCORES...
+    </div>
+  `;
+
+  try {
+    const url = `${MLB}/schedule?sportId=1&date=${targetDateStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,probablePitcher`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error("Failed to fetch games for date");
+    const data = await r.json();
+    const games = data.dates?.[0]?.games || [];
+
+    renderPrevBoxScoresContent(targetDateStr, games);
+  } catch (err) {
+    console.error("Error loading previous day box scores:", err);
+    body.innerHTML = `
+      <button class="modal-close" onclick="closePrevBoxScoresModal(event)">&times;</button>
+      <div style="text-align:center; padding:2rem; color:#f87171;">
+        <div style="font-family:'Oswald',sans-serif; font-size:1.4rem; margin-bottom:8px;">Unable to Load Box Scores</div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:15px;">Could not fetch games for ${targetDateStr}.</div>
+        <button onclick="openPreviousDayBoxScoresModal('${targetDateStr}')" class="rbtn" style="margin:0 auto; padding:6px 16px;">Try Again</button>
+      </div>
+    `;
+  }
+}
+
+function renderPrevBoxScoresContent(targetDateStr, games) {
+  const body = document.getElementById('prev-boxscores-body');
+  if (!body) return;
+
+  const yesterdayStr = isoDate(new Date(Date.now() - 86400000));
+  const twoDaysAgoStr = isoDate(new Date(Date.now() - 2 * 86400000));
+
+  let dateTitle = fmtDate(targetDateStr);
+  if (targetDateStr === yesterdayStr) dateTitle += " (Yesterday)";
+  else if (targetDateStr === twoDaysAgoStr) dateTitle += " (2 Days Ago)";
+
+  let gameCardsHtml = '';
+  if (games.length === 0) {
+    gameCardsHtml = `<div style="text-align:center; color:var(--muted); padding: 2rem; font-family:'Oswald',sans-serif;">No games found for ${targetDateStr}.</div>`;
+  } else {
+    gameCardsHtml = `<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; margin-top:1rem;">` +
+      games.map(g => {
+        const away = g.teams.away;
+        const home = g.teams.home;
+        const matchedA = USERS.find(u => u.teamId === away.team.id);
+        const matchedH = USERS.find(u => u.teamId === home.team.id);
+        const aSty = matchedA ? `color:${matchedA.secondary};${matchedA.glow||''}` : 'color:#fff;';
+        const hSty = matchedH ? `color:${matchedH.secondary};${matchedH.glow||''}` : 'color:#fff;';
+        
+        const status = g.status.abstractGameState;
+        const isFinal = status === 'Final' || status === 'Completed Early';
+        const awayS = away.score ?? '-';
+        const homeS = home.score ?? '-';
+        const awayW = isFinal && parseInt(awayS) > parseInt(homeS);
+        const homeW = isFinal && parseInt(homeS) > parseInt(awayS);
+
+        const memberTagA = matchedA ? `<span style="font-size:10px; color:var(--muted); display:block;">(${matchedA.name})</span>` : '';
+        const memberTagH = matchedH ? `<span style="font-size:10px; color:var(--muted); display:block;">(${matchedH.name})</span>` : '';
+
+        return `
+          <div class="gcard glass" style="border-radius:10px; padding:1rem;">
+            <div class="matchup">
+              <div class="tm away">
+                <div class="tm-abbr ${isFinal && !awayW ? 'dim' : ''}" style="${aSty}">${getTeamAbbr(away.team)}</div>
+                ${memberTagA}
+                <div class="tm-rec">${away.leagueRecord ? `${away.leagueRecord.wins}-${away.leagueRecord.losses}` : ''}</div>
+              </div>
+              <div class="smid">
+                <div class="score">${awayS}–${homeS}</div>
+                <div class="gstat">${status}</div>
+              </div>
+              <div class="tm home">
+                <div class="tm-abbr ${isFinal && !homeW ? 'dim' : ''}" style="${hSty}">${getTeamAbbr(home.team)}</div>
+                ${memberTagH}
+                <div class="tm-rec">${home.leagueRecord ? `${home.leagueRecord.wins}-${home.leagueRecord.losses}` : ''}</div>
+              </div>
+            </div>
+            <div class="gfooter" style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem;">
+              <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:50%; font-size:11px; color:var(--muted);">${g.venue?.name || ''}</span>
+              ${g.gamePk ? `<button onclick="openBoxScore(${g.gamePk}, event)" class="boxscore-btn">📊 Box Score</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('') +
+    `</div>`;
+  }
+
+  body.innerHTML = `
+    <button class="modal-close" onclick="closePrevBoxScoresModal(event)">&times;</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.25rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
+      <div>
+        <div style="font-family:'Oswald',sans-serif; font-size:1.5rem; letter-spacing:1px; text-transform:uppercase; color:#fff; display:flex; align-items:center; gap:8px;">
+          <div class="b-pip" style="background:#38bdf8;"></div> Previous Day Box Scores
+        </div>
+        <div style="font-size:12px; color:var(--muted); margin-top:2px;">Viewing MLB games & box scores for <strong>${dateTitle}</strong></div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <button onclick="openPreviousDayBoxScoresModal('${yesterdayStr}')" class="bs-tab-btn ${targetDateStr === yesterdayStr ? 'active' : ''}" style="padding:6px 12px; font-size:11px;">Yesterday</button>
+        <button onclick="openPreviousDayBoxScoresModal('${twoDaysAgoStr}')" class="bs-tab-btn ${targetDateStr === twoDaysAgoStr ? 'active' : ''}" style="padding:6px 12px; font-size:11px;">2 Days Ago</button>
+        <input type="date" value="${targetDateStr}" onchange="openPreviousDayBoxScoresModal(this.value)" class="dp-select" style="width:auto; padding:5px 10px; font-size:12px; height:32px;">
+      </div>
+    </div>
+    ${gameCardsHtml}
+  `;
+}
+
+function openTodayBoxScoreForGame(awayId, homeId, e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  let tg = (currentGames || []).find(gm => gm.teams.away.team.id === awayId || gm.teams.home.team.id === awayId || gm.teams.away.team.id === homeId || gm.teams.home.team.id === homeId);
+  if (tg && tg.gamePk) {
+    openBoxScore(tg.gamePk, e);
+  } else {
+    alert("No game found for Today for this matchup.");
+  }
+}
+
+function openYesterdayBoxScoreForGame(awayId, homeId, e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  let yd = new Date(); yd.setDate(yd.getDate() - 1);
+  const ydStr = isoDate(yd);
+
+  let yg = (yesterdayGames || []).find(gm => gm.teams.away.team.id === awayId || gm.teams.home.team.id === awayId || gm.teams.away.team.id === homeId || gm.teams.home.team.id === homeId);
+  if (yg && yg.gamePk) {
+    openBoxScore(yg.gamePk, e);
+  } else {
+    openPreviousDayBoxScoresModal(ydStr);
+  }
+}
+
 async function buildDailyList(apiGames, prefix) {
     let dailyData = [];
     await Promise.all(USERS.map(async u => {
@@ -2308,7 +2514,7 @@ async function loadScores(){
     const data=await r.json();
     const games=data.dates?.[0]?.games||[];
 
-    renderMiniTicker(games);
+    currentGames = games;
     evaluatePicks(games, todayStr);
 
     USERS.forEach(u => {
@@ -2324,10 +2530,11 @@ async function loadScores(){
 
     let yd = new Date(); yd.setDate(yd.getDate()-1);
     const ydStr = isoDate(yd);
-    const yurl=`${MLB}/schedule?sportId=1&date=${ydStr}&teamId=${TEAM_IDS}&hydrate=team,linescore`;
+    const yurl=`${MLB}/schedule?sportId=1&date=${ydStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
     fetch(yurl).then(async yr => {
        const ydata = await yr.json();
        const ygames = ydata.dates?.[0]?.games||[];
+       yesterdayGames = ygames;
        evaluatePicks(ygames, ydStr);
        document.getElementById('tbl-daily-back').innerHTML = await buildDailyList(ygames, 'back');
        const yw = calcWinnerFromGames(ygames);
@@ -2341,7 +2548,15 @@ async function loadScores(){
               else yEl.innerHTML = `<div class="gtba">No Game Yesterday</div>`;
           }
        });
+
+       if (activeTickerMode === 'yesterday') {
+         renderMiniTicker(yesterdayGames);
+       }
     }).catch(e=>{});
+
+    if (activeTickerMode === 'today') {
+      renderMiniTicker(currentGames);
+    }
 
     const wid = await determineTrophyWinner(games);
     setTrophy(wid);
@@ -2507,6 +2722,11 @@ window.openGameRoster = openGameRoster;
 window.openBoxScore = openBoxScore;
 window.closeBoxScore = closeBoxScore;
 window.switchBsTeamTab = switchBsTeamTab;
+window.openPreviousDayBoxScoresModal = openPreviousDayBoxScoresModal;
+window.closePrevBoxScoresModal = closePrevBoxScoresModal;
+window.openTodayBoxScoreForGame = openTodayBoxScoreForGame;
+window.openYesterdayBoxScoreForGame = openYesterdayBoxScoreForGame;
+window.switchTickerDate = switchTickerDate;
 
 initLayout();
 refreshAll();

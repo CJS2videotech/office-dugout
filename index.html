@@ -2586,7 +2586,7 @@ async function loadStandings(){
         }
         
         let divHtml = divGroup.teamRecords.map(tr => {
-          const pct = parseFloat(tr.winningPercentage||0).toFixed(3).replace(/^0/,'.');
+          const pct = parseFloat(tr.winningPercentage||0).toFixed(3).replace(/^0/,'');
           const gb = tr.gamesBack==='-'||tr.gamesBack==='0'?'—':tr.gamesBack;
           const isTarget = tr.team.id === u.teamId;
           const teamName = tr.team.teamName || tr.team.name;
@@ -2634,7 +2634,7 @@ async function loadStandings(){
     rows.sort((a,b) => parseFloat(b.winningPercentage||0) - parseFloat(a.winningPercentage||0));
 
     let html = rows.map(r => {
-      const pct = parseFloat(r.winningPercentage||0).toFixed(3).replace(/^0/,'.');
+      const pct = parseFloat(r.winningPercentage||0).toFixed(3).replace(/^0/,'');
       const gb=r.gamesBack==='-'||r.gamesBack==='0'?'—':r.gamesBack;
       const streak=r.streak?.streakCode||'';
       const sc=streak.startsWith('W')?'stk-w':'stk-l';

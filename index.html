@@ -1574,8 +1574,6 @@ function initRoster(){
       <img src="${u.photo}" 
            class="roster-thumb" 
            style="border-color:${u.secondary}" 
-           onmouseenter="this.src='${u.banner}'" 
-           onmouseleave="this.src='${u.photo}'" 
            onclick="openModal('${u.id}')" 
            alt="${u.name}"
            title="Click to view ${u.name}'s banner & stats">
@@ -2784,6 +2782,22 @@ window.toggleModalImage = toggleModalImage;
 initLayout();
 refreshAll();
 setInterval(loadScores, 60000);
+
+// Preload all banner GIFs and photos in background for instant popups on GitHub Pages
+window.addEventListener('load', () => {
+  USERS.forEach(u => {
+    if (u.banner) {
+      const bImg = new Image();
+      bImg.src = u.banner;
+    }
+    if (u.photo) {
+      const pImg = new Image();
+      pImg.src = u.photo;
+    }
+  });
+  const grpImg = new Image();
+  grpImg.src = 'assets/OD%20Group%20banner.gif';
+});
 </script>
 </body>
 </html>

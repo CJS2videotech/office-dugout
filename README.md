@@ -4,12 +4,12 @@
 
 ## 🌟 Features
 
-*   **5-User Team Hub:** Distinctly tracks 5 users (Andrea, CJ, Brennan, Dominic, Mario) and their favorite teams (Brewers, Cubs, Giants, Yankees, Guardians).
+*   **7-User Team Hub:** Distinctly tracks 7 users/teams: Andrea (Brewers), CJ (Cubs), Brennan (Giants), Dominic (Yankees), Mario (Guardians), Nicole (A's), and Arizona (Diamondbacks).
 *   **Daily Picks Engine:** 
     *   **Live Game Dropdowns:** Users can select "Today", "Tomorrow", or "Yesterday" to dynamically fetch games directly from the MLB API.
     *   **Unlimited Picking:** Make independent picks for every game of the day, featuring complete support for doubleheaders.
     *   **Auto-Grading:** Because picks are natively tied to MLB Game IDs, the dashboard silently evaluates the final box score of your picks using live MLB data—automatically tracking and updating your pick status to WON or LOST without requiring manual admin input.
-*   **Daily Picks Leaderboard:** A sleek standalone panel ranking the 5 users based on their active Daily Picks Win/Loss Record, Win Percentage, and Active Streak (🔥). The #1 ranked predictor earns the coveted Daily Picks Trophy (🏆).
+*   **Daily Picks Leaderboard:** A sleek standalone panel ranking the users based on their active Daily Picks Win/Loss Record, Win Percentage, and Active Streak (🔥). The #1 ranked predictor earns the coveted Daily Picks Trophy (🏆).
 *   **Yesterday's Recap Mode:** Selecting "Yesterday" on the Date dropdown intelligently disables new input forms to prevent predictions in the past, and transforms the Recent Picks sheet into a neat recap of yesterday's predictions and outcomes.
 *   **The Dugout Chatter:** A fully fleshed-out message board attached right under the leaderboard. Read and write real-time banter. It features integrated persistence so your trash-talk is preserved perfectly across dashboard reboots.
 *   **3D Interactive Flip-Cards:** Individual game column blocks and the Daily Leaderboard utilize native GPU-accelerated 3D CSS to physically spin around. Users can click `↺ YEST` to instantly flip the card and check their team's final box-score from yesterday.
@@ -27,7 +27,9 @@ Deploying to GitHub Pages takes less than a minute.
     *   `Brennan.jpg`
     *   `Dominic.jpg`
     *   `Mario.png`
-    *   `Button OD team.png`
+    *   `Nicole.png`
+    *   `Flag_of_Arizona.gif`
+    *   `Button OD team AZB.jpg`
     *   `OD background.png`
     *   `OD phone background.jpg`
     *   `instructions.png` (Used for the UI Guide popup)

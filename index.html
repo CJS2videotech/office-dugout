@@ -40,14 +40,15 @@ body::before {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   z-index: -10;
-  background-image: url('assets/OD%20background.png'), url('OD%20background.png'), url('asset/OD%20background.png');
+  background-image: url('assets/OD%20phone%20background.jpg'), url('OD%20phone%20background.jpg'), url('asset/OD%20phone%20background.jpg');
   background-size: cover;
-  background-position: center top;
+  background-position: center center;
   background-repeat: no-repeat;
+  filter: brightness(1.15);
 }
 @media (max-width: 768px) {
   body::before {
-    background-image: url('assets/OD%20phone%20background.jpg'), url('OD%20phone%20background.jpg'), url('asset/OD%20phone%20background.jpg'), url('assets/OD%20background.png'), url('OD%20background.png');
+    background-image: url('assets/OD%20phone%20background.jpg'), url('OD%20phone%20background.jpg'), url('asset/OD%20phone%20background.jpg');
     background-position: center center;
   }
 }
@@ -128,11 +129,13 @@ th:first-child, td:first-child{ text-align:left; }
 .uh-team{ font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); opacity: 0.9; }
 
 /* ── FLIP CARD ENGINE ── */
-.dl-scene { perspective: 1000px; width: 100%; position: relative; }
-.dl-inner { transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; position: relative; width: 100%; }
-.dl-inner.is-flipped { transform: rotateY(180deg); }
-.dl-front, .dl-back { backface-visibility: hidden; width: 100%; top: 0; left: 0; }
-.dl-back { transform: rotateY(-180deg); position: absolute; background: var(--bg); border: 1px solid var(--border-light); border-radius: 8px;}
+.dl-scene { width: 100%; position: relative; }
+.dl-inner { position: relative; width: 100%; }
+.dl-front, .dl-back { width: 100%; }
+.dl-front { display: block; }
+.dl-back { display: none; background: var(--bg); border: 1px solid var(--border-light); border-radius: 8px; }
+.dl-inner.is-flipped .dl-front { display: none; }
+.dl-inner.is-flipped .dl-back { display: block; }
 
 /* ── GAME CARDS ── */
 .gcard{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1rem; position:relative;}
@@ -160,26 +163,49 @@ th:first-child, td:first-child{ text-align:left; }
 .mg-match{flex:1; text-align:center; font-weight:500;}
 .mg-time{ color:var(--muted); font-size:11px; text-align:right;}
 
-/* ── DAILY PICKS ── */
-.dp-sec{ max-width:1400px; margin:0 auto 2rem; padding:0 2rem; }
-.dp-wrap{ display:flex; flex-wrap:wrap; gap:2rem; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.5rem; }
-.dp-input-area{ flex:1; min-width:300px; }
-.dp-recent-area{ flex:1; min-width:300px; display:flex; flex-direction:column; }
-.dp-label{ display:block; font-family:'Oswald',sans-serif; font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+/* ── HOME RUN BRACKET ── */
+.hrb-sec{ max-width:1400px; margin:0 auto 2rem; padding:0 2rem; }
+.hrb-header-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:10px; }
+.hrb-title{ display:flex; align-items:center; gap:10px; font-family:'Oswald',sans-serif; font-size:1.35rem; letter-spacing:1.5px; text-transform:uppercase; }
+.hrb-podium{ background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(245,158,11,0.06)); border:1px solid rgba(251,191,36,0.35); border-radius:14px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; }
+.hrb-crown{ font-size:2.4rem; filter:drop-shadow(0 0 18px rgba(251,191,36,0.9)); animation:hrb-bounce 2.4s ease-in-out infinite; }
+@keyframes hrb-bounce{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-6px) rotate(8deg)}}
+.hrb-leader-name{ font-family:'Graduate',serif; font-size:1.6rem; letter-spacing:1px; line-height:1; }
+.hrb-leader-team{ font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+.hrb-stat-pill{ display:flex; flex-direction:column; align-items:center; padding:10px 18px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); }
+.hrb-stat-num{ font-family:'Oswald',sans-serif; font-size:2rem; font-weight:700; line-height:1; }
+.hrb-stat-lbl{ font-size:9px; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-top:2px; }
+.hrb-hr-pill{ background:rgba(251,191,36,0.18); border-color:rgba(251,191,36,0.4); }
+.hrb-hr-pill .hrb-stat-num{ color:#fbbf24; }
+.hrb-hit-pill{ background:rgba(56,189,248,0.12); border-color:rgba(56,189,248,0.3); }
+.hrb-hit-pill .hrb-stat-num{ color:#38bdf8; }
+.hrb-table-wrap{ background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.hrb-table{ width:100%; border-collapse:collapse; font-size:13px; }
+.hrb-table th{ font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); padding:10px 12px; border-bottom:1px solid var(--border); font-weight:400; background:rgba(0,0,0,0.25); text-align:right; }
+.hrb-table th:first-child,.hrb-table td:first-child{ text-align:left; }
+.hrb-table td{ padding:11px 12px; border-bottom:1px solid var(--border); color:var(--muted); text-align:right; }
+.hrb-table tr:last-child td{ border-bottom:none; }
+.hrb-table .hrb-hr-td{ font-family:'Oswald',sans-serif; font-size:1.25rem; font-weight:700; color:#fbbf24; text-shadow:0 0 12px rgba(251,191,36,0.5); }
+.hrb-table .hrb-hit-td{ font-family:'Oswald',sans-serif; font-size:1.1rem; font-weight:600; color:#38bdf8; }
+.hrb-table .hrb-pa-td{ color:var(--muted); }
+.hrb-table .hrb-tb-td{ color:#a78bfa; }
+.hrb-rank{ display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; font-family:'Oswald',sans-serif; font-size:12px; font-weight:700; margin-right:6px; flex-shrink:0; }
+.hrb-rank-1{ background:rgba(251,191,36,0.25); color:#fbbf24; border:1px solid rgba(251,191,36,0.5); }
+.hrb-rank-2{ background:rgba(203,213,225,0.15); color:#cbd5e1; border:1px solid rgba(203,213,225,0.3); }
+.hrb-rank-3{ background:rgba(205,127,50,0.18); color:#cd7f32; border:1px solid rgba(205,127,50,0.35); }
+.hrb-rank-n{ background:rgba(255,255,255,0.06); color:var(--muted); border:1px solid var(--border); }
+.hrb-status{ display:inline-block; padding:2px 8px; border-radius:4px; font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; }
+.hrb-status-live{ background:rgba(34,197,94,.15); color:#4ade80; }
+.hrb-status-final{ background:rgba(255,255,255,.08); color:var(--muted); }
+.hrb-status-sched{ background:rgba(56,189,248,.08); color:#7dd3fc; }
+.hrb-tiebreak-legend{ display:flex; align-items:center; gap:16px; font-size:11px; color:var(--muted); flex-wrap:wrap; margin-top:4px; padding:10px 12px; background:rgba(0,0,0,0.25); border-top:1px solid var(--border); }
+.hrb-tiebreak-legend span{ display:flex; align-items:center; gap:5px; }
+.hrb-no-leader{ display:flex; flex-direction:column; align-items:center; gap:8px; padding:2rem; text-align:center; color:var(--muted); font-family:'Oswald',sans-serif; }
+/* ── DAILY PICKS SEASON LEADERBOARD (kept for season HRB wins) ── */
 .dp-select{ width:100%; background:rgba(0,0,0,0.4); border:1px solid var(--border); color:#fff; padding:10px 12px; border-radius:8px; font-family:'Inter',sans-serif; outline:none; appearance:none; cursor:pointer; }
 .dp-select:focus{ border-color:var(--green); }
 .select-wrap{ position:relative; }
 .select-wrap::after{ content:'▼'; position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--muted); pointer-events:none; }
-.dp-btn{ width:100%; background:var(--green); color:#000; border:none; padding:12px; border-radius:8px; font-family:'Oswald',sans-serif; font-size:1.1rem; letter-spacing:1px; text-transform:uppercase; cursor:pointer; font-weight:700; box-shadow:0 0 15px rgba(34,197,94,0.3); transition:all .2s; }
-.dp-btn:hover{ background:#4ade80; box-shadow:0 0 20px rgba(34,197,94,0.5); transform:translateY(-1px); }
-.dp-list{ flex:1; display:flex; flex-direction:column; gap:8px; max-height:230px; overflow-y:auto; padding-right:5px; }
-.dp-list::-webkit-scrollbar{ width:4px; }
-.dp-list::-webkit-scrollbar-thumb{ background:var(--border-light); border-radius:4px; }
-.dp-item{ background:rgba(0,0,0,0.2); border:1px solid var(--border); border-left:3px solid transparent; border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; }
-.dp-badge{ padding:2px 6px; border-radius:4px; font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; }
-.dp-pending{ background:rgba(255,255,255,0.1); color:#fff; }
-.dp-win{ background:rgba(34,197,94,.15); color:#4ade80; }
-.dp-loss{ background:rgba(239,68,68,.15); color:#f87171; }
 
 
 /* ── ROSTER & MODAL ── */
@@ -746,81 +772,94 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
   </div>
 </div>
 
-<div class="dp-sec">
-  <div class="dp-wrap glass" style="margin-bottom: 2rem;">
-    <div class="dp-input-area">
-      <div style="display:flex; align-items:center; gap:8px; font-family:'Oswald',sans-serif; font-size:1.2rem; letter-spacing:1px; text-transform:uppercase; margin-bottom:1rem;">
-        <div class="b-pip" style="background:#f59e0b;"></div> Daily Pick
-      </div>
-      <div style="background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:1.25rem;">
-        <div style="display:flex; gap:1rem; margin-bottom:1rem; flex-wrap:wrap;">
-          <div style="flex:1; min-width:130px;">
-            <label class="dp-label">Who is Picking?</label>
-            <div class="select-wrap">
-              <select id="dp-who" class="dp-select">
-                <option value="" disabled selected>-- Select --</option>
-                <option value="andrea">Andrea</option>
-                <option value="cj">CJ</option>
-                <option value="brennan">Brennan</option>
-                <option value="dominic">Dominic</option>
-                <option value="mario">Mario</option>
-                <option value="nicole">Nicole</option>
-                <option value="arizona">Arizona</option>
-              </select>
-            </div>
-          </div>
-          <div style="flex:1; min-width:130px;">
-            <label class="dp-label">Date</label>
-            <div class="select-wrap">
-              <select id="dp-date" class="dp-select" onchange="loadGamesForDate()">
-                <option value="yesterday">Yesterday</option>
-                <option value="today" selected>Today</option>
-                <option value="tomorrow">Tomorrow</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div id="dp-input-fields">
-          <div style="margin-bottom:1rem;">
-            <label class="dp-label">Game</label>
-            <div class="select-wrap">
-              <select id="dp-game" class="dp-select" onchange="populateWinners()">
-                <option value="" disabled selected>-- Select a game --</option>
-              </select>
-            </div>
-          </div>
-          <div style="margin-bottom:1.5rem;">
-            <label class="dp-label">Winner</label>
-            <div class="select-wrap">
-              <select id="dp-winner" class="dp-select">
-                <option value="" disabled selected>Select game first</option>
-              </select>
-            </div>
-          </div>
-          <button onclick="submitDailyPick()" class="dp-btn">Lock It In</button>
-        </div>
-      </div>
+<div class="hrb-sec">
+
+  <!-- HOME RUN BRACKET HEADER -->
+  <div class="hrb-header-row">
+    <div class="hrb-title">
+      <div class="b-pip" style="background:#fbbf24; width:10px; height:10px; box-shadow:0 0 10px rgba(251,191,36,0.6);"></div>
+      🏟️ Home Run Bracket
+      <span style="font-size:11px; font-weight:400; color:var(--muted); text-transform:none; letter-spacing:0; font-family:'Inter',sans-serif;">– Daily Contest</span>
     </div>
-    
-    <div class="dp-recent-area">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
-        <div id="dp-recent-title" style="display:flex; align-items:center; gap:8px; font-family:'Oswald',sans-serif; font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">
-          <div class="b-pip" style="background:var(--border-light); width:6px; height:6px;"></div> Recent Picks
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="rbtn" id="btn-toggle-hrb" onclick="toggleHRBracket()" style="padding:4px 10px; font-size:10px;">↺ YESTERDAY</button>
+    </div>
+  </div>
+
+  <!-- TODAY'S BRACKET (front) -->
+  <div class="dl-scene" style="margin-bottom:1.5rem;">
+    <div class="dl-inner" id="hrb-flipper">
+      <div class="dl-front">
+        <!-- LIVE LEADER PODIUM -->
+        <div id="hrb-podium-today" class="hrb-podium glass" style="display:none;">
+          <!-- JS populates -->
         </div>
-        <button onclick="clearPicks()" class="rbtn" style="padding:4px 8px; font-size:9px; border:none; color:var(--muted);">CLEAR HISTORY</button>
+        <!-- BRACKET TABLE -->
+        <div class="hrb-table-wrap glass">
+          <table class="hrb-table">
+            <thead>
+              <tr>
+                <th style="width:36px;">#</th>
+                <th>Team</th>
+                <th title="Home Runs">💣 HR</th>
+                <th title="Total Hits">⚾ H</th>
+                <th title="Total Bases">TB</th>
+                <th title="Plate Appearances">PA</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="hrb-tbody-today"><tr><td colspan="7" style="text-align:center; padding:2rem;">Loading bracket...</td></tr></tbody>
+          </table>
+          <div class="hrb-tiebreak-legend">
+            <span><img src="assets/Homerun%20Trophy.PNG" alt="Home Run Trophy" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; margin-right:4px;"> Tiebreakers:</span>
+            <span><span style="color:#fbbf24; font-weight:700;">1.</span> Most Home Runs</span>
+            <span><span style="color:#38bdf8; font-weight:700;">2.</span> Most Hits (if HR=0)</span>
+            <span><span style="color:#a78bfa; font-weight:700;">3.</span> Total Bases</span>
+            <span><span style="color:#86efac; font-weight:700;">4.</span> Plate Appearances (last resort)</span>
+          </div>
+        </div>
       </div>
-      <div id="dp-recent-list" class="dp-list">
-        <!-- JS populates -->
+
+      <!-- YESTERDAY'S BRACKET (back) -->
+      <div class="dl-back">
+        <div id="hrb-podium-yesterday" class="hrb-podium glass" style="display:none;">
+          <!-- JS populates -->
+        </div>
+        <div class="hrb-table-wrap glass">
+          <table class="hrb-table">
+            <thead>
+              <tr>
+                <th style="width:36px;">#</th>
+                <th>Team</th>
+                <th title="Home Runs">💣 HR</th>
+                <th title="Total Hits">⚾ H</th>
+                <th title="Total Bases">TB</th>
+                <th title="Plate Appearances">PA</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="hrb-tbody-yesterday"><tr><td colspan="7" style="text-align:center; padding:2rem;">Loading bracket...</td></tr></tbody>
+          </table>
+          <div class="hrb-tiebreak-legend">
+            <span><img src="assets/Homerun%20Trophy.PNG" alt="Home Run Trophy" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; margin-right:4px;"> Tiebreakers:</span>
+            <span><span style="color:#fbbf24; font-weight:700;">1.</span> Most Home Runs</span>
+            <span><span style="color:#38bdf8; font-weight:700;">2.</span> Most Hits (if HR=0)</span>
+            <span><span style="color:#a78bfa; font-weight:700;">3.</span> Total Bases</span>
+            <span><span style="color:#86efac; font-weight:700;">4.</span> Plate Appearances (last resort)</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- SEASON HRB LEADERBOARD -->
   <div style="font-family:'Oswald',sans-serif; font-size:1.2rem; letter-spacing:1px; text-transform:uppercase; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
-    <div class="b-pip" style="background:#10b981;"></div> Daily Picks Leaderboard
+    <div class="b-pip" style="background:#10b981;"></div> Home Run Bracket – Season Standings
   </div>
-  <div class="dp-leader-grid" id="dp-leaderboard" style="display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
+  <div id="hrb-season-leaderboard" style="display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
     <!-- Populated by JS -->
   </div>
+
 </div>
 
 <div class="modal-overlay" id="roster-modal" onclick="closeModal(event)">
@@ -911,13 +950,13 @@ if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
 }
 
 const USERS = [
-  { id: 'andrea', name: 'Andrea', email: 'andrea@example.com', teamName: 'Brewers', teamId: 158, primary: 'var(--u-andrea-1)', secondary: 'var(--u-andrea-2)', photo: 'assets/andrea.jpg', banner: 'assets/Andrea%20banner.gif', img: 'assets/andrea.jpg' },
-  { id: 'cj', name: 'CJ', email: 'cj@example.com', teamName: 'Cubs', teamId: 112, primary: 'var(--u-cj-1)', secondary: 'var(--u-cj-2)', photo: 'assets/cj.jpg', banner: 'assets/CJ%20banner.gif', img: 'assets/cj.jpg' },
+  { id: 'andrea', name: 'Andrea', email: 'andrea@example.com', teamName: 'Brewers', teamId: 158, primary: 'var(--u-andrea-1)', secondary: 'var(--u-andrea-2)', photo: 'assets/andrea.jpg', banner: 'assets/Andrea%20banner1.gif', img: 'assets/andrea.jpg' },
+  { id: 'cj', name: 'CJ', email: 'cj@example.com', teamName: 'Cubs', teamId: 112, primary: 'var(--u-cj-1)', secondary: 'var(--u-cj-2)', photo: 'assets/cj.jpg', banner: 'assets/CJ%20banner1.gif', img: 'assets/cj.jpg' },
   { id: 'brennan', name: 'Brennan', email: 'brennan@example.com', teamName: 'Giants', teamId: 137, primary: 'var(--u-brennan-1)', secondary: 'var(--u-brennan-2)', photo: 'assets/Brennan.jpg', banner: 'assets/Brennan%20banner.gif', img: 'assets/Brennan.jpg' },
-  { id: 'dominic', name: 'Dominic', email: 'dominic@example.com', teamName: 'Yankees', teamId: 147, primary: 'var(--u-dominic-1)', secondary: 'var(--u-dominic-2)', photo: 'assets/Dominic.jpg', banner: 'assets/Dom%20banner.gif', glow: 'text-shadow: 0 0 10px rgba(255,255,255,0.7), 0 0 20px rgba(255,255,255,0.4);', img: 'assets/Dominic.jpg' },
-  { id: 'mario', name: 'Mario', email: 'mario@example.com', teamName: 'Guardians', teamId: 114, primary: 'var(--u-mario-1)', secondary: 'var(--u-mario-2)', photo: 'assets/Mario.png', banner: 'assets/Mario%20banner.gif', img: 'assets/Mario.png' },
-  { id: 'nicole', name: 'Nicole', email: 'nicole@example.com', teamName: "A's", teamId: 133, primary: 'var(--u-nicole-1)', secondary: 'var(--u-nicole-2)', photo: 'assets/Nicole.png', banner: 'assets/Nicole%20banner.gif', img: 'assets/Nicole.png' },
-  { id: 'arizona', name: 'Arizona', email: 'arizona@example.com', teamName: 'D-backs', teamId: 109, primary: 'var(--u-arizona-1)', secondary: 'var(--u-arizona-2)', photo: 'assets/Button%20OD%20team%20AZB.jpg', banner: 'assets/Flag_of_Arizona.gif', img: 'assets/Button%20OD%20team%20AZB.jpg' }
+  { id: 'dominic', name: 'Dominic', email: 'dominic@example.com', teamName: 'Yankees', teamId: 147, primary: 'var(--u-dominic-1)', secondary: 'var(--u-dominic-2)', photo: 'assets/Dominic.jpg', banner: 'assets/Dom%20banner1.gif', glow: 'text-shadow: 0 0 10px rgba(255,255,255,0.7), 0 0 20px rgba(255,255,255,0.4);', img: 'assets/Dominic.jpg' },
+  { id: 'mario', name: 'Mario', email: 'mario@example.com', teamName: 'Guardians', teamId: 114, primary: 'var(--u-mario-1)', secondary: 'var(--u-mario-2)', photo: 'assets/Mario.png', banner: 'assets/Mario%20banner1.gif', img: 'assets/Mario.png' },
+  { id: 'nicole', name: 'Nicole', email: 'nicole@example.com', teamName: "A's", teamId: 133, primary: 'var(--u-nicole-1)', secondary: 'var(--u-nicole-2)', photo: 'assets/Nicole.png', banner: 'assets/Nicole%20banner1.gif', img: 'assets/Nicole.png' },
+  { id: 'arizona', name: 'Arizona', email: 'arizona@example.com', teamName: 'D-backs', teamId: 109, primary: 'var(--u-arizona-1)', secondary: 'var(--u-arizona-2)', photo: 'assets/Button%20OD%20team%20AZB.jpg', banner: 'assets/Arizona_Diamondbacks_flag.gif', img: 'assets/Button%20OD%20team%20AZB.jpg' }
 ];
 
 let TEAM_IDS = USERS.map(u => u.teamId).join(',');
@@ -965,9 +1004,205 @@ const MLB_TEAMS = [
   { id: 120, name: 'Nationals', abbr: 'WSH' }
 ];
 
-/* ── DAILY PICKS LOGIC ── */
-let dpHistory = JSON.parse(localStorage.getItem('officeDailyPicks')) || [];
-let dpAvailableGames = []; 
+/* ── HOME RUN BRACKET LOGIC ── */
+let hrbFlipped = false;
+let hrbTodayData = [];
+let hrbYesterdayData = [];
+
+function toggleHRBracket() {
+  hrbFlipped = !hrbFlipped;
+  document.getElementById('hrb-flipper').classList.toggle('is-flipped');
+  const btn = document.getElementById('btn-toggle-hrb');
+  if (hrbFlipped) {
+    if (btn) btn.innerHTML = '↺ LIVE FEED';
+  } else {
+    if (btn) btn.innerHTML = '↺ YESTERDAY';
+  }
+}
+
+function calcHRBracketWinner(bracketData) {
+  // bracketData: array of { u, hr, hits, pa, tb, pending, matchTxt }
+  const active = bracketData.filter(d => !d.pending);
+  if (active.length === 0) return null;
+  const sorted = [...active].sort((a, b) => {
+    if (b.hr !== a.hr) return b.hr - a.hr;
+    if (b.hits !== a.hits) return b.hits - a.hits;
+    if (b.tb !== a.tb) return b.tb - a.tb;
+    return b.pa - a.pa;
+  });
+  // Only award if we have something to compare
+  if (sorted[0].hr === 0 && sorted[0].hits === 0 && sorted[0].pa === 0) return null;
+  return sorted[0].u.id;
+}
+
+async function buildHRBracket(apiGames, tbodyId, podiumId, prefix) {
+  let bracketData = [];
+
+  await Promise.all(USERS.map(async u => {
+    let g = apiGames.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
+    let hr = 0, hits = 0, pa = 0, tb = 0, pending = true, matchTxt = 'No Game';
+
+    if (g) {
+      const tr = g.teams.away.team.id === u.teamId ? 'away' : 'home';
+      const st = g.status.abstractGameState;
+      if (st === 'Live' || st === 'Final' || st === 'In Progress' || st === 'Completed Early') {
+        pending = false;
+        matchTxt = (st === 'Live' || st === 'In Progress') ? 'Live' : 'Final';
+        try {
+          const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
+          const bx = await rBox.json();
+          const teamStats = bx.teams?.[tr]?.teamStats?.batting || {};
+          hr   = teamStats.homeRuns || 0;
+          hits = teamStats.hits || 0;
+          tb   = teamStats.totalBases || 0;
+          // PA = AB + BB + HBP + SF + SH
+          const ab  = teamStats.atBats || 0;
+          const bb  = teamStats.baseOnBalls || 0;
+          const hbp = teamStats.hitByPitch || 0;
+          const sf  = teamStats.sacFlies || 0;
+          const sh  = teamStats.sacBunts || 0;
+          pa = ab + bb + hbp + sf + sh;
+        } catch(e) { /* API error – leave zeros */ }
+      } else {
+        const gameTime = g.gameDate ? new Date(g.gameDate).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' }) : '–';
+        matchTxt = gameTime;
+      }
+    }
+    bracketData.push({ u, hr, hits, pa, tb, pending, matchTxt });
+  }));
+
+  // Sort by tiebreaker chain
+  bracketData.sort((a, b) => {
+    if (a.pending && !b.pending) return 1;
+    if (b.pending && !a.pending) return -1;
+    if (b.hr !== a.hr) return b.hr - a.hr;
+    if (b.hits !== a.hits) return b.hits - a.hits;
+    if (b.tb !== a.tb) return b.tb - a.tb;
+    return b.pa - a.pa;
+  });
+
+  // Determine winner
+  const winnerId = calcHRBracketWinner(bracketData);
+
+  // Render podium for leader
+  const podiumEl = document.getElementById(podiumId);
+  if (podiumEl) {
+    const leader = bracketData[0];
+    if (leader && !leader.pending && (leader.hr > 0 || leader.hits > 0 || leader.pa > 0)) {
+      const tieLabel = leader.hr > 0 ? '🏠 Leads by Home Runs' :
+                       leader.hits > 0 ? '⚾ Leads by Total Hits' :
+                       leader.tb > 0 ? '🎯 Leads by Total Bases' : '📍 Leads by Plate Appearances';
+      podiumEl.style.display = 'flex';
+      podiumEl.innerHTML = `
+        <div style="flex-shrink:0;">
+          <img src="assets/Homerun%20Trophy.PNG" alt="Home Run Trophy" class="hrb-crown" style="width:52px; height:52px; object-fit:contain; filter:drop-shadow(0 0 12px rgba(251,191,36,0.8));">
+        </div>
+        <img src="${leader.u.img}" onerror="handleImgError(this)" style="width:64px; height:64px; border-radius:12px; object-fit:cover; border:2px solid ${leader.u.secondary}; flex-shrink:0;">
+        <div style="flex:1; min-width:0;">
+          <div class="hrb-leader-name" style="color:${leader.u.secondary};${leader.u.glow||''}">${leader.u.name}</div>
+          <div class="hrb-leader-team">${leader.u.teamName}</div>
+          <div style="font-size:10px; color:#fbbf24; margin-top:4px; font-family:'Oswald',sans-serif; letter-spacing:0.5px;">${tieLabel}</div>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <div class="hrb-stat-pill hrb-hr-pill">
+            <div class="hrb-stat-num">${leader.hr}</div>
+            <div class="hrb-stat-lbl">HR</div>
+          </div>
+          <div class="hrb-stat-pill hrb-hit-pill">
+            <div class="hrb-stat-num">${leader.hits}</div>
+            <div class="hrb-stat-lbl">Hits</div>
+          </div>
+          <div class="hrb-stat-pill" style="background:rgba(167,139,250,0.12); border-color:rgba(167,139,250,0.3);">
+            <div class="hrb-stat-num" style="color:#a78bfa; font-size:1.5rem;">${leader.tb}</div>
+            <div class="hrb-stat-lbl">TB</div>
+          </div>
+        </div>
+      `;
+    } else {
+      podiumEl.style.display = 'none';
+    }
+  }
+
+  // Render table rows
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return bracketData;
+
+  tbody.innerHTML = bracketData.map((d, i) => {
+    const rank = i + 1;
+    const rankCls = rank === 1 ? 'hrb-rank-1' : rank === 2 ? 'hrb-rank-2' : rank === 3 ? 'hrb-rank-3' : 'hrb-rank-n';
+    const rankEmoji = rank === 1 && !d.pending ? '🥇' : rank === 2 && !d.pending ? '🥈' : rank === 3 && !d.pending ? '🥉' : rank;
+
+    let statusHtml = '';
+    if (d.pending && d.matchTxt === 'No Game') {
+      statusHtml = `<span class="hrb-status hrb-status-sched">No Game</span>`;
+    } else if (d.pending) {
+      statusHtml = `<span class="hrb-status hrb-status-sched">${d.matchTxt}</span>`;
+    } else if (d.matchTxt === 'Live') {
+      statusHtml = `<span class="hrb-status hrb-status-live">🔴 Live</span>`;
+    } else {
+      statusHtml = `<span class="hrb-status hrb-status-final">Final</span>`;
+    }
+
+    const isWinner = d.u.id === winnerId;
+    const winnerCrown = isWinner ? ' 👑' : '';
+
+    return `<tr style="${isWinner ? 'background:rgba(251,191,36,0.06);' : ''}">
+      <td><span class="hrb-rank ${rankCls}">${rankEmoji}</span></td>
+      <td>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="https://www.mlbstatic.com/team-logos/${d.u.teamId}.svg" style="width:22px; height:22px; flex-shrink:0; filter:${d.u.teamId===147?'brightness(0) invert(1)':'drop-shadow(0 1px 2px rgba(0,0,0,0.6))'}">
+          <div>
+            <div style="font-family:'Oswald',sans-serif; font-size:14px; color:${d.u.secondary};${d.u.glow||''} line-height:1;">${d.u.teamName}${winnerCrown}</div>
+            <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">${d.u.name}</div>
+          </div>
+        </div>
+      </td>
+      <td class="hrb-hr-td">${d.pending ? '—' : d.hr}</td>
+      <td class="hrb-hit-td">${d.pending ? '—' : d.hits}</td>
+      <td class="hrb-tb-td">${d.pending ? '—' : d.tb}</td>
+      <td class="hrb-pa-td">${d.pending ? '—' : d.pa}</td>
+      <td>${statusHtml}</td>
+    </tr>`;
+  }).join('');
+
+  return { bracketData, winnerId };
+}
+
+function renderHRBSeasonLeaderboard() {
+  const grid = document.getElementById('hrb-season-leaderboard');
+  if (!grid) return;
+
+  let stats = USERS.map(u => ({
+    ...u,
+    wins: seasonTrophies[u.id] || 0
+  }));
+  stats.sort((a, b) => b.wins - a.wins);
+
+  const topWins = stats[0] ? stats[0].wins : 0;
+
+  grid.innerHTML = stats.map((s, i) => {
+    const isTop = s.wins > 0 && s.wins === topWins;
+    return `<div class="glass" style="flex:1; min-width:250px; border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; align-items:center; gap:12px; position:relative; overflow:hidden;">
+      <div style="position:absolute; top:0; left:0; width:4px; height:100%; background:${s.secondary};"></div>
+      <img src="${s.img}" onerror="handleImgError(this)" style="width:56px; height:56px; border-radius:10px; object-fit:cover; border:2px solid ${s.secondary};">
+      <div style="flex:1;">
+        <div style="font-family:'Oswald',sans-serif; font-size:1.3rem; color:${s.secondary};${s.glow||''} letter-spacing:1px; line-height:1; margin-bottom:4px;">${s.name.toUpperCase()}</div>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">${s.teamName}</div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-family:'Oswald',sans-serif; font-size:1.5rem; font-weight:700; color:#fbbf24;">${s.wins}</span>
+          <span style="font-size:11px; color:var(--muted);">HR Bracket Win${s.wins !== 1 ? 's' : ''}</span>
+        </div>
+      </div>
+      ${isTop ? `<div style="padding-right:10px;"><img src="assets/Homerun%20Trophy.PNG" alt="HR Bracket Leader" style="width:36px; height:36px; object-fit:contain; filter:drop-shadow(0 0 10px rgba(255,215,0,0.8));"></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function getHRBStats(userId) {
+  const wins = seasonTrophies[userId] || 0;
+  return { wins };
+}
+/* ── END HOME RUN BRACKET LOGIC ── */
 
 // ── AUTHENTICATION HANDLERS ──
 function openAuthModal() {
@@ -1171,243 +1406,25 @@ if (firebaseActive) {
   }
 }
 
-async function loadGamesForDate() {
-  const dateVal = document.getElementById('dp-date').value;
-  const d = new Date();
-  if(dateVal === 'yesterday') d.setDate(d.getDate()-1);
-  if(dateVal === 'tomorrow') d.setDate(d.getDate()+1);
-  const dateStr = isoDate(d);
-  
-  const inputContainer = document.getElementById('dp-input-fields');
-  const recentTitle = document.getElementById('dp-recent-title');
-  if (dateVal === 'yesterday') {
-      inputContainer.style.display = 'none';
-      recentTitle.innerHTML = `<div class="b-pip" style="background:#3b82f6; width:6px; height:6px;"></div> Yesterday's Recap`;
-      renderRecentPicks(dateStr);
-      return;
-  } else {
-      inputContainer.style.display = 'block';
-      recentTitle.innerHTML = `<div class="b-pip" style="background:var(--border-light); width:6px; height:6px;"></div> Recent Picks`;
-      renderRecentPicks();
-  }
-  
-  const gameSelect = document.getElementById('dp-game');
-  const winnerSelect = document.getElementById('dp-winner');
-  gameSelect.innerHTML = '<option value="" disabled selected>Loading games...</option>';
-  winnerSelect.innerHTML = '<option value="" disabled selected>Select game first</option>';
-  
-  try {
-     const url=`${MLB}/schedule?sportId=1&date=${dateStr}&teamId=${TEAM_IDS}&hydrate=team`; 
-     const r = await fetch(url);
-     const data = await r.json();
-     dpAvailableGames = data.dates?.[0]?.games || [];
-     
-     if (dpAvailableGames.length === 0) {
-        gameSelect.innerHTML = '<option value="" disabled selected>No games found</option>';
-        return;
-     }
-     
-     gameSelect.innerHTML = '<option value="" disabled selected>-- Select a game --</option>' + 
-       dpAvailableGames.map(g => {
-         let gh = g.gameNumber > 1 ? ` (Game ${g.gameNumber})` : '';
-         const state = g.status.abstractGameState;
-         const isStarted = state !== 'Preview' && state !== 'Pre-Game' && state !== 'Scheduled' && state !== 'Warmup';
-         const lockedAttr = isStarted ? 'disabled' : '';
-         const lockedText = isStarted ? ' [LOCKED]' : '';
-         return `<option value="${g.gamePk}" ${lockedAttr}>${g.teams.away.team.name} @ ${g.teams.home.team.name}${gh}${lockedText}</option>`;
-       }).join('');
-       
-  } catch (e) {
-     gameSelect.innerHTML = '<option value="" disabled selected>Error loading</option>';
-  }
-}
+// loadGamesForDate removed – Daily Pick form replaced by Home Run Bracket
+async function loadGamesForDate() { /* no-op stub */ }
 
-function populateWinners() {
-  const gamePk = document.getElementById('dp-game').value;
-  const winnerSelect = document.getElementById('dp-winner');
-  const g = dpAvailableGames.find(x => x.gamePk == gamePk);
-  if (!g) return;
-  
-  winnerSelect.innerHTML = `
-    <option value="" disabled selected>-- Select winner --</option>
-    <option value="${g.teams.away.team.id}">${g.teams.away.team.name}</option>
-    <option value="${g.teams.home.team.id}">${g.teams.home.team.name}</option>
-  `;
-}
+// populateWinners, submitDailyPick, clearPicks – removed (no longer needed)
+function populateWinners() { /* no-op stub */ }
+async function submitDailyPick() { /* no-op stub */ }
+function clearPicks() { /* no-op stub */ }
+function savePicks() { /* no-op stub */ }
 
-function savePicks() { localStorage.setItem('officeDailyPicks', JSON.stringify(dpHistory)); renderRecentPicks(); }
+// renderLeaderboard – removed (replaced by renderHRBSeasonLeaderboard)
+function renderLeaderboard() { renderHRBSeasonLeaderboard(); }
 
-async function submitDailyPick() {
-  const who = document.getElementById('dp-who').value;
-  const dateVal = document.getElementById('dp-date').value;
-  const gamePk = document.getElementById('dp-game').value;
-  const winnerId = document.getElementById('dp-winner').value;
-  
-  if(!who || !gamePk || !winnerId) return alert('Please complete all fields.');
-  
-  const d = new Date();
-  if(dateVal === 'yesterday') d.setDate(d.getDate()-1);
-  if(dateVal === 'tomorrow') d.setDate(d.getDate()+1);
-  const dateStr = isoDate(d);
-  
-  const user = USERS.find(u=>u.id===who);
-  const g = dpAvailableGames.find(x => x.gamePk == gamePk);
-  const state = g.status.abstractGameState;
-  const isStarted = state !== 'Preview' && state !== 'Pre-Game' && state !== 'Scheduled' && state !== 'Warmup';
-  if (isStarted) return alert('This game has already started and is locked. You cannot modify your pick.');
-  
-  const isAway = g.teams.away.team.id == winnerId;
-  const teamName = isAway ? g.teams.away.team.name : g.teams.home.team.name;
-  
-  let gh = g.gameNumber > 1 ? ` (Gm ${g.gameNumber})` : '';
-  const pick = { id: Date.now(), who: user.id, whoName: user.name, dateStr, gamePk: parseInt(gamePk), teamId: parseInt(winnerId), teamName: teamName + gh, status: 'Pending' };
-  
-  if (firebaseActive && currentUser) {
-    const docId = `${dateStr}_${user.id}`;
-    try {
-      await setDoc(doc(db, "picks", docId), {
-        ...pick,
-        uid: currentUser.uid,
-        timestamp: new Date().toISOString()
-      });
-    } catch (e) {
-      console.error("Error writing pick to Firestore:", e);
-      alert("Database error: Could not sync pick.");
-    }
-  } else {
-    const existingIndex = dpHistory.findIndex(p => p.who === user.id && p.gamePk === parseInt(gamePk));
-    if (existingIndex >= 0) {
-        alert('Updating previous pick for this game');
-        dpHistory[existingIndex] = pick;
-    } else {
-        dpHistory.push(pick);
-    }
-    savePicks();
-    renderLeaderboard();
-  }
-  
-  // reset inputs
-  document.getElementById('dp-game').value = '';
-  document.getElementById('dp-winner').innerHTML = '<option value="" disabled selected>Select game first</option>';
-}
-
-function clearPicks() {
-  if(confirm('Clear all your browser saved Daily Picks?')) {
-     dpHistory = []; savePicks(); renderLeaderboard();
-  }
-}
-
-function renderLeaderboard() {
-  const grid = document.getElementById('dp-leaderboard');
-  if(!grid) return;
-  
-  let stats = USERS.map(u => {
-     let w=0, l=0, stk=0;
-     const picks = dpHistory.filter(p => p.who === u.id && p.status!=='Pending').sort((a,b)=>a.id - b.id);
-     picks.forEach(p => {
-       if(p.status==='Win'){ w++; stk = stk>0 ? stk+1 : 1; }
-       else { l++; stk = stk<0 ? stk-1 : -1; }
-     });
-     const tot = w+l;
-     const pct = tot===0 ? 0 : w/tot;
-     return { ...u, w, l, pct, stk, tot };
-  });
-  
-  stats.sort((a,b) => {
-     if(b.w !== a.w) return b.w - a.w;
-     if(b.pct !== a.pct) return b.pct - a.pct;
-     return b.stk - a.stk;
-  });
-  
-  let topPlayerId = stats[0] && stats[0].tot > 0 && stats[0].w > 0 ? stats[0].id : null;
-
-  grid.innerHTML = stats.map(s => {
-     const pctStr = s.tot===0 ? '0%' : Math.round(s.pct*100)+'%';
-     const isTop = s.id === topPlayerId;
-     return `<div class="glass" style="flex:1; min-width:250px; border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; align-items:center; gap:12px; position:relative; overflow:hidden;">
-        <div style="position:absolute; top:0; left:0; width:4px; height:100%; background:${s.secondary};"></div>
-        <img src="${s.img}" onerror="handleImgError(this)" style="width:60px; height:60px; border-radius:10px; object-fit:cover; border:2px solid ${s.secondary};">
-        <div style="flex:1;">
-           <div style="font-family:'Oswald',sans-serif; font-size:1.4rem; color:${s.secondary};${s.glow||''} letter-spacing:1px; line-height:1; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-              ${s.name.toUpperCase()}
-           </div>
-           <div style="display:flex; align-items:center; gap:12px; font-size:13px;">
-              <span style="font-weight:600;">${s.w}<span style="color:var(--muted);font-weight:400;font-size:11px;">W</span> ${s.l}<span style="color:var(--muted);font-weight:400;font-size:11px;">L</span></span>
-              <span>${pctStr}</span>
-              <span style="display:flex;align-items:center;gap:4px;">🔥 ${s.stk}</span>
-           </div>
-        </div>
-        ${isTop ? `<div style="font-size:28px; filter:drop-shadow(0 0 10px rgba(255,215,0,0.6)); padding-right:10px;">🏆</div>` : ''}
-     </div>`;
-  }).join('');
-}
-
-function renderRecentPicks(filterDate = null) {
-  const list = document.getElementById('dp-recent-list');
-  if(!list) return;
-  
-  let picksToShow = dpHistory;
-  if(filterDate) picksToShow = dpHistory.filter(p => p.dateStr === filterDate);
-  
-  if(picksToShow.length===0) { list.innerHTML = `<div style="color:var(--muted); font-size:12px; text-align:center; padding:10px;">No picks found${filterDate ? ' for this date' : ''}.</div>`; return; }
-  
-  const sorted = [...picksToShow].sort((a,b)=>b.id - a.id).slice(0, 50);
-  list.innerHTML = sorted.map(p => {
-    let sc = 'dp-pending', st='Pending';
-    if(p.status==='Win'){ sc='dp-win'; st='WON'; }
-    if(p.status==='Loss'){ sc='dp-loss'; st='LOST'; }
-    const u = USERS.find(x=>x.id===p.who);
-    const col = u ? u.secondary : '#fff';
-    return `<div class="dp-item">
-      <div style="display:flex; align-items:center; gap:10px;">
-         <span style="font-family:'Oswald',sans-serif; font-size:12px; color:${col}; letter-spacing:1px; text-transform:uppercase;">${p.whoName}</span>
-         <span style="font-size:11px; color:#fff;">→ ${p.teamName} <span style="color:var(--muted); margin-left:4px;">(${p.dateStr})</span></span>
-      </div>
-      <div class="dp-badge ${sc}">${st}</div>
-    </div>`;
-  }).join('');
-}
-
-function evaluatePicks(games, targetDate) {
-  let changed = false;
-  dpHistory.forEach(async p => {
-    if(p.status !== 'Pending' || p.dateStr !== targetDate) return;
-    const g = games.find(gm => gm.teams.away.team.id === p.teamId || gm.teams.home.team.id === p.teamId);
-    if(g && (g.status.abstractGameState === 'Final' || g.status.abstractGameState === 'Completed Early')) {
-       const isAway = g.teams.away.team.id === p.teamId;
-       const awayS = g.teams.away.score||0, homeS = g.teams.home.score||0;
-       let didWin = isAway ? (awayS > homeS) : (homeS > awayS);
-       if (awayS === homeS) didWin = false; 
-       p.status = didWin ? 'Win' : 'Loss';
-       changed = true;
-       
-       if (firebaseActive) {
-         const docId = `${p.dateStr}_${p.who}`;
-         await updateDoc(doc(db, "picks", docId), {
-           status: p.status
-         }).catch(e => console.error("Error updating pick outcome:", e));
-       }
-    }
-  });
-  if(changed && !firebaseActive) {
-    savePicks();
-    renderLeaderboard();
-  }
-}
-
-function getDpStats(userId) {
-  let wins=0, losses=0, streak=0;
-  const picks = dpHistory.filter(p => p.who === userId && p.status!=='Pending').sort((a,b)=>a.id - b.id);
-  picks.forEach(p => {
-    if(p.status==='Win'){ wins++; streak = streak>0 ? streak+1 : 1; }
-    else { losses++; streak = streak<0 ? streak-1 : -1; }
-  });
-  const total = wins+losses;
-  const pct = total===0 ? '.000' : (wins/total).toFixed(3).replace(/^0/,'');
-  const stStr = streak>0 ? `<span style="color:#4ade80;">W${streak}</span>` : (streak<0 ? `<span style="color:#f87171;">L${Math.abs(streak)}</span>` : '-');
-  return { wins, losses, pct, stStr };
-}
-/* ── END DAILY PICKS LOGIC ── */
+// renderRecentPicks – stub (no list element to populate anymore)
+function renderRecentPicks(filterDate) { /* no-op stub */ }
+// evaluatePicks – stub
+function evaluatePicks(games, targetDate) { /* no-op stub */ }
+// getDpStats – stub
+function getDpStats(userId) { return { wins:0, losses:0, pct:'.000', stStr:'-' }; }
+/* ── END DAILY PICKS STUBS ── */
 
 const MLB = 'https://statsapi.mlb.com/api/v1';
 
@@ -1441,7 +1458,10 @@ function fmtTime(isoStr){
 }
 
 /* ── TROPHY LOGIC ── */
+// calcWinnerFromGames is now a stub – real winner comes from buildHRBracket.
+// Used only by loadSeasonTrophies which does its own async HRB winner calc.
 function calcWinnerFromGames(games) {
+  // Fallback: sort by runs then hits (season scan still uses this for speed)
   let scores = [];
   USERS.forEach(u => {
     let g = games.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
@@ -1532,15 +1552,16 @@ function setYesterdayTrophy(winnerId) {
 let dlIsFlipped = false;
 function toggleDailyLeader() {
     dlIsFlipped = !dlIsFlipped;
-    document.getElementById('dl-flipper').classList.toggle('is-flipped');
+    const flipper = document.getElementById('dl-flipper');
+    if (flipper) flipper.classList.toggle('is-flipped');
     const title = document.getElementById('dl-title');
     const btn = document.getElementById('btn-toggle-dl');
     if(dlIsFlipped) {
-       title.innerHTML = `Yesterday <span style="font-size:10px;font-weight:400;color:var(--muted); opacity:0.6;">(Finals)</span>`;
-       btn.innerHTML = '↺ LIVE FEED';
+       if (title) title.innerHTML = `Yesterday <span style="font-size:10px;font-weight:400;color:var(--muted); opacity:0.6;">(Finals)</span>`;
+       if (btn) btn.innerHTML = '↺ LIVE FEED';
     } else {
-       title.innerHTML = `Daily Runs & Hits Leader`;
-       btn.innerHTML = '↺ YESTERDAY';
+       if (title) title.innerHTML = `Daily Runs &amp; Hits Leader`;
+       if (btn) btn.innerHTML = '↺ YESTERDAY';
     }
 }
 
@@ -1629,46 +1650,41 @@ function openModal(id) {
   const standingsEl = document.getElementById(`standings-${id}`);
   const standingsHtml = standingsEl ? standingsEl.innerHTML : '';
 
-  const dailyEl = document.getElementById(dlIsFlipped ? 'tbl-daily-back' : 'tbl-daily-front');
-  const dailyHtml = dailyEl ? `
-    <div class="modal-daily-tbl" style="background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; margin-top:15px; text-align:left;">
-      <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
-        <div style="display:flex;align-items:center;gap:6px;"><div class="b-pip" style="background:#ef4444;width:6px;height:6px;"></div>Daily Runs & Hits Leader ${dlIsFlipped?'(Yest)':''}</div>
+  const tCount = seasonTrophies[u.id] || 0;
+  const hrbStats = getHRBStats(u.id);
+
+  // HRB stats for today/yesterday
+  const hrbSource = hrbFlipped ? hrbYesterdayData : hrbTodayData;
+  const hrbEntry = hrbSource.find ? hrbSource.find(d => d.u && d.u.id === u.id) : null;
+  const hrbStatHtml = hrbEntry && !hrbEntry.pending ? `
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); border-radius:10px; padding:8px;">
+        <div style="font-family:'Oswald',sans-serif; font-size:1.6rem; font-weight:700; color:#fbbf24;">${hrbEntry.hr}</div>
+        <div style="font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">HR Today</div>
       </div>
-      <table>
-        <thead><tr><th>Team</th><th>Runs</th><th>Hits</th><th>Status</th></tr></thead>
-        <tbody>${dailyEl.innerHTML}</tbody>
-      </table>
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.25); border-radius:10px; padding:8px;">
+        <div style="font-family:'Oswald',sans-serif; font-size:1.6rem; font-weight:700; color:#38bdf8;">${hrbEntry.hits}</div>
+        <div style="font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Hits Today</div>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.25); border-radius:10px; padding:8px;">
+        <div style="font-family:'Oswald',sans-serif; font-size:1.6rem; font-weight:700; color:#a78bfa;">${hrbEntry.tb}</div>
+        <div style="font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Tot. Bases</div>
+      </div>
     </div>
   ` : '';
 
-  const tCount = seasonTrophies[u.id] || 0;
-  const dpStats = getDpStats(u.id);
-
   const trophyCountHtml = `<div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
     <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; text-align:left; display:flex; align-items:center; margin-bottom:2px; gap:6px;">
-       <div class="b-pip" style="background:#f59e0b; width:6px; height:6px;"></div> Daily Picks
+       <div class="b-pip" style="background:#fbbf24; width:6px; height:6px;"></div> Home Run Bracket
     </div>
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-      <div style="flex:1; display:flex; flex-direction:column; align-items:center; background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:8px;">
-        <div style="font-family:'Oswald',sans-serif; font-size:16px; font-weight:600; color:#fff;">${dpStats.wins}-${dpStats.losses}</div>
-        <div style="font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Record</div>
-      </div>
-      <div style="flex:1; display:flex; flex-direction:column; align-items:center; background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:8px;">
-        <div style="font-family:'Oswald',sans-serif; font-size:16px; font-weight:600; color:#fff;">${dpStats.pct}</div>
-        <div style="font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Win PCT</div>
-      </div>
-      <div style="flex:1; display:flex; flex-direction:column; align-items:center; background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:8px;">
-        <div style="font-family:'Oswald',sans-serif; font-size:16px; font-weight:600; color:#fff;">${dpStats.stStr}</div>
-        <div style="font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Streak</div>
-      </div>
-    </div>
-    <div style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 16px; background:linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,180,0,0.05)); border:1px solid rgba(255,215,0,0.3); border-radius:20px; margin-left:auto; margin-right:auto; margin-top:4px;">
-      <span style="font-size:20px; filter:drop-shadow(0 0 8px rgba(255,215,0,0.8));">🏆</span>
-      <span style="font-family:'Oswald',sans-serif; font-size:16px; color:#ffd700; letter-spacing:1px; font-weight:600;">× ${tCount}</span>
-      <span style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Daily Runs & Hits Leader</span>
+    ${hrbStatHtml}
+    <div style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 16px; background:linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.05)); border:1px solid rgba(251,191,36,0.3); border-radius:20px; margin-left:auto; margin-right:auto; margin-top:4px;">
+      <img src="assets/Homerun%20Trophy.PNG" alt="Home Run Trophy" style="width:24px; height:24px; object-fit:contain; filter:drop-shadow(0 0 8px rgba(251,191,36,0.8));">
+      <span style="font-family:'Oswald',sans-serif; font-size:16px; color:#fbbf24; letter-spacing:1px; font-weight:600;">× ${tCount}</span>
+      <span style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">HR Bracket Wins</span>
     </div>
   </div>`;
+  const dailyHtml = '';
 
   const isMe = currentUser && (currentUser.email === u.email || (currentUser.email && USERS.find(x => x.email === currentUser.email)?.id === id));
   let settingsHtml = '';
@@ -1821,8 +1837,7 @@ function initLayout(){
   });
   g.innerHTML = html;
   initRoster();
-  renderRecentPicks();
-  renderLeaderboard();
+  renderHRBSeasonLeaderboard();
   loadGamesForDate();
 }
 
@@ -2518,27 +2533,22 @@ function openYesterdayBoxScoreForGame(awayId, homeId, e) {
   }
 }
 
+// buildDailyList: still used for the top Daily Runs & Hits Leader board
 async function buildDailyList(apiGames, prefix) {
     let dailyData = [];
     await Promise.all(USERS.map(async u => {
       let g = apiGames.find(gm => gm.teams.away.team.id===u.teamId || gm.teams.home.team.id===u.teamId);
-      let runs=0, hits=0, att=0, pending=true, matchTxt="No Game";
+      let runs=0, hits=0, att=0, pending=true, matchTxt='No Game';
       if(g){
         let tr = g.teams.away.team.id === u.teamId ? 'away' : 'home';
         let st = g.status.abstractGameState;
-        if(st==='Live' || st==='Final' || st==='In Progress'){
+        if(st==='Live' || st==='Final' || st==='In Progress' || st==='Completed Early'){
            runs = g.teams[tr].score||0;
            hits = g.linescore?.teams?.[tr]?.hits||0;
            pending=false;
-           matchTxt = st==='Live' || st==='In Progress' ? 'In Progress' : 'Final';
-           try {
-             const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
-             const bx = await rBox.json();
-             const attObj = bx.info?.find(i => i.label === 'Att' || i.label === 'Attendance');
-             if(attObj) att = parseInt(attObj.value.replace(/\\D/g, '')) || 0;
-           } catch(e) {}
+           matchTxt = (st==='Live' || st==='In Progress') ? 'In Progress' : 'Final';
         } else {
-           matchTxt = "Scheduled";
+           matchTxt = 'Scheduled';
         }
       }
       dailyData.push({ u, runs, hits, att, pending, matchTxt });
@@ -2549,14 +2559,14 @@ async function buildDailyList(apiGames, prefix) {
       if(b.pending && !a.pending) return -1;
       if(a.runs !== b.runs) return b.runs - a.runs;
       if(a.hits !== b.hits) return b.hits - a.hits;
-      return b.att - a.att;
+      return 0;
     });
 
     return dailyData.map(d => `
       <tr class="row-${d.u.id}">
-        <td><span class="team-name" style="color:${d.u.secondary};${d.u.glow||''}">${d.u.teamName} <span class="trophy-badge" id="trophy-daily-${prefix}-${d.u.id}" style="display:none; font-size:14px; margin-left:4px; filter:drop-shadow(0 0 8px rgba(255,215,0,0.8));">🏆</span></span><br><span style="font-size:10px;text-transform:uppercase;">${d.u.name}</span></td>
-        <td class="bld ${!d.pending?'':'dim'}">${d.pending ? '—' : d.runs}</td>
-        <td class="${!d.pending?'':'dim'}">${d.pending ? '—' : d.hits}</td>
+        <td><span class="team-name" style="color:${d.u.secondary};${d.u.glow||''}">${d.u.teamName} <span class="trophy-badge" id="trophy-daily-${prefix}-${d.u.id}" style="display:none; font-size:14px; margin-left:4px; filter:drop-shadow(0 0 8px rgba(255,215,0,0.8));">\ud83c\udfc6</span></span><br><span style="font-size:10px;text-transform:uppercase;">${d.u.name}</span></td>
+        <td class="bld ${!d.pending?'':'dim'}">${d.pending ? '\u2014' : d.runs}</td>
+        <td class="${!d.pending?'':'dim'}">${d.pending ? '\u2014' : d.hits}</td>
         <td style="${d.pending?'font-style:italic;':''}">${d.pending?'Pending':d.matchTxt}</td>
       </tr>
     `).join('');
@@ -2572,7 +2582,6 @@ async function loadScores(){
     const games=data.dates?.[0]?.games||[];
 
     currentGames = games;
-    evaluatePicks(games, todayStr);
 
     USERS.forEach(u => {
       let g = games.find(gm => gm.teams.away.team.id===u.teamId || gm.teams.home.team.id===u.teamId);
@@ -2583,7 +2592,29 @@ async function loadScores(){
       }
     });
 
-    document.getElementById('tbl-daily-front').innerHTML = await buildDailyList(games, 'front');
+    // Build Today's HR Bracket
+    const todayBracket = await buildHRBracket(games, 'hrb-tbody-today', 'hrb-podium-today', 'today');
+    // Also populate the top Daily Runs & Hits Leader board
+    const dailyFrontHtml = await buildDailyList(games, 'front');
+    const dailyFrontEl = document.getElementById('tbl-daily-front');
+    if (dailyFrontEl) dailyFrontEl.innerHTML = dailyFrontHtml;
+    if (todayBracket && todayBracket.bracketData) {
+      hrbTodayData = todayBracket.bracketData;
+      // Use HRB winner for trophy
+      const todayHRBWinner = todayBracket.winnerId;
+
+      // Determine if all games final for trophy award
+      let numFinal = 0, total = 0;
+      USERS.forEach(u => {
+        let g = games.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
+        if(g) { total++; if(g.status.abstractGameState==='Final' || g.status.abstractGameState==='Completed Early') numFinal++; }
+      });
+      if (total > 0 && numFinal === total) {
+        setTrophy(todayHRBWinner);
+      } else {
+        setTrophy(null);
+      }
+    }
 
     let yd = new Date(); yd.setDate(yd.getDate()-1);
     const ydStr = isoDate(yd);
@@ -2592,10 +2623,17 @@ async function loadScores(){
        const ydata = await yr.json();
        const ygames = ydata.dates?.[0]?.games||[];
        yesterdayGames = ygames;
-       evaluatePicks(ygames, ydStr);
-       document.getElementById('tbl-daily-back').innerHTML = await buildDailyList(ygames, 'back');
-       const yw = calcWinnerFromGames(ygames);
-       setYesterdayTrophy(yw);
+
+       // Build Yesterday's HR Bracket
+       const ydBracket = await buildHRBracket(ygames, 'hrb-tbody-yesterday', 'hrb-podium-yesterday', 'yesterday');
+       // Also populate the top Daily Runs & Hits Leader back (yesterday)
+       const dailyBackHtml = await buildDailyList(ygames, 'back');
+       const dailyBackEl = document.getElementById('tbl-daily-back');
+       if (dailyBackEl) dailyBackEl.innerHTML = dailyBackHtml;
+       if (ydBracket && ydBracket.bracketData) {
+         hrbYesterdayData = ydBracket.bracketData;
+         setYesterdayTrophy(ydBracket.winnerId);
+       }
        
        USERS.forEach(u => {
           let yg = ygames.find(gm => gm.teams.away.team.id===u.teamId || gm.teams.home.team.id===u.teamId);
@@ -2615,11 +2653,9 @@ async function loadScores(){
       renderMiniTicker(currentGames);
     }
 
-    const wid = await determineTrophyWinner(games);
-    setTrophy(wid);
-
   } catch(e) {
-    document.getElementById('tbl-daily-front').innerHTML = '<tr><td colspan="4">Error loading data.</td></tr>';
+    const tbl = document.getElementById('hrb-tbody-today');
+    if (tbl) tbl.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#f87171;">Error loading data.</td></tr>';
   }
 }
 
@@ -2753,6 +2789,7 @@ async function refreshAll(){
   const btn = document.getElementById('btn-refresh'); if(btn) btn.classList.add('is-loading');
   await Promise.all([loadScores(), loadStandings(), loadSchedule()]);
   await loadSeasonTrophies();
+  renderHRBSeasonLeaderboard();
   if(btn) btn.classList.remove('is-loading');
 }
 
@@ -2770,11 +2807,8 @@ window.openModal = openModal;
 window.closeModal = closeModal;
 window.toggleDailyLeader = toggleDailyLeader;
 window.toggleGameCard = toggleGameCard;
-window.submitDailyPick = submitDailyPick;
-window.clearPicks = clearPicks;
+window.toggleHRBracket = toggleHRBracket;
 window.refreshAll = refreshAll;
-window.loadGamesForDate = loadGamesForDate;
-window.populateWinners = populateWinners;
 window.openGameRoster = openGameRoster;
 window.openBoxScore = openBoxScore;
 window.closeBoxScore = closeBoxScore;
@@ -2818,7 +2852,7 @@ window.toggleModalImage = toggleModalImage;
 
 initLayout();
 refreshAll();
-setInterval(loadScores, 60000);
+setInterval(loadScores, 60000); // refresh HR bracket every 60s
 
 // Preload all banner GIFs and photos in background for instant popups on GitHub Pages
 window.addEventListener('load', () => {

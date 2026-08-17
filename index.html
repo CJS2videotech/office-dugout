@@ -960,6 +960,12 @@ const USERS = [
 ];
 
 let TEAM_IDS = USERS.map(u => u.teamId).join(',');
+let currentDailyWinnerId = null;
+let yesterdayDailyWinnerId = null;
+let currentHRBWinnerId = null;
+let yesterdayHRBWinnerId = null;
+let currentDailyData = [];
+let yesterdayDailyData = [];
 let currentWinnerId = null;
 let yesterdayWinnerId = null;
 let currentGames = [];
@@ -1541,12 +1547,50 @@ async function determineTrophyWinner(todayGames) {
     return null;
 }
 
+function setDailyTrophy(todayWinnerId, yesterdayWinnerId) {
+    currentDailyWinnerId = todayWinnerId;
+    window.yesterdayDailyWinnerId = yesterdayWinnerId;
+
+    document.querySelectorAll('[id^="trophy-daily-front-"]').forEach(el => el.style.display = 'none');
+    if (todayWinnerId) {
+      const fBadge = document.getElementById(`trophy-daily-front-${todayWinnerId}`);
+      if (fBadge) fBadge.style.display = 'inline-block';
+    }
+
+    document.querySelectorAll('[id^="trophy-daily-back-"]').forEach(el => el.style.display = 'none');
+    if (yesterdayWinnerId) {
+      const bBadge = document.getElementById(`trophy-daily-back-${yesterdayWinnerId}`);
+      if (bBadge) bBadge.style.display = 'inline-block';
+    }
+
+    const activeDailyLeader = todayWinnerId || yesterdayWinnerId;
+    document.querySelectorAll('[id^="trophy-roster-daily-"]').forEach(el => el.style.display = 'none');
+    if (activeDailyLeader) {
+      const rBadge = document.getElementById(`trophy-roster-daily-${activeDailyLeader}`);
+      if (rBadge) rBadge.style.display = 'flex';
+    }
+}
+
+function setHRBTrophy(todayWinnerId, yesterdayWinnerId) {
+    currentHRBWinnerId = todayWinnerId;
+    window.yesterdayHRBWinnerId = yesterdayWinnerId;
+
+    const activeHRBLeader = todayWinnerId || yesterdayWinnerId;
+    document.querySelectorAll('[id^="trophy-roster-hr-"]').forEach(el => el.style.display = 'none');
+    if (activeHRBLeader) {
+      const rBadge = document.getElementById(`trophy-roster-hr-${activeHRBLeader}`);
+      if (rBadge) rBadge.style.display = 'flex';
+    }
+}
+
 function setYesterdayTrophy(winnerId) {
     yesterdayWinnerId = winnerId;
-    document.querySelectorAll('[id^="trophy-daily-back-"]').forEach(el => el.style.display = 'none');
-    if (!winnerId) return;
-    const bBadge = document.getElementById(`trophy-daily-back-${winnerId}`);
-    if (bBadge) bBadge.style.display = 'inline-block';
+    setDailyTrophy(currentDailyWinnerId, winnerId);
+}
+
+function setTrophy(winnerId) {
+    currentWinnerId = winnerId;
+    setDailyTrophy(winnerId, yesterdayDailyWinnerId);
 }
 
 let dlIsFlipped = false;
@@ -1581,23 +1625,17 @@ function toggleGameCard(id) {
    }
 }
 
-function setTrophy(winnerId) {
-    currentWinnerId = winnerId;
-    document.querySelectorAll('[id^="trophy-roster-"]').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('[id^="trophy-daily-front-"]').forEach(el => el.style.display = 'none');
-    if (!winnerId) return;
-    const rBadge = document.getElementById(`trophy-roster-${winnerId}`);
-    if (rBadge) rBadge.style.display = 'flex';
-    const fBadge = document.getElementById(`trophy-daily-front-${winnerId}`);
-    if (fBadge) fBadge.style.display = 'inline-block';
-}
-
 /* ── ROSTER & MODAL ── */
 function initRoster(){
   const grid = document.getElementById('roster-grid');
   grid.innerHTML = USERS.map(u => `
     <div style="position:relative; display:inline-block; text-align:center;">
-      <div class="trophy-badge" id="trophy-roster-${u.id}" style="display:none; position:absolute; top:-15px; right:-15px; font-size:28px; filter:drop-shadow(0 0 15px rgba(255,215,0,1)); z-index:10; justify-content:center; align-items:center;">🏆</div>
+      <!-- Home Run Two Bat Trophy (Top-Left) -->
+      <div class="trophy-badge" id="trophy-roster-hr-${u.id}" style="display:none; position:absolute; top:-14px; left:-12px; z-index:10; justify-content:center; align-items:center;" title="Home Run Bracket Leader / Winner">
+        <img src="assets/Homerun%20Trophy.PNG" alt="HR Trophy" style="width:34px; height:34px; object-fit:contain; filter:drop-shadow(0 0 10px rgba(251,191,36,0.95));">
+      </div>
+      <!-- Daily Runs & Hits Standard Trophy (Top-Right) -->
+      <div class="trophy-badge" id="trophy-roster-daily-${u.id}" style="display:none; position:absolute; top:-15px; right:-12px; font-size:26px; filter:drop-shadow(0 0 15px rgba(255,215,0,1)); z-index:10; justify-content:center; align-items:center;" title="Daily Runs & Hits Leader">🏆</div>
       <img src="${u.photo}" 
            class="roster-thumb" 
            style="border-color:${u.secondary}" 
@@ -1653,6 +1691,26 @@ function openModal(id) {
   const tCount = seasonTrophies[u.id] || 0;
   const hrbStats = getHRBStats(u.id);
 
+  // Active leaders
+  const activeDailyLeader = currentDailyWinnerId || yesterdayDailyWinnerId;
+  const activeHRBLeader = currentHRBWinnerId || yesterdayHRBWinnerId;
+
+  // Daily Runs & Hits stats
+  const dailySource = dlIsFlipped ? (yesterdayDailyData || []) : (currentDailyData || []);
+  const dailyEntry = dailySource.find ? dailySource.find(d => d.u && d.u.id === u.id) : null;
+  const dailyStatHtml = dailyEntry && !dailyEntry.pending ? `
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); border-radius:10px; padding:8px;">
+        <div style="font-family:'Oswald',sans-serif; font-size:1.6rem; font-weight:700; color:#4ade80;">${dailyEntry.runs}</div>
+        <div style="font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Runs Today</div>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.25); border-radius:10px; padding:8px;">
+        <div style="font-family:'Oswald',sans-serif; font-size:1.6rem; font-weight:700; color:#38bdf8;">${dailyEntry.hits}</div>
+        <div style="font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Hits Today</div>
+      </div>
+    </div>
+  ` : '';
+
   // HRB stats for today/yesterday
   const hrbSource = hrbFlipped ? hrbYesterdayData : hrbTodayData;
   const hrbEntry = hrbSource.find ? hrbSource.find(d => d.u && d.u.id === u.id) : null;
@@ -1673,17 +1731,35 @@ function openModal(id) {
     </div>
   ` : '';
 
-  const trophyCountHtml = `<div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
-    <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; text-align:left; display:flex; align-items:center; margin-bottom:2px; gap:6px;">
-       <div class="b-pip" style="background:#fbbf24; width:6px; height:6px;"></div> Home Run Bracket
+  const isHRBLeader = (u.id === activeHRBLeader);
+  const isDailyLeader = (u.id === activeDailyLeader);
+
+  const trophyCountHtml = `
+    <!-- Home Run Bracket Section -->
+    <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+      <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; text-align:left; display:flex; align-items:center; margin-bottom:2px; gap:6px;">
+         <div class="b-pip" style="background:#fbbf24; width:6px; height:6px;"></div> Home Run Bracket
+      </div>
+      ${hrbStatHtml}
+      ${isHRBLeader ? `
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 16px; background:linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.05)); border:1px solid rgba(251,191,36,0.3); border-radius:20px; margin:0 auto; width:100%; box-sizing:border-box;">
+        <img src="assets/Homerun%20Trophy.PNG" alt="Home Run Trophy" style="width:24px; height:24px; object-fit:contain; filter:drop-shadow(0 0 8px rgba(251,191,36,0.8));">
+        <span style="font-family:'Oswald',sans-serif; font-size:15px; color:#fbbf24; letter-spacing:1px; font-weight:600;">Home Run Bracket Leader</span>
+      </div>` : ''}
     </div>
-    ${hrbStatHtml}
-    <div style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 16px; background:linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.05)); border:1px solid rgba(251,191,36,0.3); border-radius:20px; margin-left:auto; margin-right:auto; margin-top:4px;">
-      <img src="assets/Homerun%20Trophy.PNG" alt="Home Run Trophy" style="width:24px; height:24px; object-fit:contain; filter:drop-shadow(0 0 8px rgba(251,191,36,0.8));">
-      <span style="font-family:'Oswald',sans-serif; font-size:16px; color:#fbbf24; letter-spacing:1px; font-weight:600;">× ${tCount}</span>
-      <span style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">HR Bracket Wins</span>
+
+    <!-- Daily Runs & Hits Section -->
+    <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;">
+      <div style="font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; text-align:left; display:flex; align-items:center; margin-bottom:2px; gap:6px;">
+         <div class="b-pip" style="background:var(--green); width:6px; height:6px;"></div> Daily Runs &amp; Hits Leader
+      </div>
+      ${dailyStatHtml}
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 16px; background:linear-gradient(135deg, ${isDailyLeader ? 'rgba(255,215,0,0.15), rgba(245,158,11,0.05)' : 'rgba(255,255,255,0.03), rgba(255,255,255,0.01)'}); border:1px solid ${isDailyLeader ? 'rgba(255,215,0,0.3)' : 'var(--border)'}; border-radius:20px; margin:0 auto; width:100%; box-sizing:border-box;">
+        <span style="font-size:${isDailyLeader ? '20px' : '16px'}; filter:drop-shadow(0 0 8px rgba(255,215,0,0.8));">🏆</span>
+        <span style="font-family:'Oswald',sans-serif; font-size:15px; color:${isDailyLeader ? '#fbbf24' : 'var(--text)'}; letter-spacing:1px; font-weight:600;">${isDailyLeader ? `Daily Leader &bull; × ${tCount} Season Wins` : `× ${tCount} Season Wins`}</span>
+      </div>
     </div>
-  </div>`;
+  `;
   const dailyHtml = '';
 
   const isMe = currentUser && (currentUser.email === u.email || (currentUser.email && USERS.find(x => x.email === currentUser.email)?.id === id));
@@ -1737,6 +1813,15 @@ function openModal(id) {
     }
   }
 
+  // Determine Title Badges
+  let titleBadges = '';
+  if (u.id === activeHRBLeader) {
+    titleBadges += `<span title="Home Run Bracket Leader" style="display:inline-flex; align-items:center; margin-left:8px; vertical-align:middle;"><img src="assets/Homerun%20Trophy.PNG" alt="Home Run Trophy" style="width:30px; height:30px; object-fit:contain; filter:drop-shadow(0 0 10px rgba(251,191,36,0.95));"></span>`;
+  }
+  if (u.id === activeDailyLeader) {
+    titleBadges += `<span title="Daily Runs & Hits Leader" style="font-size:28px; filter:drop-shadow(0 0 15px rgba(255,215,0,1)); margin-left:8px; vertical-align:middle;">🏆</span>`;
+  }
+
   body.innerHTML = `
     <button class="modal-close" onclick="closeModal(event)">&times;</button>
     <div style="position:relative; display:inline-block; margin:0 auto;">
@@ -1747,7 +1832,7 @@ function openModal(id) {
     </div>
     <div class="modal-info">
       <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:5px;">
-        <div class="modal-name" style="color:${u.secondary};${u.glow||''} margin-bottom:0;">${u.name} ${currentWinnerId === u.id ? `<span style="font-size:32px; filter:drop-shadow(0 0 15px rgba(255,215,0,1)); margin-left:8px; vertical-align:middle;">🏆</span>` : ''}</div>
+        <div class="modal-name" style="color:${u.secondary};${u.glow||''} margin-bottom:0;">${u.name} ${titleBadges}</div>
         <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" style="width:36px; height:36px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
       </div>
       <div class="modal-team">${u.teamName}</div>
@@ -2562,14 +2647,19 @@ async function buildDailyList(apiGames, prefix) {
       return 0;
     });
 
-    return dailyData.map(d => `
+    const leader = dailyData.find(d => !d.pending && (d.runs > 0 || d.hits > 0));
+    const winnerId = leader ? leader.u.id : null;
+
+    const html = dailyData.map(d => `
       <tr class="row-${d.u.id}">
-        <td><span class="team-name" style="color:${d.u.secondary};${d.u.glow||''}">${d.u.teamName} <span class="trophy-badge" id="trophy-daily-${prefix}-${d.u.id}" style="display:none; font-size:14px; margin-left:4px; filter:drop-shadow(0 0 8px rgba(255,215,0,0.8));">\ud83c\udfc6</span></span><br><span style="font-size:10px;text-transform:uppercase;">${d.u.name}</span></td>
-        <td class="bld ${!d.pending?'':'dim'}">${d.pending ? '\u2014' : d.runs}</td>
-        <td class="${!d.pending?'':'dim'}">${d.pending ? '\u2014' : d.hits}</td>
+        <td><span class="team-name" style="color:${d.u.secondary};${d.u.glow||''}">${d.u.teamName} <span class="trophy-badge" id="trophy-daily-${prefix}-${d.u.id}" style="display:none; font-size:14px; margin-left:4px; filter:drop-shadow(0 0 8px rgba(255,215,0,0.8));">🏆</span></span><br><span style="font-size:10px;text-transform:uppercase;">${d.u.name}</span></td>
+        <td class="bld ${!d.pending?'':'dim'}">${d.pending ? '—' : d.runs}</td>
+        <td class="${!d.pending?'':'dim'}">${d.pending ? '—' : d.hits}</td>
         <td style="${d.pending?'font-style:italic;':''}">${d.pending?'Pending':d.matchTxt}</td>
       </tr>
     `).join('');
+
+    return { html, winnerId, dailyData };
 }
 
 async function loadScores(){
@@ -2595,26 +2685,33 @@ async function loadScores(){
     // Build Today's HR Bracket
     const todayBracket = await buildHRBracket(games, 'hrb-tbody-today', 'hrb-podium-today', 'today');
     // Also populate the top Daily Runs & Hits Leader board
-    const dailyFrontHtml = await buildDailyList(games, 'front');
+    const dailyFrontResult = await buildDailyList(games, 'front');
     const dailyFrontEl = document.getElementById('tbl-daily-front');
-    if (dailyFrontEl) dailyFrontEl.innerHTML = dailyFrontHtml;
+    if (dailyFrontEl) dailyFrontEl.innerHTML = dailyFrontResult.html;
+    currentDailyData = dailyFrontResult.dailyData;
+
+    let todayDailyWinner = dailyFrontResult.winnerId;
+    let todayHRBWinner = (todayBracket && todayBracket.bracketData) ? todayBracket.winnerId : null;
+
     if (todayBracket && todayBracket.bracketData) {
       hrbTodayData = todayBracket.bracketData;
-      // Use HRB winner for trophy
-      const todayHRBWinner = todayBracket.winnerId;
+    }
 
-      // Determine if all games final for trophy award
-      let numFinal = 0, total = 0;
-      USERS.forEach(u => {
-        let g = games.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
-        if(g) { total++; if(g.status.abstractGameState==='Final' || g.status.abstractGameState==='Completed Early') numFinal++; }
-      });
-      if (total > 0 && numFinal === total) {
-        setTrophy(todayHRBWinner);
-      } else {
-        setTrophy(null);
+    // Determine if all games final for today's award
+    let numFinal = 0, total = 0;
+    USERS.forEach(u => {
+      let g = games.find(gm => gm.teams.away.team.id === u.teamId || gm.teams.home.team.id === u.teamId);
+      if(g) { total++; if(g.status.abstractGameState==='Final' || g.status.abstractGameState==='Completed Early') numFinal++; }
+    });
+    if (total === 0 || numFinal !== total) {
+      if (!games.some(g => g.status.abstractGameState === 'Live' || g.status.abstractGameState === 'In Progress' || g.status.abstractGameState === 'Final')) {
+        todayDailyWinner = null;
+        todayHRBWinner = null;
       }
     }
+
+    currentDailyWinnerId = todayDailyWinner;
+    currentHRBWinnerId = todayHRBWinner;
 
     let yd = new Date(); yd.setDate(yd.getDate()-1);
     const ydStr = isoDate(yd);
@@ -2626,14 +2723,21 @@ async function loadScores(){
 
        // Build Yesterday's HR Bracket
        const ydBracket = await buildHRBracket(ygames, 'hrb-tbody-yesterday', 'hrb-podium-yesterday', 'yesterday');
-       // Also populate the top Daily Runs & Hits Leader back (yesterday)
-       const dailyBackHtml = await buildDailyList(ygames, 'back');
-       const dailyBackEl = document.getElementById('tbl-daily-back');
-       if (dailyBackEl) dailyBackEl.innerHTML = dailyBackHtml;
        if (ydBracket && ydBracket.bracketData) {
          hrbYesterdayData = ydBracket.bracketData;
-         setYesterdayTrophy(ydBracket.winnerId);
+         yesterdayHRBWinnerId = ydBracket.winnerId;
        }
+
+       // Also populate the top Daily Runs & Hits Leader back (yesterday)
+       const dailyBackResult = await buildDailyList(ygames, 'back');
+       const dailyBackEl = document.getElementById('tbl-daily-back');
+       if (dailyBackEl) dailyBackEl.innerHTML = dailyBackResult.html;
+       yesterdayDailyData = dailyBackResult.dailyData;
+       yesterdayDailyWinnerId = dailyBackResult.winnerId;
+
+       // Set trophies for both separate competitions!
+       setDailyTrophy(currentDailyWinnerId, yesterdayDailyWinnerId);
+       setHRBTrophy(currentHRBWinnerId, yesterdayHRBWinnerId);
        
        USERS.forEach(u => {
           let yg = ygames.find(gm => gm.teams.away.team.id===u.teamId || gm.teams.home.team.id===u.teamId);

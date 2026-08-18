@@ -1015,6 +1015,42 @@ let hrbFlipped = false;
 let hrbTodayData = [];
 let hrbYesterdayData = [];
 
+// Cache for boxscores to avoid redundant network requests
+const boxscoreCache = new Map();
+
+async function fetchBoxscoreCached(gamePk, status) {
+  // If we already have the promise for this game, return it
+  if (boxscoreCache.has(gamePk)) {
+    return boxscoreCache.get(gamePk);
+  }
+
+  // Create the fetch promise
+  const fetchPromise = fetch(`${MLB}/game/${gamePk}/boxscore`)
+    .then(r => {
+      if (!r.ok) throw new Error("Could not fetch boxscore");
+      return r.json();
+    });
+
+  // Store in cache
+  boxscoreCache.set(gamePk, fetchPromise);
+
+  try {
+    const data = await fetchPromise;
+    // If the game is not final, remove it from the cache after 15 seconds
+    // so subsequent polls (every 60s) will get fresh data
+    if (status !== 'Final' && status !== 'Completed Early') {
+      setTimeout(() => {
+        boxscoreCache.delete(gamePk);
+      }, 15000);
+    }
+    return data;
+  } catch (err) {
+    // On error, clear the cache so we can try again
+    boxscoreCache.delete(gamePk);
+    throw err;
+  }
+}
+
 function toggleHRBracket() {
   hrbFlipped = !hrbFlipped;
   document.getElementById('hrb-flipper').classList.toggle('is-flipped');
@@ -1055,8 +1091,7 @@ async function buildHRBracket(apiGames, tbodyId, podiumId, prefix) {
         pending = false;
         matchTxt = (st === 'Live' || st === 'In Progress') ? 'Live' : 'Final';
         try {
-          const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
-          const bx = await rBox.json();
+          const bx = await fetchBoxscoreCached(g.gamePk, st);
           const teamStats = bx.teams?.[tr]?.teamStats?.batting || {};
           hr   = teamStats.homeRuns || 0;
           hits = teamStats.hits || 0;

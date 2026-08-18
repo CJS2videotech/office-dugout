@@ -694,7 +694,7 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
 <!-- Authentication Modal -->
 <div class="modal-overlay" id="auth-modal" onclick="closeAuthModal(event)">
   <div class="modal-content glass" style="max-width: 400px; padding: 2rem;">
-    <button class="modal-close" onclick="closeAuthModal(event)">&times;</button>
+    <button aria-label="Close dialog" class="modal-close" onclick="closeAuthModal(event)">&times;</button>
     <div style="font-family:'Oswald',sans-serif; font-size:1.5rem; letter-spacing:1px; text-transform:uppercase; margin-bottom:1rem; display:flex; align-items:center; justify-content:center; gap:8px;">
       <div class="b-pip" style="background:var(--green);"></div> Friend Sign In
     </div>
@@ -703,11 +703,11 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
 
     <form id="auth-form" onsubmit="handleAuthSubmit(event)">
       <div style="margin-bottom:1rem; text-align:left;">
-        <label class="dp-label">Email Address</label>
+        <label for="auth-email" class="dp-label">Email Address</label>
         <input type="email" id="auth-email" required class="dp-select" placeholder="you@example.com" style="background:rgba(0,0,0,0.6); font-family:inherit; text-align:left;">
       </div>
       <div style="margin-bottom:1.5rem; text-align:left;">
-        <label class="dp-label">Password</label>
+        <label for="auth-password" class="dp-label">Password</label>
         <input type="password" id="auth-password" required class="dp-select" placeholder="••••••••" style="background:rgba(0,0,0,0.6); font-family:inherit; text-align:left;">
       </div>
       <button type="submit" class="dp-btn" id="auth-submit-btn">Sign In</button>
@@ -882,7 +882,7 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
 
 <div class="modal-overlay" id="instructions-modal" onclick="closeInstructions(event)">
   <div class="modal-content glass" style="max-width: 800px; padding: 1.5rem; width: 95%;">
-    <button class="modal-close" onclick="closeInstructions(event)">&times;</button>
+    <button aria-label="Close dialog" class="modal-close" onclick="closeInstructions(event)">&times;</button>
     <div style="text-align:left; font-family:'Oswald',sans-serif; font-size:1.2rem; letter-spacing:1px; text-transform:uppercase; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
       <div class="b-pip" style="background:#3b82f6;"></div> User Guide
     </div>
@@ -1772,7 +1772,7 @@ function openModal(id) {
           <div class="b-pip" style="background:${u.secondary}; width:6px; height:6px;"></div> Personal Settings
         </div>
         <div style="margin-bottom:10px;">
-          <label class="dp-label">Favorite MLB Team</label>
+          <label for="settings-team" class="dp-label">Favorite MLB Team</label>
           <div class="select-wrap">
             <select id="settings-team" class="dp-select" onchange="updateFavoriteTeam(this.value)">
               ${options}
@@ -1780,14 +1780,14 @@ function openModal(id) {
           </div>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-          <span style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px;">Sort My Column First</span>
+          <label for="settings-sort-first" style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer;">Sort My Column First</label>
           <label class="switch">
             <input type="checkbox" id="settings-sort-first" ${userPreferences.sortFirst ? 'checked' : ''} onchange="toggleSortFirst(this.checked)">
             <span class="slider"></span>
           </label>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-          <span style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px;">Compact View (Hide Standings)</span>
+          <label for="settings-compact" style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer;">Compact View (Hide Standings)</label>
           <label class="switch">
             <input type="checkbox" id="settings-compact" ${userPreferences.compact ? 'checked' : ''} onchange="toggleCompactView(this.checked)">
             <span class="slider"></span>
@@ -1823,7 +1823,7 @@ function openModal(id) {
   }
 
   body.innerHTML = `
-    <button class="modal-close" onclick="closeModal(event)">&times;</button>
+    <button aria-label="Close dialog" class="modal-close" onclick="closeModal(event)">&times;</button>
     <div style="position:relative; display:inline-block; margin:0 auto;">
       <img id="modal-user-img" data-mode="banner" src="${u.banner}" class="modal-img" style="border-color:${u.secondary}; cursor:pointer;" onclick="toggleModalImage('${u.id}')" onerror="handleImgError(this)" title="Click to toggle Photo / GIF Banner">
       <div id="modal-img-badge" onclick="toggleModalImage('${u.id}')" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); border:1px solid ${u.secondary}; color:#fff; font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:12px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,0.5); user-select:none;">
@@ -2007,7 +2007,7 @@ async function openBoxScore(gamePk, e) {
   
   modal.classList.add('open');
   body.innerHTML = `
-    <button class="modal-close" onclick="closeBoxScore(event)">&times;</button>
+    <button aria-label="Close dialog" class="modal-close" onclick="closeBoxScore(event)">&times;</button>
     <div style="text-align:center; padding: 3rem 0; color:var(--muted); font-family:'Oswald',sans-serif; letter-spacing:1px; display:flex; flex-direction:column; align-items:center; gap:12px;">
       <div class="spin" style="display:block; width:28px; height:28px; border-width:3px;"></div>
       LOADING POST-GAME BOX SCORE...
@@ -2028,7 +2028,7 @@ async function openBoxScore(gamePk, e) {
   } catch (err) {
     console.error("Boxscore load error:", err);
     body.innerHTML = `
-      <button class="modal-close" onclick="closeBoxScore(event)">&times;</button>
+      <button aria-label="Close dialog" class="modal-close" onclick="closeBoxScore(event)">&times;</button>
       <div style="text-align:center; padding:2rem; color:#f87171;">
         <div style="font-family:'Oswald',sans-serif; font-size:1.4rem; margin-bottom:8px;">Unable to Load Box Score</div>
         <div style="font-size:12px; color:var(--muted); margin-bottom:15px;">Data may be temporarily unavailable from MLB Stats API.</div>
@@ -2294,7 +2294,7 @@ function renderBoxScoreContent(gamePk, box, line) {
   const isViewingYesterday = (yesterdayGames || []).some(g => g.gamePk === gamePk);
 
   body.innerHTML = `
-    <button class="modal-close" onclick="closeBoxScore(event)">&times;</button>
+    <button aria-label="Close dialog" class="modal-close" onclick="closeBoxScore(event)">&times;</button>
     
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px;">
       <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
@@ -2486,7 +2486,7 @@ async function openPreviousDayBoxScoresModal(targetDateStr) {
   prevBoxScoresDate = targetDateStr;
 
   body.innerHTML = `
-    <button class="modal-close" onclick="closePrevBoxScoresModal(event)">&times;</button>
+    <button aria-label="Close dialog" class="modal-close" onclick="closePrevBoxScoresModal(event)">&times;</button>
     <div style="text-align:center; padding: 3rem 0; color:var(--muted); font-family:'Oswald',sans-serif; letter-spacing:1px; display:flex; flex-direction:column; align-items:center; gap:12px;">
       <div class="spin" style="display:block; width:28px; height:28px; border-width:3px;"></div>
       LOADING PREVIOUS DAY BOX SCORES...
@@ -2504,7 +2504,7 @@ async function openPreviousDayBoxScoresModal(targetDateStr) {
   } catch (err) {
     console.error("Error loading previous day box scores:", err);
     body.innerHTML = `
-      <button class="modal-close" onclick="closePrevBoxScoresModal(event)">&times;</button>
+      <button aria-label="Close dialog" class="modal-close" onclick="closePrevBoxScoresModal(event)">&times;</button>
       <div style="text-align:center; padding:2rem; color:#f87171;">
         <div style="font-family:'Oswald',sans-serif; font-size:1.4rem; margin-bottom:8px;">Unable to Load Box Scores</div>
         <div style="font-size:12px; color:var(--muted); margin-bottom:15px;">Could not fetch games for ${targetDateStr}.</div>
@@ -2577,7 +2577,7 @@ function renderPrevBoxScoresContent(targetDateStr, games) {
   }
 
   body.innerHTML = `
-    <button class="modal-close" onclick="closePrevBoxScoresModal(event)">&times;</button>
+    <button aria-label="Close dialog" class="modal-close" onclick="closePrevBoxScoresModal(event)">&times;</button>
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.25rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
       <div>
         <div style="font-family:'Oswald',sans-serif; font-size:1.5rem; letter-spacing:1px; text-transform:uppercase; color:#fff; display:flex; align-items:center; gap:8px;">

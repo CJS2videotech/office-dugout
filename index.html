@@ -1041,6 +1041,31 @@ function calcHRBracketWinner(bracketData) {
   return sorted[0].u.id;
 }
 
+const boxscoreCache = new Map();
+
+async function getGameBoxscore(gamePk, status) {
+  const isFinal = status === 'Final' || status === 'Completed Early';
+
+  if (boxscoreCache.has(gamePk)) {
+    return boxscoreCache.get(gamePk);
+  }
+
+  const promise = fetch(`${MLB}/game/${gamePk}/boxscore`).then(r => r.json());
+  boxscoreCache.set(gamePk, promise);
+
+  try {
+    const data = await promise;
+    // Only keep cache for completed games, let live games fetch fresh next time
+    if (!isFinal) {
+      boxscoreCache.delete(gamePk);
+    }
+    return data;
+  } catch (err) {
+    boxscoreCache.delete(gamePk);
+    throw err;
+  }
+}
+
 async function buildHRBracket(apiGames, tbodyId, podiumId, prefix) {
   let bracketData = [];
 
@@ -1055,8 +1080,7 @@ async function buildHRBracket(apiGames, tbodyId, podiumId, prefix) {
         pending = false;
         matchTxt = (st === 'Live' || st === 'In Progress') ? 'Live' : 'Final';
         try {
-          const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
-          const bx = await rBox.json();
+          const bx = await getGameBoxscore(g.gamePk, st);
           const teamStats = bx.teams?.[tr]?.teamStats?.batting || {};
           hr   = teamStats.homeRuns || 0;
           hits = teamStats.hits || 0;
@@ -1497,6 +1521,9 @@ async function fetchDailyWinner(dateStr) {
   } catch (e) { return null; }
 }
 
+let cachedSeasonTrophies = null;
+let cachedSeasonTrophiesEndStr = null;
+
 async function loadSeasonTrophies() {
   USERS.forEach(u => seasonTrophies[u.id] = 0);
   const start = new Date(SEASON_START + 'T12:00:00');
@@ -1504,6 +1531,13 @@ async function loadSeasonTrophies() {
   const startStr = isoDate(start);
   const endStr = isoDate(yesterday);
   if (start > yesterday) return;
+
+  // Use cached data if available for the same end date
+  if (cachedSeasonTrophies && cachedSeasonTrophiesEndStr === endStr) {
+    Object.assign(seasonTrophies, cachedSeasonTrophies);
+    return;
+  }
+
   try {
     const url = `${MLB}/schedule?sportId=1&startDate=${startStr}&endDate=${endStr}&teamId=${TEAM_IDS}&hydrate=team,linescore&gameType=R`;
     const r = await fetch(url);
@@ -1521,6 +1555,10 @@ async function loadSeasonTrophies() {
       }
       curr.setDate(curr.getDate() + 1);
     }
+
+    // Cache the result
+    cachedSeasonTrophies = { ...seasonTrophies };
+    cachedSeasonTrophiesEndStr = endStr;
   } catch(e) { console.log('Season trophy scan error', e); }
 }
 

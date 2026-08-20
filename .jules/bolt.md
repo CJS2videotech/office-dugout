@@ -1,0 +1,3 @@
+## 2024-08-20 - Cache Finalized Yesterday Scores
+**Learning:** The application polls the MLB API every 60 seconds (via `loadScores()`). Polling yesterday's data constantly is inefficient once games have concluded, as the data doesn't change anymore, representing a significant source of redundant network activity in this specific architecture.
+**Action:** Implemented a client-side memory cache that intercepts yesterday's response. If all parsed games have a status of 'Final' or 'Completed Early', the raw data is cached to `window._cachedYesterdayData`, skipping the subsequent fetch payloads and processing logic from memory on every future tick.

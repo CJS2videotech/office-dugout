@@ -2715,9 +2715,8 @@ async function loadScores(){
 
     let yd = new Date(); yd.setDate(yd.getDate()-1);
     const ydStr = isoDate(yd);
-    const yurl=`${MLB}/schedule?sportId=1&date=${ydStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
-    fetch(yurl).then(async yr => {
-       const ydata = await yr.json();
+
+    const processYesterdayData = async (ydata) => {
        const ygames = ydata.dates?.[0]?.games||[];
        yesterdayGames = ygames;
 
@@ -2751,7 +2750,24 @@ async function loadScores(){
        if (activeTickerMode === 'yesterday') {
          renderMiniTicker(yesterdayGames);
        }
-    }).catch(e=>{});
+    };
+
+    if (window._cachedYdStr === ydStr && window._cachedYesterdayData) {
+        processYesterdayData(window._cachedYesterdayData).catch(e=>{});
+    } else {
+        const yurl=`${MLB}/schedule?sportId=1&date=${ydStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
+        fetch(yurl).then(async yr => {
+           const ydata = await yr.json();
+           const ygames = ydata.dates?.[0]?.games||[];
+
+           let allFinal = ygames.length > 0 && ygames.every(g => g.status.abstractGameState === 'Final' || g.status.abstractGameState === 'Completed Early');
+           if (allFinal) {
+               window._cachedYdStr = ydStr;
+               window._cachedYesterdayData = ydata;
+           }
+           processYesterdayData(ydata).catch(e=>{});
+        }).catch(e=>{});
+    }
 
     if (activeTickerMode === 'today') {
       renderMiniTicker(currentGames);

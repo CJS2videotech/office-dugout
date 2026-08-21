@@ -1,0 +1,3 @@
+## 2026-08-21 - [Client-side API payload caching on polling app]
+**Learning:** This vanilla JS frontend relies heavily on aggressive 60-second polling (`loadScores()`). Polling loops create race conditions when combining cached network data logic with independent DOM manipulation logic. Caching a network response but skipping the surrounding parsing and DOM updating logic causes the UI to freeze and fail to respond to other app state changes.
+**Action:** When optimizing a polling function, strictly cache the API response object/payload or specific sub-data components (e.g. `window.boxscoreCache[gamePk] = stats`) and inject them back into the standard rendering pipeline. Do not prematurely break or return from the polling loop because that bypasses downstream UI updates.

@@ -1055,9 +1055,24 @@ async function buildHRBracket(apiGames, tbodyId, podiumId, prefix) {
         pending = false;
         matchTxt = (st === 'Live' || st === 'In Progress') ? 'Live' : 'Final';
         try {
-          const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
-          const bx = await rBox.json();
-          const teamStats = bx.teams?.[tr]?.teamStats?.batting || {};
+          let teamStats;
+          window.boxscoreCache = window.boxscoreCache || {};
+          const isFinal = (st === 'Final' || st === 'Completed Early');
+          if (isFinal && window.boxscoreCache[g.gamePk]) {
+            teamStats = window.boxscoreCache[g.gamePk]?.[tr] || {};
+          } else {
+            const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
+            const bx = await rBox.json();
+            if (isFinal) {
+              window.boxscoreCache[g.gamePk] = {
+                away: bx.teams?.away?.teamStats?.batting || {},
+                home: bx.teams?.home?.teamStats?.batting || {}
+              };
+              teamStats = window.boxscoreCache[g.gamePk]?.[tr] || {};
+            } else {
+              teamStats = bx.teams?.[tr]?.teamStats?.batting || {};
+            }
+          }
           hr   = teamStats.homeRuns || 0;
           hits = teamStats.hits || 0;
           tb   = teamStats.totalBases || 0;

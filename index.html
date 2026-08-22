@@ -977,6 +977,8 @@ const seasonTrophies = {};
 USERS.forEach(u => seasonTrophies[u.id] = 0);
 const SEASON_START = '2026-03-20';
 
+const boxscoreCache = {};
+
 const MLB_TEAMS = [
   { id: 109, name: 'D-backs', abbr: 'AZ' },
   { id: 144, name: 'Braves', abbr: 'ATL' },
@@ -1055,8 +1057,19 @@ async function buildHRBracket(apiGames, tbodyId, podiumId, prefix) {
         pending = false;
         matchTxt = (st === 'Live' || st === 'In Progress') ? 'Live' : 'Final';
         try {
-          const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
-          const bx = await rBox.json();
+          let bx;
+          const isFinalized = st === 'Final' || st === 'Completed Early';
+
+          if (isFinalized && boxscoreCache[g.gamePk]) {
+            bx = boxscoreCache[g.gamePk];
+          } else {
+            const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
+            bx = await rBox.json();
+            if (isFinalized) {
+              boxscoreCache[g.gamePk] = bx;
+            }
+          }
+
           const teamStats = bx.teams?.[tr]?.teamStats?.batting || {};
           hr   = teamStats.homeRuns || 0;
           hits = teamStats.hits || 0;

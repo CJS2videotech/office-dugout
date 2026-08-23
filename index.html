@@ -960,6 +960,7 @@ const USERS = [
 ];
 
 let TEAM_IDS = USERS.map(u => u.teamId).join(',');
+window.apiCache = window.apiCache || {};
 let currentDailyWinnerId = null;
 let yesterdayDailyWinnerId = null;
 let currentHRBWinnerId = null;
@@ -1055,8 +1056,24 @@ async function buildHRBracket(apiGames, tbodyId, podiumId, prefix) {
         pending = false;
         matchTxt = (st === 'Live' || st === 'In Progress') ? 'Live' : 'Final';
         try {
-          const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
-          const bx = await rBox.json();
+          let bx;
+          if (st === 'Final' || st === 'Completed Early') {
+            // ⚡ Bolt: Cache API response for finalized games to prevent redundant fetching on the 60s poll.
+            // Caching the Promise itself resolves concurrent in-flight duplication.
+            if (!window.apiCache[g.gamePk]) {
+              window.apiCache[g.gamePk] = fetch(`${MLB}/game/${g.gamePk}/boxscore`)
+                .then(r => r.json())
+                .catch(err => {
+                  // Clean up failed promises so we try again next poll
+                  delete window.apiCache[g.gamePk];
+                  throw err;
+                });
+            }
+            bx = await window.apiCache[g.gamePk];
+          } else {
+            const rBox = await fetch(`${MLB}/game/${g.gamePk}/boxscore`);
+            bx = await rBox.json();
+          }
           const teamStats = bx.teams?.[tr]?.teamStats?.batting || {};
           hr   = teamStats.homeRuns || 0;
           hits = teamStats.hits || 0;

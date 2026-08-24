@@ -1,3 +1,7 @@
 ## 2024-05-23 - [Client-Side API Payload Caching]
 **Learning:** The application aggressively polls the MLB Stats API every 60 seconds. For historical data (like yesterday's schedule and completed game boxscores), these repeated calls are redundant and waste bandwidth/CPU, especially since they can trigger 7+ boxscore requests per poll. Concurrent requests in Promise.all for the same game cause duplicate network requests.
 **Action:** Implemented `window.apiCache` to memoize Promises for endpoints where `g.status.abstractGameState` is 'Final' or 'Completed Early'. Caching the Promise itself resolves concurrent request duplication and ensures the cached data is correctly injected into the normal rendering pipeline.
+
+## 2024-05-23 - [Schedule API Response Caching]
+**Learning:** The 60-second polling mechanism fetches the full hydrated schedule (including linescores, league records, and probable pitchers) for both today and yesterday. If all games in a day's schedule are 'Final' or 'Completed Early', the state will not change again, making subsequent requests redundant and wasting bandwidth.
+**Action:** Implemented caching for the entire schedule payload via `window.apiCache` when all games are final. By caching the fetch Promise itself, we resolve duplicate requests on load and avoid fetching the same huge payload every 60 seconds indefinitely. For non-final states, the promise is immediately evicted from the cache to allow the next poll to fetch fresh data.

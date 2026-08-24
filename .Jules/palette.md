@@ -1,3 +1,3 @@
-## 2024-05-24 - Add accessible labels to UI components
-**Learning:** Vanilla HTML and JS string templates are prone to missing essential accessibility attributes like `aria-label` for icon-only buttons (e.g., modal close buttons `&times;`) and `for` attributes linking labels to inputs. This breaks screen reader functionality, making UI elements unnavigable for visually impaired users.
-**Action:** Always ensure that icon-only interactive elements contain a descriptive `aria-label` and all `<label>` elements explicitly link to their target input via the `for` attribute, even when using JS string templates for rendering UI dynamically.
+## 2024-06-25 - Improve Roster Thumb and Input Accessibility
+**Learning:** Found an accessibility issue pattern specific to this app's components where interactive elements like roster thumbnails and custom toggle settings lacked keyboard navigation, focus states, and semantic linkage (using `<span>` instead of `<label>`).
+**Action:** Always ensure custom interactive elements receive `tabindex="0"`, `role="button"`, and keyboard event handlers (Enter/Space), and enforce that text labels corresponding to form inputs are explicitly linked using `<label for="...">` rather than floating text.

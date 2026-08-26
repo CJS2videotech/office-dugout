@@ -1797,14 +1797,14 @@ function openModal(id) {
           </div>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-          <span style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px;">Sort My Column First</span>
+          <label for="settings-sort-first" style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; flex:1;">Sort My Column First</label>
           <label class="switch">
             <input type="checkbox" id="settings-sort-first" ${userPreferences.sortFirst ? 'checked' : ''} onchange="toggleSortFirst(this.checked)">
             <span class="slider"></span>
           </label>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-          <span style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px;">Compact View (Hide Standings)</span>
+          <label for="settings-compact" style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; flex:1;">Compact View (Hide Standings)</label>
           <label class="switch">
             <input type="checkbox" id="settings-compact" ${userPreferences.compact ? 'checked' : ''} onchange="toggleCompactView(this.checked)">
             <span class="slider"></span>
@@ -2605,7 +2605,7 @@ function renderPrevBoxScoresContent(targetDateStr, games) {
       <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <button onclick="openPreviousDayBoxScoresModal('${yesterdayStr}')" class="bs-tab-btn ${targetDateStr === yesterdayStr ? 'active' : ''}" style="padding:6px 12px; font-size:11px;">Yesterday</button>
         <button onclick="openPreviousDayBoxScoresModal('${twoDaysAgoStr}')" class="bs-tab-btn ${targetDateStr === twoDaysAgoStr ? 'active' : ''}" style="padding:6px 12px; font-size:11px;">2 Days Ago</button>
-        <input type="date" value="${targetDateStr}" onchange="openPreviousDayBoxScoresModal(this.value)" class="dp-select" style="width:auto; padding:5px 10px; font-size:12px; height:32px;">
+        <input type="date" aria-label="Select Date" value="${targetDateStr}" onchange="openPreviousDayBoxScoresModal(this.value)" class="dp-select" style="width:auto; padding:5px 10px; font-size:12px; height:32px;">
       </div>
     </div>
     ${gameCardsHtml}

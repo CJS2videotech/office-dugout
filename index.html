@@ -2541,10 +2541,12 @@ async function openPreviousDayBoxScoresModal(targetDateStr) {
       <button class="modal-close" onclick="closePrevBoxScoresModal(event)" aria-label="Close modal">&times;</button>
       <div style="text-align:center; padding:2rem; color:#f87171;">
         <div style="font-family:'Oswald',sans-serif; font-size:1.4rem; margin-bottom:8px;">Unable to Load Box Scores</div>
-        <div style="font-size:12px; color:var(--muted); margin-bottom:15px;">Could not fetch games for ${targetDateStr}.</div>
-        <button onclick="openPreviousDayBoxScoresModal('${targetDateStr}')" class="rbtn" style="margin:0 auto; padding:6px 16px;">Try Again</button>
+        <div id="prev-boxscores-error-msg" style="font-size:12px; color:var(--muted); margin-bottom:15px;"></div>
+        <button id="prev-boxscores-retry-btn" class="rbtn" style="margin:0 auto; padding:6px 16px;">Try Again</button>
       </div>
     `;
+    document.getElementById('prev-boxscores-error-msg').textContent = `Could not fetch games for ${targetDateStr}.`;
+    document.getElementById('prev-boxscores-retry-btn').addEventListener('click', () => openPreviousDayBoxScoresModal(targetDateStr));
   }
 }
 

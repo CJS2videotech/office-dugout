@@ -2664,7 +2664,7 @@ async function buildDailyList(apiGames, prefix) {
 
 async function loadScores(){
   const todayStr=isoDate(new Date());
-  const url=`${MLB}/schedule?sportId=1&date=${todayStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
+  const url=`${MLB}/schedule?sportId=1&date=${todayStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher,boxscore`;
   try {
     const r=await fetch(url);
     if(!r.ok) throw new Error();
@@ -2715,7 +2715,7 @@ async function loadScores(){
 
     let yd = new Date(); yd.setDate(yd.getDate()-1);
     const ydStr = isoDate(yd);
-    const yurl=`${MLB}/schedule?sportId=1&date=${ydStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
+    const yurl=`${MLB}/schedule?sportId=1&date=${ydStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher,boxscore`;
     fetch(yurl).then(async yr => {
        const ydata = await yr.json();
        const ygames = ydata.dates?.[0]?.games||[];

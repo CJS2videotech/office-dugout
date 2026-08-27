@@ -1,0 +1,15 @@
+{
+  "name": "office-dugout",
+  "version": "1.0.0",
+  "description": "Office Dugout \u26be\ufe0f",
+  "main": "index.html",
+  "scripts": {
+    "test": "node calcWinnerFromGames.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  }
+}

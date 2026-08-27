@@ -1967,18 +1967,22 @@ function renderGame(g, isSchedule=false){
   const aSty = getTeamStyle(awayId, '#fff');
   const hSty = getTeamStyle(homeId, '#fff');
   const status=g.status.abstractGameState; 
-  const isLive=status==='Live', isFinal=status==='Final';
+  const isLive=status==='Live'||status==='In Progress', isFinal=status==='Final'||status==='Completed Early';
   const awayS=away.score??'', homeS=home.score??'';
   const hasScore=isLive||isFinal;
   const awayW=isFinal&&parseInt(awayS)>parseInt(homeS);
   const homeW=isFinal&&parseInt(homeS)>parseInt(awayS);
   
-  let ss='', sc='', badge='';
+  let ss='', sc='', badge='', bsoHtml='';
   if(isLive){
     const inn=g.linescore?.currentInningOrdinal||'';
     const half=g.linescore?.inningHalf||'';
     ss=`${half} ${inn}`.trim(); sc='live';
     badge=`<div class="live-badge">LIVE</div>`;
+
+    if (g.linescore && g.linescore.balls !== undefined && g.linescore.strikes !== undefined && g.linescore.outs !== undefined) {
+      bsoHtml = `<div style="font-size:9px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:1px; margin-top:2px;">${g.linescore.balls}-${g.linescore.strikes}, ${g.linescore.outs} OUT${g.linescore.outs === 1 ? '' : 'S'}</div>`;
+    }
   } else if(isFinal){ ss='Final'; } else { ss=fmtTime(g.gameDate); }
 
   if(isSchedule){
@@ -2000,6 +2004,7 @@ function renderGame(g, isSchedule=false){
       <div class="smid">
         ${hasScore?`<div class="score">${awayS}–${homeS}</div>`:`<div class="vs-txt">vs</div>`}
         <div class="gstat ${sc}">${ss}</div>
+        ${bsoHtml}
       </div>
       <div class="tm home">
         <div class="tm-abbr ${isFinal&&!homeW?'dim':''}" style="${hSty}">${getTeamAbbr(home.team)}</div>

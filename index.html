@@ -1370,8 +1370,7 @@ function subscribeToPicks() {
     snapshot.forEach((docSnap) => {
       dpHistory.push(docSnap.data());
     });
-    renderLeaderboard();
-    renderRecentPicks();
+    renderHRBSeasonLeaderboard();
   });
 }
 
@@ -1423,8 +1422,7 @@ if (firebaseActive) {
       }
       
       dpHistory = JSON.parse(localStorage.getItem('officeDailyPicks')) || [];
-      renderLeaderboard();
-      renderRecentPicks();
+      renderHRBSeasonLeaderboard();
     }
     initLayout();
     refreshAll();
@@ -1437,24 +1435,6 @@ if (firebaseActive) {
   }
 }
 
-// loadGamesForDate removed – Daily Pick form replaced by Home Run Bracket
-async function loadGamesForDate() { /* no-op stub */ }
-
-// populateWinners, submitDailyPick, clearPicks – removed (no longer needed)
-function populateWinners() { /* no-op stub */ }
-async function submitDailyPick() { /* no-op stub */ }
-function clearPicks() { /* no-op stub */ }
-function savePicks() { /* no-op stub */ }
-
-// renderLeaderboard – removed (replaced by renderHRBSeasonLeaderboard)
-function renderLeaderboard() { renderHRBSeasonLeaderboard(); }
-
-// renderRecentPicks – stub (no list element to populate anymore)
-function renderRecentPicks(filterDate) { /* no-op stub */ }
-// evaluatePicks – stub
-function evaluatePicks(games, targetDate) { /* no-op stub */ }
-// getDpStats – stub
-function getDpStats(userId) { return { wins:0, losses:0, pct:'.000', stStr:'-' }; }
 /* ── END DAILY PICKS STUBS ── */
 
 const MLB = 'https://statsapi.mlb.com/api/v1';
@@ -1957,7 +1937,6 @@ function initLayout(){
   g.innerHTML = html;
   initRoster();
   renderHRBSeasonLeaderboard();
-  loadGamesForDate();
 }
 
 /* ── FULL GAME RENDERER ── */

@@ -1814,14 +1814,14 @@ function openModal(id) {
           </div>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-          <span style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px;">Sort My Column First</span>
+          <label for="settings-sort-first" style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; flex:1;">Sort My Column First</label>
           <label class="switch">
             <input type="checkbox" id="settings-sort-first" ${userPreferences.sortFirst ? 'checked' : ''} onchange="toggleSortFirst(this.checked)">
             <span class="slider"></span>
           </label>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-          <span style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px;">Compact View (Hide Standings)</span>
+          <label for="settings-compact" style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; flex:1;">Compact View (Hide Standings)</label>
           <label class="switch">
             <input type="checkbox" id="settings-compact" ${userPreferences.compact ? 'checked' : ''} onchange="toggleCompactView(this.checked)">
             <span class="slider"></span>

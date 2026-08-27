@@ -2803,7 +2803,7 @@ async function loadScores(){
        if (activeTickerMode === 'yesterday') {
          renderMiniTicker(yesterdayGames);
        }
-    }).catch(e=>{});
+    }).catch(e => { console.error("Error loading yesterday's games:", e); });
 
     if (activeTickerMode === 'today') {
       renderMiniTicker(currentGames);

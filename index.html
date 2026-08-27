@@ -1381,7 +1381,6 @@ if (firebaseActive) {
     const authBtn = document.getElementById("btn-auth-trigger");
     if (user) {
       currentUser = user;
-      console.log("Logged in as:", user.email);
       
       await loadUserPreferences(user.uid);
       

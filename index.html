@@ -2054,14 +2054,25 @@ async function openBoxScore(gamePk, e) {
   `;
 
   try {
-    const [rBox, rLine] = await Promise.all([
-      fetch(`${MLB}/game/${gamePk}/boxscore`),
-      fetch(`${MLB}/game/${gamePk}/linescore`)
-    ]);
+    // ⚡ Bolt: Reuse the background-polled boxscore promise if it exists to save a network request
+    let boxPromise = (window.apiCache && window.apiCache[gamePk]) || (window.liveApiCache && window.liveApiCache[gamePk]);
+    if (!boxPromise) {
+      boxPromise = fetch(`${MLB}/game/${gamePk}/boxscore`).then(r => {
+        if (!r.ok) throw new Error("Could not fetch boxscore");
+        return r.json();
+      });
+    }
 
-    if (!rBox.ok) throw new Error("Could not fetch boxscore");
-    const box = await rBox.json();
-    const line = rLine.ok ? await rLine.json() : null;
+    // ⚡ Bolt: The /schedule hydrate=linescore already gives us this data in currentGames/yesterdayGames!
+    let linePromise;
+    const cachedGame = (currentGames || []).find(g => g.gamePk === gamePk) || (yesterdayGames || []).find(g => g.gamePk === gamePk);
+    if (cachedGame && cachedGame.linescore) {
+      linePromise = Promise.resolve(cachedGame.linescore);
+    } else {
+      linePromise = fetch(`${MLB}/game/${gamePk}/linescore`).then(r => r.ok ? r.json() : null);
+    }
+
+    const [box, line] = await Promise.all([boxPromise, linePromise]);
 
     renderBoxScoreContent(gamePk, box, line);
   } catch (err) {

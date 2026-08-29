@@ -1,0 +1,3 @@
+## 2024-05-18 - Keyboard Accessibility for Interactive Divs/Imgs
+**Learning:** In standard HTML, non-interactive elements like `div` or `img` used as buttons (`onclick`) are completely invisible to keyboard users. Even if they are visually obvious (like cards or thumbnails), users relying on keyboard navigation (Tab) or screen readers cannot access them.
+**Action:** When creating custom interactive elements instead of standard `<button>` tags, always add `tabindex="0"`, `role="button"`, an `onkeydown` handler to map 'Enter' and 'Space' to the click action, and a distinct `:focus-visible` styling to ensure accessibility.

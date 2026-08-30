@@ -4,3 +4,6 @@
 ## 2024-08-27 - Connect UI text to adjacent form controls with labels
 **Learning:** Custom CSS toggle switches often use descriptive text adjacent to the `<input type="checkbox">` that acts visually as a label but functionally as a standard text node (e.g. `<span>`). This forces users to precisely tap the tiny visual toggle element.
 **Action:** Always convert descriptive elements adjacent to form inputs into semantic `<label for="[id]">` tags. Apply `cursor: pointer` and `flex: 1` to expand the interactive hit area across the entire row, drastically improving UX on smaller screens or touch devices.
+## 2026-08-30 - Make custom interactive elements keyboard accessible
+**Learning:** Custom interactive elements (like custom images, badges, and divs that act as buttons via `onclick`) are not accessible to keyboard users by default, preventing them from being focused via Tab or activated via Enter/Space.
+**Action:** When creating custom interactive elements with `onclick`, always add `tabindex="0"` and `role="button"`. Furthermore, attach an `onkeydown` handler to trigger the click action when `Enter` or `Space` is pressed, and ensure a global `:focus-visible` CSS rule exists so the focus state is apparent.

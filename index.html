@@ -2054,14 +2054,41 @@ async function openBoxScore(gamePk, e) {
   `;
 
   try {
-    const [rBox, rLine] = await Promise.all([
-      fetch(`${MLB}/game/${gamePk}/boxscore`),
-      fetch(`${MLB}/game/${gamePk}/linescore`)
-    ]);
+    let boxPromise = window.apiCache[gamePk] || (window.liveApiCache && window.liveApiCache[gamePk]);
+    let cachedLine = null;
 
-    if (!rBox.ok) throw new Error("Could not fetch boxscore");
-    const box = await rBox.json();
-    const line = rLine.ok ? await rLine.json() : null;
+    const allGames = [...(currentGames || []), ...(yesterdayGames || [])];
+    const game = allGames.find(g => g.gamePk === gamePk);
+    if (game && game.linescore) {
+      cachedLine = game.linescore;
+    }
+
+    let box;
+    let line = cachedLine;
+
+    if (boxPromise && cachedLine) {
+      box = await boxPromise;
+    } else {
+      const promises = [];
+      if (boxPromise) {
+        promises.push(boxPromise);
+      } else {
+        promises.push(fetch(`${MLB}/game/${gamePk}/boxscore`).then(r => {
+          if (!r.ok) throw new Error("Could not fetch boxscore");
+          return r.json();
+        }));
+      }
+
+      if (!cachedLine) {
+        promises.push(fetch(`${MLB}/game/${gamePk}/linescore`).then(r => r.ok ? r.json() : null));
+      }
+
+      const results = await Promise.all(promises);
+      box = results[0];
+      if (!cachedLine) {
+        line = results[1];
+      }
+    }
 
     renderBoxScoreContent(gamePk, box, line);
   } catch (err) {
@@ -2533,10 +2560,15 @@ async function openPreviousDayBoxScoresModal(targetDateStr) {
   `;
 
   try {
-    const url = `${MLB}/schedule?sportId=1&date=${targetDateStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,probablePitcher`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error("Failed to fetch games for date");
-    const data = await r.json();
+    const url = `${MLB}/schedule?sportId=1&date=${targetDateStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
+    let data;
+    if (window.apiCache[url]) {
+      data = await window.apiCache[url];
+    } else {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error("Failed to fetch games for date");
+      data = await r.json();
+    }
     const games = data.dates?.[0]?.games || [];
 
     renderPrevBoxScoresContent(targetDateStr, games);

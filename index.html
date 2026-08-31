@@ -2054,14 +2054,37 @@ async function openBoxScore(gamePk, e) {
   `;
 
   try {
-    const [rBox, rLine] = await Promise.all([
-      fetch(`${MLB}/game/${gamePk}/boxscore`),
-      fetch(`${MLB}/game/${gamePk}/linescore`)
-    ]);
+    // ⚡ Bolt: Check memory for hydrated linescore to prevent redundant network fetches
+    let hydratedLinescore = null;
+    const allGames = [...(currentGames || []), ...(yesterdayGames || [])];
+    const cachedGame = allGames.find(g => g.gamePk === gamePk);
+    if (cachedGame && cachedGame.linescore) {
+      hydratedLinescore = cachedGame.linescore;
+    }
 
-    if (!rBox.ok) throw new Error("Could not fetch boxscore");
-    const box = await rBox.json();
-    const line = rLine.ok ? await rLine.json() : null;
+    // ⚡ Bolt: Check API Cache for boxscore
+    let boxscorePromise;
+    if (window.apiCache && window.apiCache[gamePk]) {
+      boxscorePromise = window.apiCache[gamePk];
+    } else if (window.liveApiCache && window.liveApiCache[gamePk]) {
+      boxscorePromise = window.liveApiCache[gamePk];
+    } else {
+      // If not cached, fetch it and parse json
+      boxscorePromise = fetch(`${MLB}/game/${gamePk}/boxscore`).then(r => {
+        if (!r.ok) throw new Error("Could not fetch boxscore");
+        return r.json();
+      });
+    }
+
+    // ⚡ Bolt: Fetch concurrently to avoid waterfall
+    const promises = [boxscorePromise];
+    if (!hydratedLinescore) {
+      promises.push(fetch(`${MLB}/game/${gamePk}/linescore`).then(r => r.ok ? r.json() : null));
+    }
+
+    const results = await Promise.all(promises);
+    const box = results[0];
+    const line = hydratedLinescore || (results.length > 1 ? results[1] : null);
 
     renderBoxScoreContent(gamePk, box, line);
   } catch (err) {

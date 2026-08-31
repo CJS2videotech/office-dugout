@@ -15,6 +15,7 @@
 <style>
 /* ── RESET & BASE ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 :root{
   --bg:#090d14; --card:rgba(20, 25, 35, 0.45); --card2:rgba(30, 40, 60, 0.35);
   --border:rgba(255,255,255,0.12); --border-light:rgba(255,255,255,0.22);
@@ -1676,7 +1677,10 @@ function initRoster(){
            onclick="openModal('${u.id}')" 
            onerror="handleImgError(this)"
            alt="${u.name}"
-           title="Click to view ${u.name}'s banner & stats">
+           title="Click to view ${u.name}'s banner & stats"
+           role="button"
+           tabindex="0"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}">
       <div style="font-family:'Oswald',sans-serif; font-size:12px; color:${u.secondary}; margin-top:6px; letter-spacing:0.5px; text-transform:uppercase;">${u.name}</div>
     </div>
   `).join('');
@@ -1859,8 +1863,8 @@ function openModal(id) {
   body.innerHTML = `
     <button class="modal-close" onclick="closeModal(event)" aria-label="Close modal">&times;</button>
     <div style="position:relative; display:inline-block; margin:0 auto;">
-      <img id="modal-user-img" data-mode="banner" src="${u.banner}" class="modal-img" style="border-color:${u.secondary}; cursor:pointer;" onclick="toggleModalImage('${u.id}')" onerror="handleImgError(this)" title="Click to toggle Photo / GIF Banner">
-      <div id="modal-img-badge" onclick="toggleModalImage('${u.id}')" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); border:1px solid ${u.secondary}; color:#fff; font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:12px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,0.5); user-select:none;">
+      <img id="modal-user-img" data-mode="banner" src="${u.banner}" class="modal-img" style="border-color:${u.secondary}; cursor:pointer;" onclick="toggleModalImage('${u.id}')" onerror="handleImgError(this)" title="Click to toggle Photo / GIF Banner" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}">
+      <div id="modal-img-badge" onclick="toggleModalImage('${u.id}')" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); border:1px solid ${u.secondary}; color:#fff; font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:12px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,0.5); user-select:none;" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}">
         ✨ GIF Banner (Click to Toggle)
       </div>
     </div>
@@ -2473,7 +2477,7 @@ function renderMiniTicker(games) {
             titleAttr = `title="Click to view ${matchedUser.name}'s ${matchedUser.teamName} roster"`;
         }
 
-        return `<div class="ticker-box" onclick="openGameRoster(${away.team.id}, ${home.team.id}, ${g.gamePk})" ${titleAttr} style="display:flex; flex-direction:column; justify-content:center; background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:8px; padding:6px 12px; font-size:11px; font-family:'Oswald',sans-serif; min-width:75px; line-height:1.2; letter-spacing:0.5px; cursor:pointer;">
+        return `<div class="ticker-box" onclick="openGameRoster(${away.team.id}, ${home.team.id}, ${g.gamePk})" ${titleAttr} role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}" style="display:flex; flex-direction:column; justify-content:center; background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:8px; padding:6px 12px; font-size:11px; font-family:'Oswald',sans-serif; min-width:75px; line-height:1.2; letter-spacing:0.5px; cursor:pointer;">
             <div style="display:flex; justify-content:space-between; gap:12px;">
               <span style="${aSty}">${getTeamAbbr(away.team)}</span>
               <span style="color:#fff; font-weight:600;">${awayScore !== '-' ? awayScore : ''}</span>

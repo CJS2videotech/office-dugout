@@ -2054,14 +2054,28 @@ async function openBoxScore(gamePk, e) {
   `;
 
   try {
-    const [rBox, rLine] = await Promise.all([
-      fetch(`${MLB}/game/${gamePk}/boxscore`),
-      fetch(`${MLB}/game/${gamePk}/linescore`)
-    ]);
+    // ⚡ Bolt: Cache API response for boxscore to prevent redundant fetching on the 60s poll.
+    // Check global background polling caches first before firing a new network request
+    let boxPromise = null;
+    if (window.apiCache && window.apiCache[gamePk]) boxPromise = window.apiCache[gamePk];
+    else if (window.liveApiCache && window.liveApiCache[gamePk]) boxPromise = window.liveApiCache[gamePk];
+    else boxPromise = fetch(`${MLB}/game/${gamePk}/boxscore`).then(r => {
+      if(!r.ok) throw new Error("Could not fetch boxscore");
+      return r.json();
+    });
 
-    if (!rBox.ok) throw new Error("Could not fetch boxscore");
-    const box = await rBox.json();
-    const line = rLine.ok ? await rLine.json() : null;
+    // ⚡ Bolt: Linescore payload is already deeply nested inside the daily schedule payload.
+    // Extract linescore from cached daily arrays (currentGames/yesterdayGames) instead of a redundant fetch
+    let linePromise = null;
+    let g = (currentGames || []).find(gm => gm.gamePk === gamePk) || (yesterdayGames || []).find(gm => gm.gamePk === gamePk);
+    if (g && g.linescore) {
+      linePromise = Promise.resolve(g.linescore);
+    } else {
+      linePromise = fetch(`${MLB}/game/${gamePk}/linescore`).then(r => r.ok ? r.json() : null);
+    }
+
+    // Await both promises concurrently to avoid a performance waterfall
+    const [box, line] = await Promise.all([boxPromise, linePromise]);
 
     renderBoxScoreContent(gamePk, box, line);
   } catch (err) {

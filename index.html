@@ -2054,14 +2054,21 @@ async function openBoxScore(gamePk, e) {
   `;
 
   try {
-    const [rBox, rLine] = await Promise.all([
-      fetch(`${MLB}/game/${gamePk}/boxscore`),
-      fetch(`${MLB}/game/${gamePk}/linescore`)
-    ]);
+    const boxUrl = `${MLB}/game/${gamePk}/boxscore`;
+    let boxPromise = window.apiCache?.[boxUrl] || window.liveApiCache?.[boxUrl] || window.apiCache?.[gamePk] || window.liveApiCache?.[gamePk];
 
-    if (!rBox.ok) throw new Error("Could not fetch boxscore");
-    const box = await rBox.json();
-    const line = rLine.ok ? await rLine.json() : null;
+    if (!boxPromise) {
+      boxPromise = fetch(boxUrl).then(r => {
+        if (!r.ok) throw new Error("Could not fetch boxscore");
+        return r.json();
+      });
+    }
+
+    let linePromise = fetch(`${MLB}/game/${gamePk}/linescore`)
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null);
+
+    const [box, line] = await Promise.all([boxPromise, linePromise]);
 
     renderBoxScoreContent(gamePk, box, line);
   } catch (err) {
@@ -2534,9 +2541,19 @@ async function openPreviousDayBoxScoresModal(targetDateStr) {
 
   try {
     const url = `${MLB}/schedule?sportId=1&date=${targetDateStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,probablePitcher`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error("Failed to fetch games for date");
-    const data = await r.json();
+    window.apiCache = window.apiCache || {};
+
+    if (!window.apiCache[url]) {
+      window.apiCache[url] = fetch(url).then(r => {
+        if (!r.ok) throw new Error("Failed to fetch games for date");
+        return r.json();
+      }).catch(e => {
+        delete window.apiCache[url];
+        throw e;
+      });
+    }
+
+    const data = await window.apiCache[url];
     const games = data.dates?.[0]?.games || [];
 
     renderPrevBoxScoresContent(targetDateStr, games);

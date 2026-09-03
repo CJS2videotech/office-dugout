@@ -2054,13 +2054,20 @@ async function openBoxScore(gamePk, e) {
   `;
 
   try {
-    const [rBox, rLine] = await Promise.all([
-      fetch(`${MLB}/game/${gamePk}/boxscore`),
+    // ⚡ Bolt: Check existing caches from background polling to prevent redundant boxscore requests.
+    // The background HR bracket logic fetches and caches the same boxscore endpoints.
+    let cachedBoxPromise = window.apiCache?.[gamePk] || window.liveApiCache?.[gamePk];
+    let fetchBoxPromise = cachedBoxPromise || fetch(`${MLB}/game/${gamePk}/boxscore`).then(r => {
+      if (!r.ok) throw new Error("Could not fetch boxscore");
+      return r.json();
+    });
+
+    // ⚡ Bolt: Fetch concurrently to prevent a performance regression waterfall when the boxscore cache misses.
+    const [box, rLine] = await Promise.all([
+      fetchBoxPromise,
       fetch(`${MLB}/game/${gamePk}/linescore`)
     ]);
 
-    if (!rBox.ok) throw new Error("Could not fetch boxscore");
-    const box = await rBox.json();
     const line = rLine.ok ? await rLine.json() : null;
 
     renderBoxScoreContent(gamePk, box, line);

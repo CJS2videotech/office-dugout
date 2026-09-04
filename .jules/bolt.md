@@ -5,3 +5,7 @@
 ## 2024-05-23 - [API Response Caching for Polled Schedules]
 **Learning:** Polling static historical endpoints (like season trophies or yesterday's schedule) causes redundant network requests. Concurrent UI mapping loops for Live game endpoints can trigger duplicate in-flight requests if users share a game.
 **Action:** Cached the static season trophy API call. Cached yesterday's schedule API call conditionally (only if all games are final). Added a short-lived `liveApiCache` per polling loop to deduplicate concurrent live boxscore requests. Always cache the Promise to handle concurrency.
+
+## 2024-05-23 - [Modal Caching and Concurrent Fetching]
+**Learning:** Re-fetching box scores and linescores for user-triggered modals (like Box Score) ignores the fact that these are already requested in background polling or cached via `window.apiCache`/`liveApiCache`. Also, when mixing cached promises with fallback fetch network requests, sequentially awaiting them produces a waterfall delay regression.
+**Action:** Reused cached promises and pre-hydrated properties (`matchingGame.linescore`) inside user-triggered modals (`openBoxScore`). Wrapped both cached promises and fallback `fetch` calls in a single `Promise.all` to fetch them concurrently instead of sequentially awaiting them.

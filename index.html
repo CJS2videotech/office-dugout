@@ -2054,14 +2054,38 @@ async function openBoxScore(gamePk, e) {
   `;
 
   try {
-    const [rBox, rLine] = await Promise.all([
-      fetch(`${MLB}/game/${gamePk}/boxscore`),
-      fetch(`${MLB}/game/${gamePk}/linescore`)
-    ]);
+    // ⚡ Bolt: Cache lookup to avoid redundant network requests for box scores and linescores.
+    // Ensure we fall back to fetching concurrently to prevent a waterfall delay.
 
-    if (!rBox.ok) throw new Error("Could not fetch boxscore");
-    const box = await rBox.json();
-    const line = rLine.ok ? await rLine.json() : null;
+    // 1. Boxscore lookup
+    let boxPromise = null;
+    if (window.apiCache && window.apiCache[gamePk]) {
+      boxPromise = window.apiCache[gamePk];
+    } else if (window.liveApiCache && window.liveApiCache[gamePk]) {
+      boxPromise = window.liveApiCache[gamePk];
+    } else {
+      boxPromise = fetch(`${MLB}/game/${gamePk}/boxscore`).then(r => {
+         if (!r.ok) throw new Error("Could not fetch boxscore");
+         return r.json();
+      });
+    }
+
+    // 2. Linescore lookup (try to extract from already loaded schedule arrays)
+    let cachedLine = null;
+    const allGames = [...(typeof currentGames !== 'undefined' ? currentGames : []), ...(typeof yesterdayGames !== 'undefined' ? yesterdayGames : [])];
+    const matchingGame = allGames.find(g => g.gamePk === gamePk);
+    if (matchingGame && matchingGame.linescore) {
+      cachedLine = matchingGame.linescore;
+    }
+
+    let linePromise = null;
+    if (cachedLine) {
+       linePromise = Promise.resolve(cachedLine);
+    } else {
+       linePromise = fetch(`${MLB}/game/${gamePk}/linescore`).then(r => r.ok ? r.json() : null).catch(() => null);
+    }
+
+    const [box, line] = await Promise.all([boxPromise, linePromise]);
 
     renderBoxScoreContent(gamePk, box, line);
   } catch (err) {

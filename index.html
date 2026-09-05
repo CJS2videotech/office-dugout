@@ -2054,14 +2054,35 @@ async function openBoxScore(gamePk, e) {
   `;
 
   try {
-    const [rBox, rLine] = await Promise.all([
-      fetch(`${MLB}/game/${gamePk}/boxscore`),
-      fetch(`${MLB}/game/${gamePk}/linescore`)
-    ]);
+    let boxPromise = null;
+    let linePromise = null;
 
-    if (!rBox.ok) throw new Error("Could not fetch boxscore");
-    const box = await rBox.json();
-    const line = rLine.ok ? await rLine.json() : null;
+    // ⚡ Bolt: Check existing caches to reuse boxscore promises and avoid duplicate network requests.
+    // The background polling endpoints map 'g.gamePk' directly to the /game/{gamePk}/boxscore URL.
+    if (window.apiCache && window.apiCache[gamePk]) {
+      boxPromise = window.apiCache[gamePk];
+    } else if (window.liveApiCache && window.liveApiCache[gamePk]) {
+      boxPromise = window.liveApiCache[gamePk];
+    } else {
+      boxPromise = fetch(`${MLB}/game/${gamePk}/boxscore`).then(r => {
+        if (!r.ok) throw new Error("Could not fetch boxscore");
+        return r.json();
+      });
+    }
+
+    // ⚡ Bolt: Check if linescore can be sourced from already hydrated game states (reduces latency and bandwidth)
+    const cGames = (typeof currentGames !== 'undefined' && currentGames) ? currentGames : [];
+    const yGames = (typeof yesterdayGames !== 'undefined' && yesterdayGames) ? yesterdayGames : [];
+    const hydratedGame = cGames.find(g => g.gamePk === gamePk) || yGames.find(g => g.gamePk === gamePk);
+
+    if (hydratedGame && hydratedGame.linescore) {
+      linePromise = Promise.resolve(hydratedGame.linescore);
+    } else {
+      linePromise = fetch(`${MLB}/game/${gamePk}/linescore`).then(r => r.ok ? r.json() : null);
+    }
+
+    // ⚡ Bolt: Fetch concurrently only if we have to fall back to network requests
+    const [box, line] = await Promise.all([boxPromise, linePromise]);
 
     renderBoxScoreContent(gamePk, box, line);
   } catch (err) {

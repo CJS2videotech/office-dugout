@@ -4,3 +4,6 @@
 ## 2024-08-27 - Connect UI text to adjacent form controls with labels
 **Learning:** Custom CSS toggle switches often use descriptive text adjacent to the `<input type="checkbox">` that acts visually as a label but functionally as a standard text node (e.g. `<span>`). This forces users to precisely tap the tiny visual toggle element.
 **Action:** Always convert descriptive elements adjacent to form inputs into semantic `<label for="[id]">` tags. Apply `cursor: pointer` and `flex: 1` to expand the interactive hit area across the entire row, drastically improving UX on smaller screens or touch devices.
+## 2024-05-19 - Adding Keyboard Accessibility to Custom UI Elements
+**Learning:** In a vanilla JS/HTML single-page application like Office Dugout, custom interactive components like dynamically rendered `<img>` or `<div>` elements with `onclick` handlers are often completely inaccessible to keyboard users out of the box because they lack native button semantics.
+**Action:** When adding or modifying custom interactive elements (like `onclick` on an image or div), always convert them into accessible buttons by adding `role="button"`, `tabindex="0"`, an `onkeydown` listener mapped to "Enter" and "Space" (with `event.preventDefault()` to stop scrolling), and applying a `:focus-visible` CSS rule for visual feedback during keyboard navigation.

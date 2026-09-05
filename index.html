@@ -216,6 +216,8 @@ th:first-child, td:first-child{ text-align:left; }
 .roster-thumb{ width:120px; height:150px; border-radius:18px; object-fit:cover; object-position:top; border:3px solid var(--border-light); cursor:pointer; transition:transform .2s, box-shadow .2s; box-shadow:0 6px 15px rgba(0,0,0,0.6); }
 .roster-thumb:hover{ transform:scale(1.08); box-shadow:0 10px 25px rgba(255,255,255,0.2); }
 
+[role="button"]:focus-visible, .rbtn:focus-visible, .modal-close:focus-visible, .dp-select:focus-visible, .boxscore-btn:focus-visible, .bs-tab-btn:focus-visible, [tabindex="0"]:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
 .modal-overlay{ position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:999; display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; opacity:0; pointer-events:none; transition:opacity .3s; padding: 2rem 0; }
 .modal-overlay.open{ opacity:1; pointer-events:auto; }
 .modal-content{ max-width:450px; width:90%; margin:auto; border-radius:16px; padding:2rem; position:relative; transform:translateY(20px); transition:transform .3s; display:flex; flex-direction:column; gap:1.5rem; text-align:center; }
@@ -1674,6 +1676,9 @@ function initRoster(){
            class="roster-thumb" 
            style="border-color:${u.secondary}" 
            onclick="openModal('${u.id}')" 
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}"
+           role="button"
+           tabindex="0"
            onerror="handleImgError(this)"
            alt="${u.name}"
            title="Click to view ${u.name}'s banner & stats">
@@ -1859,8 +1864,8 @@ function openModal(id) {
   body.innerHTML = `
     <button class="modal-close" onclick="closeModal(event)" aria-label="Close modal">&times;</button>
     <div style="position:relative; display:inline-block; margin:0 auto;">
-      <img id="modal-user-img" data-mode="banner" src="${u.banner}" class="modal-img" style="border-color:${u.secondary}; cursor:pointer;" onclick="toggleModalImage('${u.id}')" onerror="handleImgError(this)" title="Click to toggle Photo / GIF Banner">
-      <div id="modal-img-badge" onclick="toggleModalImage('${u.id}')" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); border:1px solid ${u.secondary}; color:#fff; font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:12px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,0.5); user-select:none;">
+      <img id="modal-user-img" data-mode="banner" src="${u.banner}" class="modal-img" style="border-color:${u.secondary}; cursor:pointer;" onclick="toggleModalImage('${u.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}" role="button" tabindex="0" onerror="handleImgError(this)" title="Click to toggle Photo / GIF Banner">
+      <div id="modal-img-badge" onclick="toggleModalImage('${u.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}" role="button" tabindex="0" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); border:1px solid ${u.secondary}; color:#fff; font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:12px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,0.5); user-select:none;">
         ✨ GIF Banner (Click to Toggle)
       </div>
     </div>

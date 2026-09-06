@@ -215,6 +215,7 @@ th:first-child, td:first-child{ text-align:left; }
 .roster-grid{ display:flex; justify-content:center; gap:2.5rem; flex-wrap:wrap; padding: 1rem 0; }
 .roster-thumb{ width:120px; height:150px; border-radius:18px; object-fit:cover; object-position:top; border:3px solid var(--border-light); cursor:pointer; transition:transform .2s, box-shadow .2s; box-shadow:0 6px 15px rgba(0,0,0,0.6); }
 .roster-thumb:hover{ transform:scale(1.08); box-shadow:0 10px 25px rgba(255,255,255,0.2); }
+.roster-thumb:focus-visible{ transform:scale(1.08); outline: 3px solid var(--green); outline-offset: 2px; box-shadow:0 10px 25px rgba(255,255,255,0.2); }
 
 .modal-overlay{ position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:999; display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; opacity:0; pointer-events:none; transition:opacity .3s; padding: 2rem 0; }
 .modal-overlay.open{ opacity:1; pointer-events:auto; }
@@ -1674,6 +1675,9 @@ function initRoster(){
            class="roster-thumb" 
            style="border-color:${u.secondary}" 
            onclick="openModal('${u.id}')" 
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"
+           role="button"
+           tabindex="0"
            onerror="handleImgError(this)"
            alt="${u.name}"
            title="Click to view ${u.name}'s banner & stats">

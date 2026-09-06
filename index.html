@@ -2054,14 +2054,41 @@ async function openBoxScore(gamePk, e) {
   `;
 
   try {
-    const [rBox, rLine] = await Promise.all([
-      fetch(`${MLB}/game/${gamePk}/boxscore`),
-      fetch(`${MLB}/game/${gamePk}/linescore`)
-    ]);
+    // ⚡ Bolt: Check memory/caches before hitting network
+    // 1. Linescore might already be hydrated in current/yesterday games
+    let cachedLine = null;
+    const allGames = [...(currentGames || []), ...(yesterdayGames || [])];
+    const foundGame = allGames.find(g => g.gamePk === gamePk);
+    if (foundGame && foundGame.linescore) {
+      cachedLine = foundGame.linescore;
+    }
 
-    if (!rBox.ok) throw new Error("Could not fetch boxscore");
-    const box = await rBox.json();
-    const line = rLine.ok ? await rLine.json() : null;
+    // 2. Boxscore promise might already exist in live or finalized cache
+    let boxPromise;
+    if (window.apiCache && window.apiCache[gamePk]) {
+      boxPromise = window.apiCache[gamePk];
+    } else if (window.liveApiCache && window.liveApiCache[gamePk]) {
+      boxPromise = window.liveApiCache[gamePk];
+    } else {
+      // Not cached, fetch and parse
+      boxPromise = fetch(`${MLB}/game/${gamePk}/boxscore`).then(r => {
+        if (!r.ok) throw new Error("Could not fetch boxscore");
+        return r.json();
+      });
+    }
+
+    // 3. Prepare linescore fallback promise if not found in memory
+    let linePromise;
+    if (cachedLine) {
+      linePromise = Promise.resolve(cachedLine);
+    } else {
+      linePromise = fetch(`${MLB}/game/${gamePk}/linescore`)
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null);
+    }
+
+    // 4. Resolve concurrently to avoid waterfall
+    const [box, line] = await Promise.all([boxPromise, linePromise]);
 
     renderBoxScoreContent(gamePk, box, line);
   } catch (err) {

@@ -1964,7 +1964,56 @@ function initLayout(){
 }
 
 /* ── FULL GAME RENDERER ── */
-function renderGame(g, isSchedule=false){
+function renderScheduleGame(g) {
+  const away=g.teams.away, home=g.teams.home;
+  const awayId=away.team.id, homeId=home.team.id;
+  const aSty = getTeamStyle(awayId, '#fff');
+  const hSty = getTeamStyle(homeId, '#fff');
+  const status=g.status.abstractGameState;
+  const isLive=status==='Live'||status==='In Progress', isFinal=status==='Final'||status==='Completed Early';
+
+  let ss='';
+  if(isLive){
+    const inn=g.linescore?.currentInningOrdinal||'';
+    const half=g.linescore?.inningHalf||'';
+    ss=`${half} ${inn}`.trim();
+  } else if(isFinal){ ss='Final'; } else { ss=fmtTime(g.gameDate); }
+
+  const div = document.createElement('div');
+  div.className = 'mini-game';
+
+  const dateSpan = document.createElement('span');
+  dateSpan.className = 'mg-date';
+  dateSpan.textContent = new Date(g.gameDate).toLocaleDateString('en-US',{month:'numeric',day:'numeric'});
+  div.appendChild(dateSpan);
+
+  const matchSpan = document.createElement('span');
+  matchSpan.className = 'mg-match';
+
+  const awaySpan = document.createElement('span');
+  awaySpan.style.cssText = `${aSty}font-weight:${USERS.some(u=>u.teamId===awayId)?'700':'500'}`;
+  awaySpan.textContent = getTeamAbbr(away.team);
+
+  const atText = document.createTextNode(' @ ');
+
+  const homeSpan = document.createElement('span');
+  homeSpan.style.cssText = `${hSty}font-weight:${USERS.some(u=>u.teamId===homeId)?'700':'500'}`;
+  homeSpan.textContent = getTeamAbbr(home.team);
+
+  matchSpan.appendChild(awaySpan);
+  matchSpan.appendChild(atText);
+  matchSpan.appendChild(homeSpan);
+  div.appendChild(matchSpan);
+
+  const timeSpan = document.createElement('span');
+  timeSpan.className = 'mg-time';
+  timeSpan.textContent = ss;
+  div.appendChild(timeSpan);
+
+  return div;
+}
+
+function renderGame(g){
   const away=g.teams.away, home=g.teams.home;
   const awayId=away.team.id, homeId=home.team.id;
   const aSty = getTeamStyle(awayId, '#fff');
@@ -1987,15 +2036,6 @@ function renderGame(g, isSchedule=false){
       bsoHtml = `<div style="font-size:9px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:1px; margin-top:2px;">${g.linescore.balls}-${g.linescore.strikes}, ${g.linescore.outs} OUT${g.linescore.outs === 1 ? '' : 'S'}</div>`;
     }
   } else if(isFinal){ ss='Final'; } else { ss=fmtTime(g.gameDate); }
-
-  if(isSchedule){
-    // Compact row
-    return `<div class="mini-game">
-      <span class="mg-date">${new Date(g.gameDate).toLocaleDateString('en-US',{month:'numeric',day:'numeric'})}</span>
-      <span class="mg-match"><span style="${aSty}font-weight:${USERS.some(u=>u.teamId===awayId)?'700':'500'}">${getTeamAbbr(away.team)}</span> @ <span style="${hSty}font-weight:${USERS.some(u=>u.teamId===homeId)?'700':'500'}">${getTeamAbbr(home.team)}</span></span>
-      <span class="mg-time">${ss}</span>
-    </div>`;
-  }
 
   let cardHtml = `<div class="gcard glass ${isLive?'gcard-live':''}">
     ${badge}
@@ -2022,18 +2062,16 @@ function renderGame(g, isSchedule=false){
       </div>
     </div>`;
 
-  if(!isSchedule){
-    let awayP = away.probablePitcher?.fullName || 'TBD';
-    let homeP = home.probablePitcher?.fullName || 'TBD';
-    if(awayP !== 'TBD' || homeP !== 'TBD') {
-        cardHtml += `<div style="font-size:10px;text-align:center;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);">
-          <div style="display:flex; justify-content:space-between;">
-            <span style="flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${awayP}</span>
-            <span style="opacity:0.5;margin:0 4px;">vs</span>
-            <span style="flex:1;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${homeP}</span>
-          </div>
-        </div>`;
-    }
+  let awayP = away.probablePitcher?.fullName || 'TBD';
+  let homeP = home.probablePitcher?.fullName || 'TBD';
+  if(awayP !== 'TBD' || homeP !== 'TBD') {
+      cardHtml += `<div style="font-size:10px;text-align:center;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);">
+        <div style="display:flex; justify-content:space-between;">
+          <span style="flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${awayP}</span>
+          <span style="opacity:0.5;margin:0 4px;">vs</span>
+          <span style="flex:1;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${homeP}</span>
+        </div>
+      </div>`;
   }
 
   cardHtml += `</div>`;
@@ -2995,10 +3033,17 @@ async function loadSchedule(){
     USERS.forEach(u => {
       const uGames = games.filter(g => g.teams.away.team.id===u.teamId || g.teams.home.team.id===u.teamId);
       const next5 = uGames.slice(0,5);
+      const container = document.getElementById(`sched-${u.id}`);
+      container.innerHTML = '';
       if(next5.length===0){
-        document.getElementById(`sched-${u.id}`).innerHTML = '<div class="gtba">No upcoming games</div>';
+        const div = document.createElement('div');
+        div.className = 'gtba';
+        div.textContent = 'No upcoming games';
+        container.appendChild(div);
       } else {
-        document.getElementById(`sched-${u.id}`).innerHTML = next5.map(g => renderGame(g, true)).join('');
+        next5.forEach(g => {
+          container.appendChild(renderScheduleGame(g));
+        });
       }
     });
 

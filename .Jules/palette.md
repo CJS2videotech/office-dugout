@@ -7,3 +7,6 @@
 ## 2024-05-24 - Make custom interactive elements accessible
 **Learning:** In vanilla web projects, custom interactive elements (like `<img>` or `<div>`) equipped with `onclick` handlers are completely invisible to keyboard-only navigation by default. This makes them inaccessible to many users.
 **Action:** When adding or discovering custom elements acting as buttons, ensure they have `role="button"`, `tabindex="0"`, an inline `onkeydown` handler to trap Space/Enter keys and trigger clicks (preventing default scroll behavior), and a `:focus-visible` styling rule to provide clear visual feedback.
+## 2024-09-09 - Accessible date inputs
+**Learning:** Date inputs (`<input type="date">`) without an explicit `<label>` element are inaccessible to screen readers, leaving users without context on what the input is for.
+**Action:** When adding or discovering date inputs or similar form controls without a visual label, always provide an `aria-label` attribute describing the input's purpose to ensure accessibility.

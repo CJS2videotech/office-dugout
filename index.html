@@ -2678,7 +2678,7 @@ function renderPrevBoxScoresContent(targetDateStr, games) {
       <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <button onclick="openPreviousDayBoxScoresModal('${yesterdayStr}')" class="bs-tab-btn ${targetDateStr === yesterdayStr ? 'active' : ''}" style="padding:6px 12px; font-size:11px;">Yesterday</button>
         <button onclick="openPreviousDayBoxScoresModal('${twoDaysAgoStr}')" class="bs-tab-btn ${targetDateStr === twoDaysAgoStr ? 'active' : ''}" style="padding:6px 12px; font-size:11px;">2 Days Ago</button>
-        <input type="date" value="${targetDateStr}" onchange="openPreviousDayBoxScoresModal(this.value)" class="dp-select" style="width:auto; padding:5px 10px; font-size:12px; height:32px;">
+        <input type="date" value="${targetDateStr}" aria-label="Select a date for previous box scores" onchange="openPreviousDayBoxScoresModal(this.value)" class="dp-select" style="width:auto; padding:5px 10px; font-size:12px; height:32px;">
       </div>
     </div>
     ${gameCardsHtml}

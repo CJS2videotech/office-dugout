@@ -206,6 +206,10 @@ th:first-child, td:first-child{ text-align:left; }
 .dp-select:focus{ border-color:var(--green); }
 .select-wrap{ position:relative; }
 .select-wrap::after{ content:'▼'; position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--muted); pointer-events:none; }
+.dp-btn { width: 100%; background: var(--green); color: #000; border: none; padding: 10px; border-radius: 8px; font-family: 'Oswald', sans-serif; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.dp-btn:hover:not(:disabled) { box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); transform: translateY(-1px); }
+.dp-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.dp-label { display: block; font-size: 11px; color: var(--muted); font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
 
 
 /* ── ROSTER & MODAL ── */
@@ -715,7 +719,7 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
         <label class="dp-label" for="auth-password">Password</label>
         <input type="password" id="auth-password" required class="dp-select" placeholder="••••••••" style="background:rgba(0,0,0,0.6); font-family:inherit; text-align:left;">
       </div>
-      <button type="submit" class="dp-btn" id="auth-submit-btn">Sign In</button>
+      <button type="submit" class="dp-btn" id="auth-submit-btn"><div class="spin"></div><span id="auth-submit-text">Sign In</span></button>
     </form>
     
     <div style="font-size:11px; color:var(--muted); margin-top:15px; line-height:1.4;">
@@ -1260,7 +1264,8 @@ async function handleAuthSubmit(e) {
   }
   
   submitBtn.disabled = true;
-  submitBtn.textContent = "Signing In...";
+  submitBtn.classList.add("is-loading");
+  document.getElementById("auth-submit-text").textContent = "Signing In...";
   errorMsg.style.display = "none";
   
   try {
@@ -1272,7 +1277,8 @@ async function handleAuthSubmit(e) {
     errorMsg.style.display = "block";
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = "Sign In";
+    submitBtn.classList.remove("is-loading");
+    document.getElementById("auth-submit-text").textContent = "Sign In";
   }
 }
 

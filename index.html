@@ -2756,10 +2756,36 @@ async function loadScores(){
   window.liveApiCache = {};
   const todayStr=isoDate(new Date());
   const url=`${MLB}/schedule?sportId=1&date=${todayStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
-  try {
-    const r=await fetch(url);
+
+  let yd = new Date(); yd.setDate(yd.getDate()-1);
+  const ydStr = isoDate(yd);
+  const yurl=`${MLB}/schedule?sportId=1&date=${ydStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
+
+  // ⚡ Bolt: Initiate both fetch promises concurrently at the top of the function to eliminate request waterfalls
+  let todayPromise = fetch(url).then(async r => {
     if(!r.ok) throw new Error();
-    const data=await r.json();
+    return r.json();
+  });
+
+  if (!window.apiCache[yurl]) {
+    window.apiCache[yurl] = fetch(yurl).then(async yr => {
+       if(!yr.ok) throw new Error();
+       const ydata = await yr.json();
+       const ygames = ydata.dates?.[0]?.games||[];
+
+       const allFinal = ygames.every(g => g.status.abstractGameState === 'Final' || g.status.abstractGameState === 'Completed Early');
+       if (!allFinal && ygames.length > 0) {
+          delete window.apiCache[yurl];
+       }
+       return ydata;
+    }).catch(e => {
+       delete window.apiCache[yurl];
+       throw e;
+    });
+  }
+
+  try {
+    const data=await todayPromise;
     const games=data.dates?.[0]?.games||[];
 
     currentGames = games;
@@ -2803,27 +2829,6 @@ async function loadScores(){
 
     currentDailyWinnerId = todayDailyWinner;
     currentHRBWinnerId = todayHRBWinner;
-
-    let yd = new Date(); yd.setDate(yd.getDate()-1);
-    const ydStr = isoDate(yd);
-    const yurl=`${MLB}/schedule?sportId=1&date=${ydStr}&teamId=${TEAM_IDS}&hydrate=team,linescore,leagueRecord,probablePitcher`;
-
-    if (!window.apiCache[yurl]) {
-      window.apiCache[yurl] = fetch(yurl).then(async yr => {
-         if(!yr.ok) throw new Error();
-         const ydata = await yr.json();
-         const ygames = ydata.dates?.[0]?.games||[];
-
-         const allFinal = ygames.every(g => g.status.abstractGameState === 'Final' || g.status.abstractGameState === 'Completed Early');
-         if (!allFinal && ygames.length > 0) {
-            delete window.apiCache[yurl];
-         }
-         return ydata;
-      }).catch(e => {
-         delete window.apiCache[yurl];
-         throw e;
-      });
-    }
 
     window.apiCache[yurl].then(async ydata => {
        const ygames = ydata.dates?.[0]?.games||[];

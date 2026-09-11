@@ -7,3 +7,6 @@
 ## 2024-05-24 - Make custom interactive elements accessible
 **Learning:** In vanilla web projects, custom interactive elements (like `<img>` or `<div>`) equipped with `onclick` handlers are completely invisible to keyboard-only navigation by default. This makes them inaccessible to many users.
 **Action:** When adding or discovering custom elements acting as buttons, ensure they have `role="button"`, `tabindex="0"`, an inline `onkeydown` handler to trap Space/Enter keys and trigger clicks (preventing default scroll behavior), and a `:focus-visible` styling rule to provide clear visual feedback.
+## 2024-09-11 - Add alt attributes to dynamic images
+**Learning:** In vanilla JS projects with extensive template literals, dynamically injected `<img>` tags often lack `alt` attributes or use generic text like `alt="logo"`, creating significant accessibility barriers for screen reader users relying on these images for context (e.g., team logos, user avatars).
+**Action:** Always verify that dynamically constructed `<img>` tags within JS string templates use context-aware `alt` text by passing in the relevant variables (e.g., `alt="${u.name} banner"` or `alt="${u.teamName} logo"`).

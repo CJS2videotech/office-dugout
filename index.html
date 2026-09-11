@@ -1128,7 +1128,7 @@ async function buildHRBracket(apiGames, tbodyId, podiumId, prefix) {
         <div style="flex-shrink:0;">
           <img src="assets/Homerun%20Trophy.PNG" alt="Home Run Trophy" class="hrb-crown" style="width:52px; height:52px; object-fit:contain; filter:drop-shadow(0 0 12px rgba(251,191,36,0.8));">
         </div>
-        <img src="${leader.u.img}" onerror="handleImgError(this)" style="width:64px; height:64px; border-radius:12px; object-fit:cover; border:2px solid ${leader.u.secondary}; flex-shrink:0;">
+        <img src="${leader.u.img}" alt="${leader.u.name}" onerror="handleImgError(this)" style="width:64px; height:64px; border-radius:12px; object-fit:cover; border:2px solid ${leader.u.secondary}; flex-shrink:0;">
         <div style="flex:1; min-width:0;">
           <div class="hrb-leader-name" style="color:${leader.u.secondary};${leader.u.glow||''}">${leader.u.name}</div>
           <div class="hrb-leader-team">${leader.u.teamName}</div>
@@ -1181,7 +1181,7 @@ async function buildHRBracket(apiGames, tbodyId, podiumId, prefix) {
       <td><span class="hrb-rank ${rankCls}">${rankEmoji}</span></td>
       <td>
         <div style="display:flex; align-items:center; gap:8px;">
-          <img src="https://www.mlbstatic.com/team-logos/${d.u.teamId}.svg" style="width:22px; height:22px; flex-shrink:0; filter:${d.u.teamId===147?'brightness(0) invert(1)':'drop-shadow(0 1px 2px rgba(0,0,0,0.6))'}">
+          <img src="https://www.mlbstatic.com/team-logos/${d.u.teamId}.svg" alt="${d.u.teamName} logo" style="width:22px; height:22px; flex-shrink:0; filter:${d.u.teamId===147?'brightness(0) invert(1)':'drop-shadow(0 1px 2px rgba(0,0,0,0.6))'}">
           <div>
             <div style="font-family:'Oswald',sans-serif; font-size:14px; color:${d.u.secondary};${d.u.glow||''} line-height:1;">${d.u.teamName}${winnerCrown}</div>
             <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">${d.u.name}</div>
@@ -1215,7 +1215,7 @@ function renderHRBSeasonLeaderboard() {
     const isTop = s.wins > 0 && s.wins === topWins;
     return `<div class="glass" style="flex:1; min-width:250px; border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; align-items:center; gap:12px; position:relative; overflow:hidden;">
       <div style="position:absolute; top:0; left:0; width:4px; height:100%; background:${s.secondary};"></div>
-      <img src="${s.img}" onerror="handleImgError(this)" style="width:56px; height:56px; border-radius:10px; object-fit:cover; border:2px solid ${s.secondary};">
+      <img src="${s.img}" alt="${s.name}" onerror="handleImgError(this)" style="width:56px; height:56px; border-radius:10px; object-fit:cover; border:2px solid ${s.secondary};">
       <div style="flex:1;">
         <div style="font-family:'Oswald',sans-serif; font-size:1.3rem; color:${s.secondary};${s.glow||''} letter-spacing:1px; line-height:1; margin-bottom:4px;">${s.name.toUpperCase()}</div>
         <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">${s.teamName}</div>
@@ -1862,7 +1862,7 @@ function openModal(id) {
   body.innerHTML = `
     <button class="modal-close" onclick="closeModal(event)" aria-label="Close modal">&times;</button>
     <div style="position:relative; display:inline-block; margin:0 auto;">
-      <img role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); this.click(); }" id="modal-user-img" data-mode="banner" src="${u.banner}" class="modal-img" style="border-color:${u.secondary}; cursor:pointer;" onclick="toggleModalImage('${u.id}')" onerror="handleImgError(this)" title="Click to toggle Photo / GIF Banner">
+      <img role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); this.click(); }" id="modal-user-img" data-mode="banner" src="${u.banner}" alt="${u.name} banner" class="modal-img" style="border-color:${u.secondary}; cursor:pointer;" onclick="toggleModalImage('${u.id}')" onerror="handleImgError(this)" title="Click to toggle Photo / GIF Banner">
       <div role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); this.click(); }" id="modal-img-badge" onclick="toggleModalImage('${u.id}')" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); border:1px solid ${u.secondary}; color:#fff; font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:12px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,0.5); user-select:none;">
         ✨ GIF Banner (Click to Toggle)
       </div>
@@ -1870,7 +1870,7 @@ function openModal(id) {
     <div class="modal-info">
       <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:5px;">
         <div class="modal-name" style="color:${u.secondary};${u.glow||''} margin-bottom:0;">${u.name} ${titleBadges}</div>
-        <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" style="width:36px; height:36px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
+        <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" alt="${u.teamName} logo" style="width:36px; height:36px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
       </div>
       <div class="modal-team">${u.teamName}</div>
       ${trophyCountHtml}
@@ -1939,7 +1939,7 @@ function initLayout(){
             <div class="uh-name" style="color:${u.secondary};${u.glow||''}">${u.name}</div>
             <div class="uh-team" style="color:${u.secondary};${u.glow||''}">${u.teamName}</div>
           </div>
-          <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" alt="logo" style="width:42px; height:42px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
+          <img src="https://www.mlbstatic.com/team-logos/${u.teamId}.svg" alt="${u.teamName} logo" style="width:42px; height:42px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6)) ${u.teamId === 147 ? 'brightness(0) invert(1)' : ''};">
         </div>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:flex-end; margin: 12px 0 6px;">
@@ -2211,7 +2211,7 @@ function renderBoxScoreContent(gamePk, box, line) {
           <tr>
             <td class="ls-team-td">
               <div class="ls-team-cell">
-                <img src="https://www.mlbstatic.com/team-logos/${awayTeam.team.id}.svg" style="${awayTeam.team.id===147?'filter:brightness(0) invert(1)':''}">
+                <img src="https://www.mlbstatic.com/team-logos/${awayTeam.team.id}.svg" alt="${awayName} logo" style="${awayTeam.team.id===147?'filter:brightness(0) invert(1)':''}">
                 <span class="ls-team-name-full" style="${getTeamStyle(awayTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${awayName}</span>
                 <span class="ls-team-name-abbr" style="${getTeamStyle(awayTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:13px;">${awayAbbr}</span>
               </div>
@@ -2224,7 +2224,7 @@ function renderBoxScoreContent(gamePk, box, line) {
           <tr>
             <td class="ls-team-td">
               <div class="ls-team-cell">
-                <img src="https://www.mlbstatic.com/team-logos/${homeTeam.team.id}.svg" style="${homeTeam.team.id===147?'filter:brightness(0) invert(1)':''}">
+                <img src="https://www.mlbstatic.com/team-logos/${homeTeam.team.id}.svg" alt="${homeName} logo" style="${homeTeam.team.id===147?'filter:brightness(0) invert(1)':''}">
                 <span class="ls-team-name-full" style="${getTeamStyle(homeTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${homeName}</span>
                 <span class="ls-team-name-abbr" style="${getTeamStyle(homeTeam.team.id)}; font-family:'Oswald',sans-serif; font-weight:700; font-size:13px;">${homeAbbr}</span>
               </div>
@@ -2402,7 +2402,7 @@ function renderBoxScoreContent(gamePk, box, line) {
 
     <div class="bs-header">
       <div class="bs-team-block">
-        <img src="https://www.mlbstatic.com/team-logos/${awayTeam.team.id}.svg" class="bs-team-logo" style="${awayTeam.team.id === 147 ? 'filter:brightness(0) invert(1)' : ''}">
+        <img src="https://www.mlbstatic.com/team-logos/${awayTeam.team.id}.svg" alt="${awayName} logo" class="bs-team-logo" style="${awayTeam.team.id === 147 ? 'filter:brightness(0) invert(1)' : ''}">
         <div>
           <div style="font-family:'Oswald',sans-serif; font-size:1.3rem; ${getTeamStyle(awayTeam.team.id)}">${awayName}</div>
           <div style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase;">AWAY</div>
@@ -2415,7 +2415,7 @@ function renderBoxScoreContent(gamePk, box, line) {
       </div>
       
       <div class="bs-team-block" style="flex-direction:row-reverse; text-align:right;">
-        <img src="https://www.mlbstatic.com/team-logos/${homeTeam.team.id}.svg" class="bs-team-logo" style="${homeTeam.team.id === 147 ? 'filter:brightness(0) invert(1)' : ''}">
+        <img src="https://www.mlbstatic.com/team-logos/${homeTeam.team.id}.svg" alt="${homeName} logo" class="bs-team-logo" style="${homeTeam.team.id === 147 ? 'filter:brightness(0) invert(1)' : ''}">
         <div>
           <div style="font-family:'Oswald',sans-serif; font-size:1.3rem; ${getTeamStyle(homeTeam.team.id)}">${homeName}</div>
           <div style="font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; text-transform:uppercase;">HOME</div>

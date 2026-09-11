@@ -2774,9 +2774,11 @@ async function loadScores(){
     });
 
     // Build Today's HR Bracket
-    const todayBracket = await buildHRBracket(games, 'hrb-tbody-today', 'hrb-podium-today', 'today');
     // Also populate the top Daily Runs & Hits Leader board
-    const dailyFrontResult = await buildDailyList(games, 'front');
+    const [todayBracket, dailyFrontResult] = await Promise.all([
+      buildHRBracket(games, 'hrb-tbody-today', 'hrb-podium-today', 'today'),
+      buildDailyList(games, 'front')
+    ]);
     const dailyFrontEl = document.getElementById('tbl-daily-front');
     if (dailyFrontEl) dailyFrontEl.innerHTML = dailyFrontResult.html;
     currentDailyData = dailyFrontResult.dailyData;
@@ -2830,14 +2832,17 @@ async function loadScores(){
        yesterdayGames = ygames;
 
        // Build Yesterday's HR Bracket
-       const ydBracket = await buildHRBracket(ygames, 'hrb-tbody-yesterday', 'hrb-podium-yesterday', 'yesterday');
+       // Also populate the top Daily Runs & Hits Leader back (yesterday)
+       const [ydBracket, dailyBackResult] = await Promise.all([
+         buildHRBracket(ygames, 'hrb-tbody-yesterday', 'hrb-podium-yesterday', 'yesterday'),
+         buildDailyList(ygames, 'back')
+       ]);
+
        if (ydBracket && ydBracket.bracketData) {
          hrbYesterdayData = ydBracket.bracketData;
          yesterdayHRBWinnerId = ydBracket.winnerId;
        }
 
-       // Also populate the top Daily Runs & Hits Leader back (yesterday)
-       const dailyBackResult = await buildDailyList(ygames, 'back');
        const dailyBackEl = document.getElementById('tbl-daily-back');
        if (dailyBackEl) dailyBackEl.innerHTML = dailyBackResult.html;
        yesterdayDailyData = dailyBackResult.dailyData;
@@ -3060,8 +3065,7 @@ tick(); setInterval(tick,10000);
 
 async function refreshAll(){
   const btn = document.getElementById('btn-refresh'); if(btn) btn.classList.add('is-loading');
-  await Promise.all([loadScores(), loadStandings(), loadSchedule()]);
-  await loadSeasonTrophies();
+  await Promise.all([loadScores(), loadStandings(), loadSchedule(), loadSeasonTrophies()]);
   renderHRBSeasonLeaderboard();
   if(btn) btn.classList.remove('is-loading');
 }

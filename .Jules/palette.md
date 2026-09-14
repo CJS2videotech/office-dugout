@@ -7,3 +7,6 @@
 ## 2024-05-24 - Make custom interactive elements accessible
 **Learning:** In vanilla web projects, custom interactive elements (like `<img>` or `<div>`) equipped with `onclick` handlers are completely invisible to keyboard-only navigation by default. This makes them inaccessible to many users.
 **Action:** When adding or discovering custom elements acting as buttons, ensure they have `role="button"`, `tabindex="0"`, an inline `onkeydown` handler to trap Space/Enter keys and trigger clicks (preventing default scroll behavior), and a `:focus-visible` styling rule to provide clear visual feedback.
+## 2025-02-19 - Safe Async Button Loading States
+**Learning:** Updating a button's `textContent` directly destroys nested DOM elements (like loading spinners), breaking the intended visual loading state.
+**Action:** Always scope text updates to a dedicated inner `<span id="...">` and toggle an `.is-loading` class to manage visibility of nested spinners.

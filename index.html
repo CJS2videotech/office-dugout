@@ -204,6 +204,8 @@ th:first-child, td:first-child{ text-align:left; }
 /* ── DAILY PICKS SEASON LEADERBOARD (kept for season HRB wins) ── */
 .dp-select{ width:100%; background:rgba(0,0,0,0.4); border:1px solid var(--border); color:#fff; padding:10px 12px; border-radius:8px; font-family:'Inter',sans-serif; outline:none; appearance:none; cursor:pointer; }
 .dp-select:focus{ border-color:var(--green); }
+input.dp-select{ cursor:text; }
+input[type="date"].dp-select{ cursor:pointer; }
 .select-wrap{ position:relative; }
 .select-wrap::after{ content:'▼'; position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--muted); pointer-events:none; }
 
@@ -237,7 +239,8 @@ th:first-child, td:first-child{ text-align:left; }
 .modal-daily-tbl .team-name{ font-size:12px; font-weight:600; padding-right:5px; }
 
 /* ── REFRESH ── */
-.rbtn{ background:transparent; border:1px solid var(--border); color:var(--muted); padding:6px 12px; border-radius:6px; font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all .2s;}
+.rbtn{ background:transparent; border:1px solid var(--border); color:var(--muted); padding:6px 12px; border-radius:6px; font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all .2s; justify-content:center;}
+#auth-submit-btn { width:100%; background:var(--green); color:#000; font-weight:bold; padding:10px; border:none; margin-top:5px; }
 .rbtn:hover{ color:#fff; border-color:#fff; }
 .spin{width:12px; height:12px; border:2px solid rgba(255,255,255,.1); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; display:none;}
 .is-loading .spin{display:block;}
@@ -256,7 +259,7 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
 .ticker-box { transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s; }
 .ticker-box:hover { transform: translateY(-2px); border-color: var(--border-light); background: rgba(255,255,255,0.12); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
 
-[role="button"]:focus-visible, .ticker-box:focus-visible, .roster-thumb:focus-visible, #modal-user-img:focus-visible, #modal-img-badge:focus-visible {
+[role="button"]:focus-visible, button:focus-visible, input:focus-visible + .slider, .ticker-box:focus-visible, .roster-thumb:focus-visible, #modal-user-img:focus-visible, #modal-img-badge:focus-visible {
   outline: 3px solid var(--green);
   outline-offset: 2px;
 }
@@ -715,7 +718,7 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
         <label class="dp-label" for="auth-password">Password</label>
         <input type="password" id="auth-password" required class="dp-select" placeholder="••••••••" style="background:rgba(0,0,0,0.6); font-family:inherit; text-align:left;">
       </div>
-      <button type="submit" class="dp-btn" id="auth-submit-btn">Sign In</button>
+      <button type="submit" class="rbtn" id="auth-submit-btn">Sign In</button>
     </form>
     
     <div style="font-size:11px; color:var(--muted); margin-top:15px; line-height:1.4;">

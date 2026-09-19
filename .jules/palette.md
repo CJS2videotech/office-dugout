@@ -1,0 +1,3 @@
+## 2026-09-19 - Auth Submit Button Loading State
+**Learning:** In vanilla HTML/JS projects, toggling a loading text over an entire button element (e.g. `submitBtn.textContent = 'Signing In...'`) destroys nested inner DOM elements like loading spinners. Using a utility class `.is-loading` combined with scoping text updates to a dedicated `<span>` element preserves visual structure for a much better async user experience.
+**Action:** When implementing async loading states on buttons, avoid `.textContent` on the parent button. Ensure any text modification targets a nested string container `<span>` so loading indicator nodes are not wiped from the DOM.

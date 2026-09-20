@@ -3142,6 +3142,15 @@ window.addEventListener('load', () => {
   const grpImg = new Image();
   grpImg.src = 'assets/OD%20Group%20banner.gif';
 });
+
+// Global Escape key listener to close modals
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(modal => {
+      modal.classList.remove('open');
+    });
+  }
+});
 </script>
 </body>
 </html>

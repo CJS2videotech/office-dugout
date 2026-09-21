@@ -3123,6 +3123,15 @@ function handleImgError(img) {
 window.handleImgError = handleImgError;
 window.toggleModalImage = toggleModalImage;
 
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(modal => {
+      modal.classList.remove('open');
+    });
+  }
+});
+
+
 initLayout();
 refreshAll();
 setInterval(loadScores, 60000); // refresh HR bracket every 60s

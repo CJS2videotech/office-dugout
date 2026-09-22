@@ -3128,6 +3128,14 @@ refreshAll();
 setInterval(loadScores, 60000); // refresh HR bracket every 60s
 
 // Preload all banner GIFs and photos in background for instant popups on GitHub Pages
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(modal => {
+      modal.classList.remove('open');
+    });
+  }
+});
+
 window.addEventListener('load', () => {
   USERS.forEach(u => {
     if (u.banner) {

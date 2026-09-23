@@ -715,7 +715,10 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
         <label class="dp-label" for="auth-password">Password</label>
         <input type="password" id="auth-password" required class="dp-select" placeholder="••••••••" style="background:rgba(0,0,0,0.6); font-family:inherit; text-align:left;">
       </div>
-      <button type="submit" class="dp-btn" id="auth-submit-btn">Sign In</button>
+      <button type="submit" class="rbtn" id="auth-submit-btn" style="width:100%; justify-content:center; padding:10px; font-weight:bold; background:var(--green); color:#000; border-color:var(--green);">
+        <div class="spin" style="border-top-color:#000; border-color:rgba(0,0,0,0.2);"></div>
+        <span id="auth-submit-text">Sign In</span>
+      </button>
     </form>
     
     <div style="font-size:11px; color:var(--muted); margin-top:15px; line-height:1.4;">
@@ -1260,7 +1263,9 @@ async function handleAuthSubmit(e) {
   }
   
   submitBtn.disabled = true;
-  submitBtn.textContent = "Signing In...";
+  submitBtn.classList.add('is-loading');
+  const submitText = document.getElementById("auth-submit-text");
+  if (submitText) submitText.textContent = "Signing In...";
   errorMsg.style.display = "none";
   
   try {
@@ -1272,7 +1277,8 @@ async function handleAuthSubmit(e) {
     errorMsg.style.display = "block";
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = "Sign In";
+    submitBtn.classList.remove('is-loading');
+    if (submitText) submitText.textContent = "Sign In";
   }
 }
 

@@ -3060,9 +3060,9 @@ tick(); setInterval(tick,10000);
 
 async function refreshAll(){
   const btn = document.getElementById('btn-refresh'); if(btn) btn.classList.add('is-loading');
-  await Promise.all([loadScores(), loadStandings(), loadSchedule()]);
-  await loadSeasonTrophies();
-  renderHRBSeasonLeaderboard();
+  // ⚡ Bolt: Execute independent API requests concurrently to prevent waterfall delays
+  await Promise.all([loadScores(), loadStandings(), loadSchedule(), loadSeasonTrophies()]);
+  renderHRBSeasonLeaderboard(); // Depends on data hydrated by loadScores
   if(btn) btn.classList.remove('is-loading');
 }
 

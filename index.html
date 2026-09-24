@@ -202,6 +202,7 @@ th:first-child, td:first-child{ text-align:left; }
 .hrb-tiebreak-legend span{ display:flex; align-items:center; gap:5px; }
 .hrb-no-leader{ display:flex; flex-direction:column; align-items:center; gap:8px; padding:2rem; text-align:center; color:var(--muted); font-family:'Oswald',sans-serif; }
 /* ── DAILY PICKS SEASON LEADERBOARD (kept for season HRB wins) ── */
+.dp-label{ font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; display:block; }
 .dp-select{ width:100%; background:rgba(0,0,0,0.4); border:1px solid var(--border); color:#fff; padding:10px 12px; border-radius:8px; font-family:'Inter',sans-serif; outline:none; appearance:none; cursor:pointer; }
 .dp-select:focus{ border-color:var(--green); }
 .select-wrap{ position:relative; }
@@ -704,7 +705,7 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
       <div class="b-pip" style="background:var(--green);"></div> Friend Sign In
     </div>
     
-    <div id="auth-error-msg" style="color:#f87171; font-size:12px; margin-bottom:10px; display:none; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px; border:1px solid rgba(239,68,68,0.2);"></div>
+    <div id="auth-error-msg" role="alert" aria-live="assertive" style="color:#f87171; font-size:12px; margin-bottom:10px; display:none; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px; border:1px solid rgba(239,68,68,0.2);"></div>
 
     <form id="auth-form" onsubmit="handleAuthSubmit(event)">
       <div style="margin-bottom:1rem; text-align:left;">
@@ -715,7 +716,9 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
         <label class="dp-label" for="auth-password">Password</label>
         <input type="password" id="auth-password" required class="dp-select" placeholder="••••••••" style="background:rgba(0,0,0,0.6); font-family:inherit; text-align:left;">
       </div>
-      <button type="submit" class="dp-btn" id="auth-submit-btn">Sign In</button>
+      <button type="submit" class="rbtn" id="auth-submit-btn" style="width: 100%; justify-content: center;">
+        <div class="spin"></div><span id="auth-submit-text">Sign In</span>
+      </button>
     </form>
     
     <div style="font-size:11px; color:var(--muted); margin-top:15px; line-height:1.4;">
@@ -1260,7 +1263,8 @@ async function handleAuthSubmit(e) {
   }
   
   submitBtn.disabled = true;
-  submitBtn.textContent = "Signing In...";
+  submitBtn.classList.add("is-loading");
+  document.getElementById("auth-submit-text").textContent = "Signing In...";
   errorMsg.style.display = "none";
   
   try {
@@ -1272,7 +1276,8 @@ async function handleAuthSubmit(e) {
     errorMsg.style.display = "block";
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = "Sign In";
+    submitBtn.classList.remove("is-loading");
+    document.getElementById("auth-submit-text").textContent = "Sign In";
   }
 }
 

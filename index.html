@@ -3127,6 +3127,13 @@ initLayout();
 refreshAll();
 setInterval(loadScores, 60000); // refresh HR bracket every 60s
 
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const openModals = document.querySelectorAll('.modal-overlay.open');
+    openModals.forEach(modal => modal.classList.remove('open'));
+  }
+});
+
 // Preload all banner GIFs and photos in background for instant popups on GitHub Pages
 window.addEventListener('load', () => {
   USERS.forEach(u => {

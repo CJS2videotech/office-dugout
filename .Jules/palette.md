@@ -7,3 +7,6 @@
 ## 2024-05-24 - Make custom interactive elements accessible
 **Learning:** In vanilla web projects, custom interactive elements (like `<img>` or `<div>`) equipped with `onclick` handlers are completely invisible to keyboard-only navigation by default. This makes them inaccessible to many users.
 **Action:** When adding or discovering custom elements acting as buttons, ensure they have `role="button"`, `tabindex="0"`, an inline `onkeydown` handler to trap Space/Enter keys and trigger clicks (preventing default scroll behavior), and a `:focus-visible` styling rule to provide clear visual feedback.
+## 2024-09-25 - Enable Escape key to close custom modal overlays
+**Learning:** Custom UI modal elements (`.modal-overlay`) in a vanilla HTML/CSS project lack the native `<dialog>` element's built-in behaviors, such as closing when the Escape key is pressed. This leaves keyboard users stranded if they don't manually tab to the close button.
+**Action:** Always map a global `window` `keydown` listener for `Escape` to programmatically remove the active/open classes from custom modal overlays to provide standard, expected keyboard accessibility.

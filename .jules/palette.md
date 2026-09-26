@@ -1,0 +1,3 @@
+## 2024-05-24 - Accessible Dynamic Error Messages & Modal Escape Key Support
+**Learning:** In vanilla HTML/JS projects without native `<dialog>` tags, custom `.modal-overlay` components need a global `keydown` event listener attached to `window` for the `Escape` key to provide native-like dialog closing behavior. Additionally, dynamic error messages (like in the Auth Modal) need `role="alert"` and `aria-live="assertive"` to be announced by screen readers when they are dynamically displayed.
+**Action:** When implementing custom modals or dynamic error messages, always ensure Escape key support is wired up globally and use ARIA attributes like `role="alert"` for accessibility.

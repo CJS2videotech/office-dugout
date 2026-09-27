@@ -704,7 +704,7 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
       <div class="b-pip" style="background:var(--green);"></div> Friend Sign In
     </div>
     
-    <div id="auth-error-msg" style="color:#f87171; font-size:12px; margin-bottom:10px; display:none; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px; border:1px solid rgba(239,68,68,0.2);"></div>
+    <div id="auth-error-msg" role="alert" aria-live="assertive" style="color:#f87171; font-size:12px; margin-bottom:10px; display:none; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px; border:1px solid rgba(239,68,68,0.2);"></div>
 
     <form id="auth-form" onsubmit="handleAuthSubmit(event)">
       <div style="margin-bottom:1rem; text-align:left;">

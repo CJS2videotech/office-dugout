@@ -1,0 +1,3 @@
+## 2024-09-27 - Dynamically displayed error messages require explicit ARIA roles
+**Learning:** In vanilla HTML/JS projects, dynamically revealing error messages (e.g. setting `display: block` and populating text on authentication failures) is not automatically announced by screen readers.
+**Action:** Always add `role="alert"` and `aria-live="assertive"` to the static error message container so screen readers instantly interrupt and announce the error when the content is dynamically updated or revealed.

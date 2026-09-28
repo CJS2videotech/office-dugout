@@ -1,0 +1,3 @@
+## 2024-05-18 - Auth Modal Accessibility and Loading States
+**Learning:** Screen readers miss dynamically appearing error messages (like auth failures) unless `role="alert"` and `aria-live="assertive"` are explicitly set. Also, updating button text via `textContent` destroys nested DOM elements (like loading spinners), breaking the loading UI.
+**Action:** When updating loading text on buttons with icons/spinners, wrap the text in an inner `<span>` and target it for text changes while toggling a `.is-loading` class on the parent button. Always add ARIA alert roles to dynamic error message containers.

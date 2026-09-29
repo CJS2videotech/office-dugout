@@ -1,0 +1,3 @@
+## 2024-10-27 - Dynamic Error Message Accessibility
+**Learning:** Dynamic error messages (like auth errors) in vanilla HTML apps are not announced to screen readers by default when their `display` style changes from `none` to `block`.
+**Action:** Always add `role="alert"` and `aria-live="assertive"` to error message containers so that screen readers immediately read the text when it becomes visible.

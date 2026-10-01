@@ -9,3 +9,7 @@
 ## 2026-09-07 - [Reusing Cached Promises in Modals]
 **Learning:** Background polling loops populate window.apiCache and window.liveApiCache with API request promises, and currentGames and yesterdayGames with hydrated API payloads (e.g., linescore). Making new network requests in user-triggered events (like modals) ignores these populated caches and duplicates network fetches.
 **Action:** Reused the cached promises (e.g., window.apiCache[gamePk]) and hydrated objects (e.g., game.linescore from currentGames) in modal functions instead of making redundant fetch calls, falling back to fetch concurrently using Promise.all only on cache misses.
+
+## 2024-10-01 - [Resolving Promise Waterfalls in Background Polling Loops]
+**Learning:** Background polling functions like `loadScores()` and `refreshAll()` often have multiple independent API requests. In `refreshAll()`, `loadSeasonTrophies()` was awaited sequentially *after* `Promise.all([loadScores(), loadStandings(), loadSchedule()])` finished, adding a significant delay. Inside `loadScores()`, the fetch for yesterday's games was only initiated after the `await fetch(url)` for today's games completed, causing an internal request waterfall.
+**Action:** Always encapsulate independent fetch operations within a single `Promise.all()`. For requests that must populate UI variables sequentially but don't depend on each other for initialization, start all fetch Promises simultaneously at the top of the function and `await` or `.then()` them at the exact execution points they are required.

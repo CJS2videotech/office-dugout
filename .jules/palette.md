@@ -1,0 +1,3 @@
+## 2024-06-25 - Safe Button Loading States and ARIA Alerts
+**Learning:** In vanilla HTML/JS projects using standard utility classes like `.rbtn`, replacing the button's `textContent` to show a loading state destroys nested DOM elements (like loading spinners). Also, dynamically rendering error messages requires `role="alert"` and `aria-live="assertive"` so screen readers can announce auth errors to users.
+**Action:** When implementing loading states on buttons in this project, scope text updates to an inner `<span id="...">` and toggle the `.is-loading` class rather than modifying the root element's text content. Always add ARIA live regions to dynamic error containers.

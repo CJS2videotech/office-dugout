@@ -1298,7 +1298,7 @@ async function loadUserPreferences(uid) {
         const localProfile = USERS.find(u => u.email === auth.currentUser.email);
         if (localProfile) {
           localProfile.teamId = parseInt(data.favoriteTeamId);
-          localProfile.teamName = data.favoriteTeamName || localProfile.teamName;
+          localProfile.teamName = escapeHTML(data.favoriteTeamName || localProfile.teamName);
           TEAM_IDS = USERS.map(user => user.teamId).join(',');
         }
       }
@@ -1478,6 +1478,16 @@ function getTeamAbbr(team) {
 }
 
 /* ── HELPERS ── */
+function escapeHTML(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[tag]));
+}
 function pad(n){return String(n).padStart(2,'0')}
 function isoDate(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function fmtDate(str){

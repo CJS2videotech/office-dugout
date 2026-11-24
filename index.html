@@ -240,6 +240,21 @@ th:first-child, td:first-child{ text-align:left; }
 .tx-b-other{ background:rgba(148,163,184,0.16); color:#cbd5e1; border:1px solid rgba(148,163,184,0.25); }
 .tx-b-inter{ background:rgba(251,191,36,0.25); color:#fde047; border:1px solid rgba(253,224,71,0.55); }
 .tx-b-milb{ background:rgba(99,102,241,0.2); color:#a5b4fc; border:1px solid rgba(129,140,248,0.3); }
+.tx-b-breaking{ background:rgba(249,115,22,0.22); color:#fb923c; border:1px solid rgba(251,146,60,0.45); }
+.tx-b-rumor{ background:rgba(168,85,247,0.2); color:#d8b4fe; border:1px solid rgba(192,132,252,0.4); }
+.tx-b-src{ background:rgba(56,189,248,0.16); color:#7dd3fc; border:1px solid rgba(56,189,248,0.35); }
+.tx-pill-hot{ border-color:rgba(251,146,60,0.45); color:#fed7aa; }
+.tx-pill-hot.active{ background:rgba(249,115,22,0.24); border-color:#fb923c; color:#fff; box-shadow:0 0 12px rgba(249,115,22,0.28); }
+.tx-pill-cnt{ background:rgba(249,115,22,0.28); color:#fed7aa; padding:1px 6px; border-radius:10px; font-size:10px; font-weight:700; }
+.tx-breaking-strip{ display:none; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; background:linear-gradient(90deg, rgba(249,115,22,0.16), rgba(56,189,248,0.1)); border:1px solid rgba(251,146,60,0.4); border-radius:9px; padding:9px 13px; margin-bottom:0.8rem; cursor:pointer; transition:background .18s, border-color .18s; }
+.tx-breaking-strip:hover{ background:linear-gradient(90deg, rgba(249,115,22,0.25), rgba(56,189,248,0.16)); border-color:#fb923c; }
+.tx-breaking-strip-text{ font-size:12px; color:#f8fafc; line-height:1.4; }
+.tx-breaking-strip-cta{ font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:0.8px; text-transform:uppercase; color:#fb923c; white-space:nowrap; font-weight:600; }
+.tx-news-title{ font-size:13.5px; font-weight:600; color:#f8fafc; line-height:1.35; text-decoration:none; }
+a.tx-news-title:hover{ color:#38bdf8; text-decoration:underline; }
+.tx-news-foot{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:2px; font-size:11px; color:var(--muted); }
+.tx-news-link{ color:#7dd3fc; text-decoration:none; font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:0.7px; text-transform:uppercase; }
+.tx-news-link:hover{ color:#fff; text-decoration:underline; }
 .tx-date{ font-size:11px; color:var(--muted); font-family:'Oswald',sans-serif; letter-spacing:0.5px; }
 .tx-players{ display:flex; flex-wrap:wrap; gap:6px; }
 .tx-player{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:14px; font-size:11.5px; font-weight:500; text-decoration:none; border:1px solid var(--border); background:rgba(255,255,255,0.06); color:#f1f5f9; transition:all .15s; }
@@ -928,6 +943,7 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
     </div>
     <div class="tx-controls" style="margin-bottom:0.6rem;">
       <div class="tx-pills" id="tx-cat-pills">
+        <button class="tx-pill tx-pill-hot" data-cat="breaking" onclick="setTxCategory('breaking')">🔥 Breaking &amp; Rumors <span id="tx-breaking-count" class="tx-pill-cnt" style="display:none;">0</span></button>
         <button class="tx-pill active" data-cat="headlines" onclick="setTxCategory('headlines')">Headlines</button>
         <button class="tx-pill" data-cat="trade" onclick="setTxCategory('trade')">Trades</button>
         <button class="tx-pill" data-cat="acquired" onclick="setTxCategory('acquired')">Acquisitions &amp; Signings</button>
@@ -937,8 +953,9 @@ input:checked + .slider:before { transform: translateX(14px); background-color: 
     </div>
     <div class="tx-meta">
       <span id="tx-summary">Loading office team transactions...</span>
-      <span style="opacity:0.75;">Click any player chip for MLB stats</span>
+      <span id="tx-updated" style="opacity:0.8;">Auto-refreshes every 10m</span>
     </div>
+    <div id="tx-breaking-strip" class="tx-breaking-strip" onclick="setTxCategory('breaking')"></div>
     <div id="tx-list" class="tx-list">
       <div class="tx-empty">Loading MLB trades &amp; acquisitions...</div>
     </div>
@@ -2969,12 +2986,192 @@ async function loadSchedule(){
 }
 
 /* ── TRADES & ACQUISITIONS WIRE ── */
+const MLB_TEAM_NEWS_MAP = {
+  108: { espnId: 3, name: 'Los Angeles Angels', short: 'Angels' },
+  109: { espnId: 29, name: 'Arizona Diamondbacks', short: 'D-backs' },
+  110: { espnId: 1, name: 'Baltimore Orioles', short: 'Orioles' },
+  111: { espnId: 2, name: 'Boston Red Sox', short: 'Red Sox' },
+  112: { espnId: 16, name: 'Chicago Cubs', short: 'Cubs' },
+  113: { espnId: 17, name: 'Cincinnati Reds', short: 'Reds' },
+  114: { espnId: 5, name: 'Cleveland Guardians', short: 'Guardians' },
+  115: { espnId: 27, name: 'Colorado Rockies', short: 'Rockies' },
+  116: { espnId: 6, name: 'Detroit Tigers', short: 'Tigers' },
+  117: { espnId: 18, name: 'Houston Astros', short: 'Astros' },
+  118: { espnId: 7, name: 'Kansas City Royals', short: 'Royals' },
+  119: { espnId: 19, name: 'Los Angeles Dodgers', short: 'Dodgers' },
+  120: { espnId: 20, name: 'Washington Nationals', short: 'Nationals' },
+  121: { espnId: 21, name: 'New York Mets', short: 'Mets' },
+  133: { espnId: 11, name: 'Athletics', short: 'Athletics' },
+  134: { espnId: 23, name: 'Pittsburgh Pirates', short: 'Pirates' },
+  135: { espnId: 25, name: 'San Diego Padres', short: 'Padres' },
+  136: { espnId: 12, name: 'Seattle Mariners', short: 'Mariners' },
+  137: { espnId: 26, name: 'San Francisco Giants', short: 'Giants' },
+  138: { espnId: 24, name: 'St. Louis Cardinals', short: 'Cardinals' },
+  139: { espnId: 30, name: 'Tampa Bay Rays', short: 'Rays' },
+  140: { espnId: 13, name: 'Texas Rangers', short: 'Rangers' },
+  141: { espnId: 14, name: 'Toronto Blue Jays', short: 'Blue Jays' },
+  142: { espnId: 9, name: 'Minnesota Twins', short: 'Twins' },
+  143: { espnId: 22, name: 'Philadelphia Phillies', short: 'Phillies' },
+  144: { espnId: 15, name: 'Atlanta Braves', short: 'Braves' },
+  145: { espnId: 4, name: 'Chicago White Sox', short: 'White Sox' },
+  146: { espnId: 28, name: 'Miami Marlins', short: 'Marlins' },
+  147: { espnId: 10, name: 'New York Yankees', short: 'Yankees' },
+  158: { espnId: 8, name: 'Milwaukee Brewers', short: 'Brewers' }
+};
+
 let txGroupedCache = [];
+let txNewsCache = [];
+let txLastUpdated = null;
 let txSelectedTeam = 'all';
 let txSelectedCategory = 'headlines';
 
 function escTxHtml(str) {
   return String(str || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function stripTxHtml(str) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = String(str || '');
+  return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+function fmtRelativeTime(ms) {
+  if (!ms || Number.isNaN(ms)) return '';
+  const diffMin = Math.floor((Date.now() - ms) / 60000);
+  if (diffMin < 1) return 'Just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const dt = new Date(ms);
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function classifyNewsTag(title) {
+  const txt = (title || '').toLowerCase();
+  if (/\b(trade|traded|trades|acquire|acquires|acquired|blockbuster|swap)\b/.test(txt)) {
+    return { cls: 'tx-b-trade', lbl: 'TRADE REPORT' };
+  }
+  if (/\b(agree|agrees|agreed|sign|signs|signed|signing|re-sign|re-signs|contract|deal|extension|claim|claimed|returning to)\b/.test(txt)) {
+    return { cls: 'tx-b-breaking', lbl: 'DEAL REPORT' };
+  }
+  if (/\b(interest|interested|rumor|rumors|pursuing|targeting|visited|trade talks|in talks|eyeing|front-runner|frontrunner)\b/.test(txt)) {
+    return { cls: 'tx-b-rumor', lbl: 'RUMOR' };
+  }
+  if (/\b(dfa|designated|non-tender|nontender|release|released|cut by|waive|waived|retire|retires|opt out|opts out)\b/.test(txt)) {
+    return { cls: 'tx-b-dep', lbl: 'ROSTER MOVE' };
+  }
+  return { cls: 'tx-b-other', lbl: 'TEAM NEWS' };
+}
+
+async function fetchBreakingNews() {
+  const uniqueTeamIds = [...new Set(USERS.map(u => u.teamId))];
+  const byKey = new Map();
+
+  const upsertItem = (item) => {
+    const normTitle = (item.title || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 72);
+    const key = item.url || normTitle;
+    if (!key) return;
+    if (!byKey.has(key)) {
+      byKey.set(key, item);
+    } else {
+      const ex = byKey.get(key);
+      item.teamIds.forEach(id => ex.teamIds.add(id));
+      if (item.publishedMs > ex.publishedMs) ex.publishedMs = item.publishedMs;
+      if (!ex.description && item.description) ex.description = item.description;
+    }
+  };
+
+  // 1) ESPN team-specific MLB news (CORS-enabled, no rate limits, includes pending-physical reports)
+  const espnTasks = uniqueTeamIds.map(async mlbId => {
+    const info = MLB_TEAM_NEWS_MAP[mlbId];
+    if (!info) return;
+    try {
+      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/news?team=${info.espnId}&limit=15`);
+      if (!r.ok) return;
+      const data = await r.json();
+      for (const a of (data.articles || [])) {
+        if (a.type === 'Media') continue; // skip duplicate video clip entries
+        const teamCats = (a.categories || []).filter(c => c.type === 'team');
+        // Filter out generic 10-30 team league-wide roundups
+        if (teamCats.length > 5) continue;
+        const matchedIds = new Set([mlbId]);
+        for (const c of teamCats) {
+          const cid = c.teamId ? Number(c.teamId) : null;
+          const cdesc = (c.description || '').toLowerCase();
+          for (const uid of uniqueTeamIds) {
+            const uinfo = MLB_TEAM_NEWS_MAP[uid];
+            if (uinfo && ((cid && uinfo.espnId === cid) || (cdesc && cdesc === uinfo.name.toLowerCase()))) {
+              matchedIds.add(uid);
+            }
+          }
+        }
+        const publishedMs = a.published ? Date.parse(a.published) : Date.now();
+        upsertItem({
+          source: 'ESPN',
+          title: a.headline || 'MLB Update',
+          description: stripTxHtml(a.description || '').slice(0, 220),
+          url: a.links?.web?.href || '',
+          publishedMs: Number.isNaN(publishedMs) ? Date.now() : publishedMs,
+          teamIds: matchedIds
+        });
+      }
+    } catch (err) {
+      console.warn('ESPN news fetch skipped for team', mlbId, err);
+    }
+  });
+
+  // 2) MLB Trade Rumors main RSS feed (single request via rss2json — hot-stove deals & rumors)
+  const mlbtrTask = (async () => {
+    try {
+      const r = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://www.mlbtraderumors.com/feed'));
+      if (!r.ok) return;
+      const data = await r.json();
+      if (data.status !== 'ok') return;
+      for (const it of (data.items || [])) {
+        const cats = (it.categories || []).map(c => String(c).toLowerCase());
+        const titleLow = (it.title || '').toLowerCase();
+        const matchedIds = new Set();
+        for (const uid of uniqueTeamIds) {
+          const info = MLB_TEAM_NEWS_MAP[uid];
+          if (!info) continue;
+          const fullLow = info.name.toLowerCase();
+          const shortLow = info.short.toLowerCase();
+          const inCats = cats.some(c => c === fullLow || c === shortLow || (uid === 133 && (c === 'oakland athletics' || c === 'athletics')) || (uid === 109 && c === 'arizona diamondbacks'));
+          const inTitle = new RegExp(`\\b${shortLow.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i').test(titleLow) || (uid === 133 && /\ba's\b/i.test(titleLow));
+          if (inCats || inTitle) matchedIds.add(uid);
+        }
+        if (matchedIds.size === 0) continue;
+        // Skip mega multi-team roundups tagging >5 teams
+        if (cats.filter(c => Object.values(MLB_TEAM_NEWS_MAP).some(m => m.name.toLowerCase() === c)).length > 5) continue;
+        const pubIso = it.pubDate ? it.pubDate.replace(' ', 'T') + 'Z' : '';
+        const publishedMs = pubIso ? Date.parse(pubIso) : Date.now();
+        let snippet = stripTxHtml(it.description || '');
+        if (snippet.length > 220) snippet = snippet.slice(0, 217).trimEnd() + '…';
+        upsertItem({
+          source: 'MLBTR',
+          title: stripTxHtml(it.title || 'MLB Trade Rumors Update'),
+          description: snippet,
+          url: it.link || '',
+          publishedMs: Number.isNaN(publishedMs) ? Date.now() : publishedMs,
+          teamIds: matchedIds
+        });
+      }
+    } catch (err) {
+      console.warn('MLBTR RSS fetch skipped:', err);
+    }
+  })();
+
+  await Promise.allSettled([...espnTasks, mlbtrTask]);
+
+  return Array.from(byKey.values())
+    .map(item => {
+      item.matchedUsers = USERS.filter(u => item.teamIds.has(u.teamId));
+      item.isInterTeam = item.matchedUsers.length >= 2;
+      item.tag = classifyNewsTag(item.title, item.description);
+      return item;
+    })
+    .filter(item => item.matchedUsers.length > 0)
+    .sort((a, b) => b.publishedMs - a.publishedMs);
 }
 
 function renderTxTeamPills() {
@@ -3084,10 +3281,110 @@ function fmtTxDate(str) {
   return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function updateTxMetaTimestamp() {
+  const updEl = document.getElementById('tx-updated');
+  if (!updEl) return;
+  const tStr = txLastUpdated ? txLastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+  const hint = txSelectedCategory === 'breaking' ? 'ESPN + MLBTR · Auto-refreshes every 10m' : 'Official MLB API · Auto-refreshes every 10m';
+  updEl.textContent = tStr ? `Updated ${tStr} · ${hint}` : hint;
+}
+
 function renderTransactions() {
   const listEl = document.getElementById('tx-list');
   const sumEl = document.getElementById('tx-summary');
+  const stripEl = document.getElementById('tx-breaking-strip');
+  const cntEl = document.getElementById('tx-breaking-count');
   if (!listEl) return;
+
+  updateTxMetaTimestamp();
+
+  const days = parseInt(document.getElementById('tx-range')?.value || '90', 10);
+  const cutoffMs = Date.now() - days * 86400000;
+  const recent48hMs = Date.now() - 48 * 3600000;
+
+  const filteredNews = txNewsCache.filter(item => {
+    if (txSelectedTeam !== 'all') {
+      const tid = parseInt(txSelectedTeam, 10);
+      if (!item.teamIds.has(tid)) return false;
+    }
+    return item.publishedMs >= cutoffMs;
+  });
+
+  const breaking48h = filteredNews.filter(item => item.publishedMs >= recent48hMs);
+  if (cntEl) {
+    if (filteredNews.length > 0) {
+      cntEl.style.display = 'inline-block';
+      cntEl.textContent = breaking48h.length > 0 ? `${breaking48h.length} new` : String(filteredNews.length);
+    } else {
+      cntEl.style.display = 'none';
+    }
+  }
+
+  // Show a clickable alert strip on official tabs when breaking news dropped in the last 48h
+  if (stripEl) {
+    if (txSelectedCategory !== 'breaking' && breaking48h.length > 0) {
+      const top = breaking48h[0];
+      const more = breaking48h.length > 1 ? ` + ${breaking48h.length - 1} more` : '';
+      stripEl.style.display = 'flex';
+      stripEl.innerHTML = `
+        <div class="tx-breaking-strip-text">
+          <strong style="color:#fb923c;">🔥 BREAKING (48H):</strong> ${escTxHtml(top.title)}<span style="color:var(--muted);">${escTxHtml(more)}</span>
+        </div>
+        <span class="tx-breaking-strip-cta">View Breaking &amp; Rumors →</span>
+      `;
+    } else {
+      stripEl.style.display = 'none';
+    }
+  }
+
+  // BREAKING NEWS & RUMORS TAB
+  if (txSelectedCategory === 'breaking') {
+    if (sumEl) {
+      const recentNote = breaking48h.length > 0 ? ` (${breaking48h.length} in last 48h)` : '';
+      sumEl.textContent = `${filteredNews.length} breaking report${filteredNews.length === 1 ? '' : 's'} & rumor${filteredNews.length === 1 ? '' : 's'}${recentNote}`;
+    }
+    if (filteredNews.length === 0) {
+      listEl.innerHTML = `<div class="tx-empty">No recent breaking reports or rumors found for this selection. Try selecting "All ${USERS.length} Teams" or clicking Refresh.</div>`;
+      return;
+    }
+    listEl.innerHTML = filteredNews.slice(0, 60).map(item => {
+      const primaryUser = item.matchedUsers[0];
+      const borderCol = item.isInterTeam ? '#fbbf24' : (primaryUser ? primaryUser.secondary : '#fb923c');
+      const whoHtml = item.matchedUsers.map(u => `
+        <span style="display:inline-flex; align-items:center; gap:6px;">
+          <img src="${u.img || u.photo}" onerror="handleImgError(this)" alt="${escTxHtml(u.name)}" class="tx-avatar" style="border-color:${u.secondary};">
+          <span class="tx-team-tag" style="color:${u.secondary};${u.glow || ''}">${escTxHtml(u.name)} · ${escTxHtml(u.teamName)}</span>
+        </span>
+      `).join('<span style="color:#fbbf24; font-weight:700; font-size:12px;">⇄</span>');
+
+      const titleHtml = item.url
+        ? `<a class="tx-news-title" href="${escTxHtml(item.url)}" target="_blank" rel="noopener noreferrer">${escTxHtml(item.title)}</a>`
+        : `<div class="tx-news-title">${escTxHtml(item.title)}</div>`;
+
+      const footLink = item.url
+        ? `<a class="tx-news-link" href="${escTxHtml(item.url)}" target="_blank" rel="noopener noreferrer">Read Full Story ↗</a>`
+        : '';
+
+      return `<div class="tx-card ${item.isInterTeam ? 'tx-inter' : ''}" style="border-left-color:${borderCol};">
+        <div class="tx-card-top">
+          <div class="tx-who">${whoHtml}</div>
+          <div class="tx-badges">
+            ${item.isInterTeam ? '<span class="tx-badge tx-b-inter">⚡ OFFICE MATCHUP</span>' : ''}
+            <span class="tx-badge ${item.tag.cls}">${escTxHtml(item.tag.lbl)}</span>
+            <span class="tx-badge tx-b-src">${escTxHtml(item.source)}</span>
+            <span class="tx-date">${escTxHtml(fmtRelativeTime(item.publishedMs))}</span>
+          </div>
+        </div>
+        ${titleHtml}
+        ${item.description ? `<div class="tx-desc">${escTxHtml(item.description)}</div>` : ''}
+        <div class="tx-news-foot">
+          <span>Reported news (may be pending physical / official MLB filing)</span>
+          ${footLink}
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
 
   const filtered = txGroupedCache.filter(g => {
     if (txSelectedTeam !== 'all') {
@@ -3104,11 +3401,11 @@ function renderTransactions() {
     const acqCount = filtered.filter(g => g.category === 'acquired').length;
     const interCount = filtered.filter(g => g.isInterTeam).length;
     const interNote = interCount > 0 ? ` · ${interCount} office-to-office` : '';
-    sumEl.textContent = `${filtered.length} move${filtered.length === 1 ? '' : 's'} shown (${tradeCount} trade${tradeCount === 1 ? '' : 's'}, ${acqCount} acquisition${acqCount === 1 ? '' : 's'}${interNote})`;
+    sumEl.textContent = `${filtered.length} official move${filtered.length === 1 ? '' : 's'} shown (${tradeCount} trade${tradeCount === 1 ? '' : 's'}, ${acqCount} acquisition${acqCount === 1 ? '' : 's'}${interNote})`;
   }
 
   if (filtered.length === 0) {
-    listEl.innerHTML = `<div class="tx-empty">No matching transactions in this time window. Try switching to "All Moves" or expanding the date range.</div>`;
+    listEl.innerHTML = `<div class="tx-empty">No matching official transactions in this time window. Check "🔥 Breaking &amp; Rumors" for reported deals pending physicals, or switch to "All Moves".</div>`;
     return;
   }
 
@@ -3166,28 +3463,54 @@ function renderTransactions() {
   }).join('');
 }
 
-async function loadTransactions() {
+async function loadTransactions(silent = false) {
   const listEl = document.getElementById('tx-list');
   const sumEl = document.getElementById('tx-summary');
+  const btnEl = document.getElementById('tx-refresh-btn');
   const days = parseInt(document.getElementById('tx-range')?.value || '90', 10);
-  const end = new Date();
-  const start = new Date();
-  start.setDate(end.getDate() - days);
+  const now = new Date();
+  const end = new Date(now);
+  end.setDate(end.getDate() + 1); // +1 day buffer so late-night ET moves show immediately
+  const start = new Date(now);
+  start.setDate(start.getDate() - days);
 
-  if (listEl) listEl.innerHTML = '<div class="tx-empty">Loading MLB trades &amp; acquisitions...</div>';
-  try {
+  if (btnEl) btnEl.textContent = '↻ Updating...';
+  if (!silent && listEl && txGroupedCache.length === 0 && txNewsCache.length === 0) {
+    listEl.innerHTML = '<div class="tx-empty">Loading MLB trades, acquisitions &amp; breaking news...</div>';
+  }
+
+  const officialTask = (async () => {
     const url = `${MLB}/transactions?teamId=${TEAM_IDS}&startDate=${isoDate(start)}&endDate=${isoDate(end)}`;
     const r = await fetch(url);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
-    txGroupedCache = groupTransactions(data.transactions || []);
-    renderTxTeamPills();
-    renderTransactions();
-  } catch (e) {
-    console.error('Failed to load transactions:', e);
+    return groupTransactions(data.transactions || []);
+  })();
+
+  const [offRes, newsRes] = await Promise.allSettled([officialTask, fetchBreakingNews()]);
+
+  if (offRes.status === 'fulfilled') {
+    txGroupedCache = offRes.value;
+  } else {
+    console.error('Failed to load official transactions:', offRes.reason);
+  }
+  if (newsRes.status === 'fulfilled') {
+    txNewsCache = newsRes.value;
+  } else {
+    console.error('Failed to load breaking news:', newsRes.reason);
+  }
+
+  txLastUpdated = new Date();
+  if (btnEl) btnEl.textContent = '↻ Refresh';
+
+  if (offRes.status === 'rejected' && newsRes.status === 'rejected' && txGroupedCache.length === 0 && txNewsCache.length === 0) {
     if (sumEl) sumEl.textContent = 'Could not load transactions.';
     if (listEl) listEl.innerHTML = '<div class="tx-empty">Error loading MLB transactions. Click Refresh to try again.</div>';
+    return;
   }
+
+  renderTxTeamPills();
+  renderTransactions();
 }
 /* ── END TRADES & ACQUISITIONS WIRE ── */
 
@@ -3266,6 +3589,7 @@ window.toggleModalImage = toggleModalImage;
 initLayout();
 refreshAll();
 setInterval(loadScores, 60000); // refresh HR bracket every 60s
+setInterval(() => loadTransactions(true), 10 * 60 * 1000); // auto-refresh trades & breaking news every 10m
 
 // Preload all banner GIFs and photos in background for instant popups on GitHub Pages
 window.addEventListener('load', () => {
